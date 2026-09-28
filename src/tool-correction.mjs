@@ -7,7 +7,8 @@ export async function generateWithCorrection(backend, request, {signal,onDelta})
  catch(error){
   if(request.mode!=='native-tools'||error.code!=='internal_tool_blocked'||emitted||signal.aborted)throw error;
   backend.warn?.('internal_tool_corrective_retry');
-  const corrected={...request,prompt:request.prompt+'\nBRIDGE FEEDBACK: Your previous attempt selected a disabled OpenCode internal tool. That action did NOT execute. Choose the matching bridge_client_* direct function from the supplied mapping. Do not use internal OpenCode tools or Code Mode. Any denial in the historical Codex tool results still stands; never retry or circumvent a client-denied operation.'};
+  const corrected={...request,prompt:request.prompt+'\nBRIDGE FEEDBACK: Your previous attempt selected a disabled OpenCode internal tool. That action did NOT execute. Choose the matching bridge_client_* function from the supplied mapping using the configured dispatch mode. Never use OpenCode workspace tools. Any denial in the historical Codex tool results still stands; never retry or circumvent a client-denied operation.'};
+  if (request.messages) corrected.messages = [...request.messages, {role:'system',content:[{type:'text',text:corrected.prompt.slice(request.prompt.length)}]}];
   // Exactly one additional generation, sharing the original request deadline.
   return backend.generate(corrected,callbacks);
  }

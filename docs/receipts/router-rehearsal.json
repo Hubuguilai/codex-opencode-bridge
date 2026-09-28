@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-28T23:33:55.603Z",
+  "type": "mock-upstream-router-integration",
+  "checks": {
+    "registryAccepted": true,
+    "nativeCatalogPreserved": true,
+    "modelMapped": true,
+    "toolNamespacePreserved": true,
+    "reasoningPreserved": true,
+    "callIdReturned": true,
+    "stateRemoved": true
+  },
+  "passed": true
+}

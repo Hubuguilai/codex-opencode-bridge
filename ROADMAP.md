@@ -1,32 +1,29 @@
 # Roadmap
 
-## Product objective (2026-09-29)
+## 0.2.0-rc.1 delivered scope
 
-Support native Codex workflows, including client-executed file/command tools and
-multi-step continuations. Text-only operation is a baseline, not the intended end
-product. The first milestone is a real Codex read/write/command round trip in a
-disposable project. See [acceptance criteria](docs/native-codex-target.md).
+- [x] Authenticated local OpenCode v2 runtime and Chat/Responses transport
+- [x] Official plugin relay of actual Codex tool schemas/calls/results
+- [x] Native message history, namespaces, custom tool input and call identities
+- [x] Real Codex file/command/follow-up/repair workflows on Space Bunny Free
+- [x] Live denied approval, cancellation, timeout and recovery checks
+- [x] Negative Nemotron receipts retained; experimental status is explicit
+- [x] Independent Router/LiteLLM/forwarder protocol rehearsal with mock upstream
+- [x] Reversible isolated configuration preparation; no live settings overwritten
+- [x] English/Chinese documentation, MIT license, prior-art review and CI
 
-## v0.1 foundation
+## Remaining product work
 
-- [x] Standalone dependency-free Node package and private GitHub repository
-- [x] OpenCode v2 runtime lifecycle and exact model allowlist
-- [x] Chat/Responses text interfaces with honest unsupported-feature errors
-- [x] Authenticated loopback, limits, cancellation, cleanup and protocol tests
-- [x] Dated prior-art review and reproducible opt-in live probe
+- [ ] Reliable native workflows for Nemotron and other runtime-only free models
+- [ ] Live Desktop picker migration and UI acceptance, separately authorized
+- [ ] More models certified with their own repeated real-client receipts
+- [ ] Long-context/multimodal validation and per-model maximum capability evidence
+- [ ] Crash-recovery journal for sessions whose creation response was lost
+- [ ] Stronger isolation of third-party plugins/MCP beyond trusted local configuration
+- [ ] Incremental native final-text streaming without sacrificing safe recovery
+- [ ] Public-release decision after support boundaries and upstream access are reviewed
 
-## Before broad distribution
-
-- [ ] Reproduce actual Codex Desktop text-only router integration with strict validation
-- [ ] Tool execution boundary: genuine client function-call/result round trip
-- [ ] Independently verify closest MIT alternative on the exact v2 runtime
-- [ ] Crash-recovery journal for orphan sessions
-- [ ] Stronger isolation of upstream plugins/MCP and host filesystem
-- [ ] Native upstream event subscription, replacing snapshot polling where stable
-- [ ] Installation/service management and reversible picker configuration
-- [ ] Model-specific verified catalog metadata and long-input tests
-- [ ] Upstream service terms/access-policy review before public promotion
-
-Windows, multiple users, automatic account/key routing, and unlimited free access
-are not part of the v0.1 claim. Changes to the existing user prototype require a
-separate migration and a Codex end-to-end test.
+The private candidate is not a universal or unlimited free API gateway. Windows,
+multi-user hosting, automatic key/account routing and quota circumvention are
+outside the current scope. See [verification](docs/verification.md) for the exact
+model boundary and [acceptance contract](docs/native-codex-target.md) for the goal.

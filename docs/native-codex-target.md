@@ -70,12 +70,12 @@ Passing a greeting, a mocked tool event, a model-written JSON snippet or an HTTP
 | Gate | Evidence required | Current state |
 |---|---|---|
 | Text transport | Real short responses, JSON and SSE | Passed for Nemotron prototype / v0.1 smoke |
-| Native tools | Real file read/write/command/result loop executed by Codex | First real Codex CLI/app-server proof passed; repeat acceptance in progress |
-| Continuations | Multiple tool steps, follow-up edits, stable IDs/history | Same-thread follow-up proof passed; broader acceptance in progress |
-| Lifecycle | Cancel, timeout, permission refusal, bounded retries | Adapter tests exist; Desktop gate pending |
-| Desktop UX | Picker coexistence, restart, reversible install/uninstall | Existing prototype entry only |
+| Native tools | Real file read/write/command/result loop executed by Codex | Passed complete Space Bunny suites; Nemotron remains experimental |
+| Continuations | Multiple tool steps, follow-up edits, stable IDs/history | Passed same-thread Space Bunny create/follow-up/repair |
+| Lifecycle | Cancel, timeout, permission refusal, bounded retries | Real Codex app-server cancel/timeout/denial/recovery passed |
+| Desktop UX | Picker coexistence, restart, reversible install/uninstall | Isolated Router protocol/catalog rehearsal and reversible preparation passed; live UI activation excluded |
 | Optional features | Per-model vision, reasoning and context tests | No blanket claim |
-| Public release | Reproducible supported-model matrix, docs and owner release decision | Pending |
+| Public release | Reproducible supported-model matrix, docs and owner release decision | Private candidate prepared; public release not authorized |
 
 ## Source finding
 

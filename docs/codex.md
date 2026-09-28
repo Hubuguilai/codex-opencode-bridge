@@ -1,8 +1,8 @@
 # Codex integration and coexistence
 
 Native mode requires `BRIDGE_MODE=native-tools`. The first tested combination is
-OpenCode 2.0.18, Codex 0.157.1 and `opencode/nemotron-3-ultra-free`. The bridge uses
-Responses for Codex's function/custom tools. Chat supports ordinary function tools.
+OpenCode 2.0.18, Codex 0.157.1 and `opencode/nemotron-3-ultra-free`. Space Bunny Free has since passed the full control suite; Nemotron remains
+experimental (see verification.md). The bridge uses Responses for Codex's function/custom tools. Chat supports ordinary function tools.
 It never performs the client file/command operations itself.
 
 ## Isolated, repeatable verification
@@ -56,5 +56,46 @@ Preserve the single upstream-default reasoning setting. Prefer Responses passthr
 so namespaces and custom tools do not have to be flattened by another layer.
 
 The current work has not migrated the operator's active picker or live router.
-A separate router integration rehearsal and reversible install are release gates.
+An isolated full-router rehearsal and reversible configuration preparation are
+implemented; live Desktop activation remains a separate operation.
 Do not describe the CLI/app-server proof as a completed Desktop installation.
+
+## Prepare and remove a configuration directory
+
+```sh
+node bin/bridge.mjs prepare /absolute/new/bridge-config --model opencode/space-bunny-free
+# Copy an existing catalog without changing its source:
+node bin/bridge.mjs prepare /absolute/another/new-directory --catalog /absolute/models.json
+```
+
+The command refuses an existing output directory or duplicate model ID. It writes
+`models.json`, `codex.config.toml`, `bridge-env.json`, a private token under `state/`
+and an ownership manifest. These are reviewable installation artifacts, not an
+automatic switch of your current model provider. The root provider in the fragment
+selects the standalone bridge; coexistence in one picker still needs the existing
+router route described above.
+
+To launch the prepared bridge, set `BRIDGE_STATE_DIR` to its `state` directory,
+`BRIDGE_MODE=native-tools` and `BRIDGE_MODELS` to the prepared model, then run
+`npm start`. Load `state/local-token` into the dedicated client's `BRIDGE_TOKEN`
+environment without putting it on a command line or committing it.
+
+After stopping the service:
+
+```sh
+node bin/bridge.mjs remove-prepared /absolute/new/bridge-config
+```
+
+Removal checks the manifest and file hashes and refuses edited/extra files or
+runtime work directories. It never removes Codex/OpenCode authentication or the
+original catalog. No LaunchAgent/system service is installed by these commands.
+
+The optional router rehearsal is reproducible with an installed Codex Router
+checkout and its existing LiteLLM environment:
+
+```sh
+node scripts/router-rehearsal.mjs --router-root /absolute/codex-router
+```
+
+It uses isolated state and ports 4696–4699 with a mock upstream, then removes them.
+The check validates protocol coexistence, not live UI deployment.

@@ -7,13 +7,14 @@ import { findOpenCode } from './config.mjs';
 import { BridgeError } from './errors.mjs';
 
 export class OpenCodeBackend {
-  constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', warn = () => {} }) {
+  constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', toolTransport = 'direct', warn = () => {} }) {
     this.url = url;
     this.directory = directory;
     this.pollMs = pollMs;
     this.maxOutputBytes = maxOutputBytes;
     this.warn = warn;
     this.mode = mode;
+    this.toolTransport = toolTransport;
     this.authorization = `Basic ${Buffer.from(`opencode:${password}`).toString('base64')}`;
   }
   async call(route, { method = 'GET', body, signal = AbortSignal.timeout(10000) } = {}) {
@@ -50,7 +51,7 @@ export class OpenCodeBackend {
       if (native) {
         fs.rmSync(capturePath, { force: true });
         fs.rmSync(path.join(this.directory, 'bridge-plugin-ready'), { force: true });
-        fs.writeFileSync(path.join(this.directory, 'bridge-request.json'), JSON.stringify({ requestId, tools: request.tools || [], options: request.options }), { mode: 0o600 });
+        fs.writeFileSync(path.join(this.directory, 'bridge-request.json'), JSON.stringify({ requestId, tools: request.tools || [], messages: request.messages, toolTransport: this.toolTransport, options: request.options }), { mode: 0o600 });
       }
       const created = await this.call('/api/session', { method: 'POST', body: {
         title: 'Temporary bridge request', model: { id, providerID },
@@ -77,6 +78,7 @@ export class OpenCodeBackend {
           let capture;
           try { capture = JSON.parse(fs.readFileSync(capturePath, 'utf8')); } catch { await delay(this.pollMs, undefined, { signal }); continue; }
           if (capture.requestId !== requestId) throw new BridgeError(502, 'relay_state_mismatch', 'Unexpected client tool relay state.');
+          if (capture.kind === 'limit') throw new BridgeError(502, 'dispatch_step_limit', 'OpenCode dispatch exceeded four model steps without a client transfer.');
           if (capture.kind === 'blocked') throw new BridgeError(422, 'internal_tool_blocked', 'The model selected an OpenCode internal tool; execution was blocked. Retry the task using client tools.');
           const tool = request.tools.find(x => x.relayName === capture.relayName);
           if (!tool || capture.kind !== 'call') throw new BridgeError(502, 'unknown_client_tool', 'Unrecognized client tool call.');
@@ -91,8 +93,9 @@ export class OpenCodeBackend {
         const result = await this.call(`${route}/message?limit=100`, { signal });
         if (!Array.isArray(result.data)) throw new BridgeError(502, 'opencode_protocol_error', 'Invalid OpenCode message response.');
         const assistants = result.data.filter(x => x.type === 'assistant');
-        if (assistants.length > 1) throw new BridgeError(502, 'unexpected_agent_loop', 'Unexpected multi-step agent execution in text-only mode.');
-        const assistant = assistants[0];
+        if (native && assistants.length > 4) throw new BridgeError(502, 'dispatch_step_limit', 'OpenCode dispatch exceeded four model steps without a client transfer.');
+        if (!native && assistants.length > 1) throw new BridgeError(502, 'unexpected_agent_loop', 'Unexpected multi-step agent execution in text-only mode.');
+        const assistant = assistants.at(-1);
         if (assistant) {
           if ([401, 403, 429].includes(assistant.error?.status)) {
             throw new BridgeError(assistant.error.status, 'upstream_access_or_quota', 'OpenCode provider denied access or quota. Check your model entitlement in OpenCode.');
@@ -102,15 +105,16 @@ export class OpenCodeBackend {
             throw new BridgeError(502, 'unexpected_tool_call', 'OpenCode attempted a tool call in text-only mode.');
           }
           const text = (assistant.content || []).filter(x => x.type === 'text' && typeof x.text === 'string').map(x => x.text).join('');
-          if (!text.startsWith(previous)) throw new BridgeError(502, 'non_append_output', 'Upstream changed already-delivered text.');
+          if (!native && !text.startsWith(previous)) throw new BridgeError(502, 'non_append_output', 'Upstream changed already-delivered text.');
           if (Buffer.byteLength(text) > this.maxOutputBytes) throw new BridgeError(502, 'output_too_large', 'Output exceeded the configured byte limit.');
-          if (text.length > previous.length) await onDelta(text.slice(previous.length));
+          if (!native && text.length > previous.length) await onDelta(text.slice(previous.length));
           previous = text;
           if (assistant.time?.completed && !(native && assistant.finish === 'tool-calls')) {
             if (assistant.finish === 'tool-calls' || assistant.finish === 'length') {
               throw new BridgeError(502, 'incomplete_generation', 'OpenCode did not complete a plain text answer.');
             }
             if (!text) throw new BridgeError(502, 'empty_generation', 'OpenCode returned no text.');
+            if (native) await onDelta(text);
             completed = true;
             return { tokens: assistant.tokens || {} };
           }
@@ -153,7 +157,7 @@ export async function startOpenCode(config, env = process.env) {
   child.on('error', () => { ended = true; });
   child.on('exit', () => { ended = true; });
   const backend = new OpenCodeBackend({ url: `http://127.0.0.1:${config.upstreamPort}`, password, directory,
-    pollMs: config.pollMs, maxOutputBytes: config.maxOutputBytes, mode: config.mode,
+    pollMs: config.pollMs, maxOutputBytes: config.maxOutputBytes, mode: config.mode, toolTransport: config.toolTransport,
     warn: code => process.stderr.write(`[bridge] ${code}\n`),
   });
   const stop = async () => {

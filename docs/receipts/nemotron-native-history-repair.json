@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-28T23:31:58.066Z",
+  "model": "opencode/nemotron-3-ultra-free",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "repair",
+      "status": "failed",
+      "error": "stream disconnected before completion: The model selected an OpenCode internal tool; execution was blocked. Retry the task using client tools.",
+      "commands": 1,
+      "durationMs": 44122,
+      "checks": {
+        "testPassed": false,
+        "testUnchanged": true
+      },
+      "passed": false
+    }
+  ],
+  "opencode": "2.0.18",
+  "passed": false
+}

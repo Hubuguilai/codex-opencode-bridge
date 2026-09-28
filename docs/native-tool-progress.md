@@ -1,7 +1,9 @@
 # Native tool compatibility evidence (development)
 
 Date: 2026-09-29. This is a development record, not a release acceptance claim.
-Repository remains private.
+Repository remains private. This is a chronological development notebook;
+intermediate limitations below are superseded where noted. The current support
+contract is [verification.md](verification.md).
 
 ## Implemented transport
 
@@ -14,9 +16,9 @@ namespaces and call IDs, to Codex. Codex executes its own tools and supplies the
 results in the next request. OpenCode internal actions are denied by both the
 permission hook and before-execution hook. No text-markup tool parser is used.
 
-Each generation uses a temporary upstream session. The bridge serializes client
-conversation roles and tool results into a prompt; this is not native upstream
-role preservation. This limitation must remain explicit until improved and tested.
+Each generation uses a temporary upstream session. The initial bridge serialized client conversation roles and tool results into a
+prompt. Later work replaced that path with native OpenCode message and tool-result
+structures, while mapping system/developer instructions to its single system role.
 The managed work directory and plugin guards are not an operating-system sandbox.
 Users must trust their installed OpenCode runtime and global configuration.
 
@@ -83,3 +85,18 @@ A live lifecycle run passed: interrupting an active Codex turn released the
 backend and removed the request manifest; a 100 ms generation deadline returned
 HTTP 504 with `request_cancelled`; a subsequent real Codex turn completed normally.
 These are separate scenario passes, not a clean full-suite reliability certificate.
+
+## Candidate closure
+
+Native message history and descriptive client-tool aliases were implemented;
+Nemotron still produced blocked internal-tool choices. An experimental Code Mode
+dispatcher permitted only the documented restricted JavaScript dispatcher while
+retaining nested workspace-tool guards. A repair reached passing Python checks
+but did not complete its turn within 180 seconds. It remains a failed gate.
+
+Space Bunny Free, used as a control, passed a focused repair and then two complete
+suites across the final development revisions. The candidate receipt includes
+a source digest. The final offline suite has 36 passing tests. An independent
+Router/LiteLLM/API-forwarder rehearsal with generated credentials and a mock
+upstream also passed and removed its temporary state. See the current matrix and
+committed receipts rather than pooling exploratory runs into performance scores.

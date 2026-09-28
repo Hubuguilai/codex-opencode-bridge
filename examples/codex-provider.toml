@@ -1,7 +1,8 @@
 # Standalone native-tool test configuration. Do not overwrite a working config.
-# Start the bridge with BRIDGE_MODE=native-tools and load its local BRIDGE_TOKEN.
+# Start with BRIDGE_MODE=native-tools BRIDGE_MODELS=opencode/space-bunny-free.
+# Load the local BRIDGE_TOKEN in the dedicated client environment.
 model_provider = "opencode_bridge"
-model = "opencode/nemotron-3-ultra-free"
+model = "opencode/space-bunny-free"
 model_reasoning_effort = "default"
 model_reasoning_summary = "none"
 web_search = "disabled"

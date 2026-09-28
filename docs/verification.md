@@ -1,58 +1,85 @@
-# Verification — 2026-09-28
+# Verification and model support — 0.2.0-rc.1
 
-## Local checks
+This candidate is private and experimental. Passing the adapter tests does not
+certify every model, every Desktop tool, or future provider availability.
 
-- Node.js 24.4.1 on macOS.
-- `npm run check`: passed.
-- `npm test`: **18 passed, 0 failed**.
-- No runtime npm dependencies. Package-lock generated; initial npm audit: 0 findings.
-- Pre-push sensitive-pattern scan: no API-key patterns, GitHub tokens, private-key
-  blocks or the operator's absolute home path in project files.
+## Current support matrix
 
-Tests exercise HTTP authentication, Unicode, message history, both output formats,
-incremental SSE, error redaction, input overflow, unsupported features, upstream
-readiness, cancellation, timeouts, concurrency, non-append output, HTTP 204 cleanup
-and cancellation during session creation. They use a local mock OpenCode server.
+| Model / route | Actual evidence | Status |
+|---|---|---|
+| `opencode/space-bunny-free`, native tools, direct dispatch | Complete real Codex app-server suite: create, follow-up, repair, denied approval, cancellation, timeout and recovery | Verified for this text/tool test scope |
+| `opencode/nemotron-3-ultra-free`, direct dispatch | File/command workflows and individual repairs succeeded; repeated complete suites failed on internal-tool choices or generation failure | Experimental; not a verified full workflow |
+| Nemotron, Code Mode dispatch | File repair reached an independently passing test, but the turn exceeded its 180-second limit | Experimental; failed terminal completion gate |
+| Other OpenCode models | Configurable allowlist, no acceptance receipt | Unverified |
+| Images/audio/files, hosted search, adjustable reasoning | Rejected rather than silently dropped | Unsupported |
 
-## Real runtime requests
+Space Bunny is a useful control because its direct external API was already an
+option; success here validates the bridge's client-tool protocol, not a claim that
+this model requires a runtime bridge. Nemotron's failure is the primary remaining
+limitation for the original free-model use case. The project does not promise
+unlimited access or reinterpret a provider rejection as permission to bypass it.
 
-`npm run smoke -- --live` with an explicitly selected installed OpenCode binary:
+## Real client method
 
-```json
-{
-  "model": "opencode/nemotron-3-ultra-free",
-  "upstream": { "version": "2.0.18" },
-  "results": [
-    { "api": "chat/completions", "status": 200, "markerReceived": true, "ok": true },
-    { "api": "responses", "status": 200, "markerReceived": true, "ok": true }
-  ]
-}
-```
+`node scripts/native-acceptance.mjs --live` starts the installed official OpenCode
+runtime, an isolated bridge, and a real Codex app-server with ephemeral threads.
+It uses fresh markers and temporary files, checks generated files independently,
+re-runs the repaired test, refuses approvals, interrupts a live turn, injects a
+short deadline, and verifies a subsequent turn completes. Tool actions run in the
+Codex workspace. OpenCode's own workspace tools remain blocked.
 
-The Chat request returned a normal JSON completion; the Responses request emitted
-the expected completion event with the test marker. This proves one short text
-request on each interface, not full context capacity, tool use, sustained load,
-every model, or Desktop picker integration. Upstream availability can change.
+Use `BRIDGE_TEST_MODEL=opencode/space-bunny-free` for the verified control.
+`BRIDGE_TOOL_TRANSPORT=codemode` opts into the experimental dispatcher.
+OpenCode 2.0.18 / Codex 0.157.1 / Node 24.4.1 / macOS were exercised live.
+The 32k catalog value is an acceptance-test budget, not the provider's maximum.
 
-A separate marker request to the operator's pre-existing prototype also succeeded.
-No active Codex Router provider or LaunchAgent was replaced by this project.
+## Receipts and negative evidence
 
-## Findings from failed probes
+Sanitized receipts are under [receipts/](receipts/). They contain model/runtime
+versions, checks, timing and failure messages, not keys, prompts, raw tool output
+or personal workspace paths. Later receipts include a source digest. Early
+receipts do not identify every intermediate uncommitted revision; they are
+exploratory history, not an exact release-build certificate.
 
-1. A version with all internal permissions denied returned an upstream free-tier
-   403. Removing that override while still using custom UUID session IDs also failed.
-   Using OpenCode-generated session IDs and the default Plan permissions succeeded.
-   This is an observed compatibility boundary; **the separate causal contribution
-   of permissions versus ID shape was not isolated**. We use the official session
-   defaults, and do not claim the model is accessible with tools completely disabled.
-2. Session deletion returns HTTP 204 without JSON. The adapter now accepts this as
-   success; a dedicated regression test covers it.
-3. Readiness must validate JSON and version, not HTTP 200, since unsupported routes
-   can return the OpenCode HTML application.
+- [Space Bunny release-candidate suite with source digest](receipts/space-bunny-rc-suite.json).
+- [Space Bunny first complete suite](receipts/space-bunny-first-suite.json).
+- [Nemotron initial suite](receipts/nemotron-initial-suite.json).
+- [Nemotron corrective suite](receipts/nemotron-corrective-suite.json).
+- [Nemotron native-history repair failure](receipts/nemotron-native-history-repair.json).
+- [Nemotron Code Mode repair timeout](receipts/nemotron-codemode-repair.json).
+- [Isolated Router protocol rehearsal](receipts/router-rehearsal.json).
 
-## Remaining verification
+Different revisions and prompts must not be pooled into a model benchmark or a
+claimed production success rate. The original plain-text v0.1 smoke and first
+native feasibility probes remain described in [development history](native-tool-progress.md).
 
-- GitHub matrix results are visible in the repository's Actions tab.
-- No full Codex native tool round trip was attempted or implemented.
-- No long-context, multimodal, Windows, or other model result is claimed.
-- Unexpected upstream tools cause an error, but detection is not an execution sandbox.
+## Offline and integration checks
+
+`npm run check` and `npm test` cover authentication, SSE/event identities,
+cancellation/cleanup, schema validation, native message history, runtime guards,
+bounded corrective retry and reversible preparation. CI runs on macOS/Linux and
+Node 22/24; live model tests are deliberately not part of CI.
+
+The optional `scripts/router-rehearsal.mjs --router-root /installed/codex-router`
+uses generated credentials and a mock upstream through the actual Router,
+LiteLLM gateway and API forwarder. It confirms original native catalog entries
+remain intact, upstream model mapping, namespace/call identity, reasoning fields,
+and removal of temporary state. It does not execute a Desktop GUI turn or prove
+that a live menu has been migrated.
+
+## Release decision and concrete options
+
+The candidate can be reviewed as an experimental native-tool bridge with a
+verified control model. It is **not ready to advertise Nemotron as equivalent to
+native GPT integration**. For that narrower requirement, the concrete options are:
+
+1. Keep Nemotron experimental and use the verified Space Bunny path for client
+   workflows now; direct API access may be simpler for that particular model.
+2. Validate another officially available model or route that reliably accepts
+   arbitrary client tool schemas; publish its own receipt before enabling it.
+3. Wait for/support an upstream raw-inference or tool-selection interface that
+   removes the competing internal-tool surface. Do not spoof identity or bypass
+   access checks to obtain it.
+
+No public release, account sharing, live-router restart or active Desktop-model
+migration is included in this candidate.

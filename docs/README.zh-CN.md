@@ -1,14 +1,14 @@
 # codex-opencode-bridge
 
-把用户有权使用的 OpenCode 模型接入 Codex 的本地兼容服务。当前为私有开发版本，
-首先验证 `opencode/nemotron-3-ultra-free`，尚未完成全部桌面集成验收。
+把用户有权使用的 OpenCode 模型接入 Codex 的本地兼容服务。当前为私有候选版本 **0.2.0-rc.1**。Space Bunny Free 已通过完整真实客户端验收；
+优先测试的 Nemotron 3 Ultra Free 仍有工具误选和超时，明确列为实验支持。
 
 ## 已经验证到哪一步
 
 通过真实 Codex CLI 和会话服务，已经分别完成：读取随机标记、计算并写入 Markdown、
 执行验证命令、同一会话继续修改、修复失败的 Python 测试。修复过程中出现了 Codex
 原生文件修改事件。审批拒绝后目标文件不存在；取消、超时及后续恢复测试也已经通过。
-这些是各项实际成功记录，并不代表每次请求都成功或最终完整套件已全部通过。
+Space Bunny 的完整套件已通过七项验收；Nemotron 的各项成功记录不代表完整验收通过。
 
 曾发生模型误选 OpenCode 内部工具的失败。桥接阻止了该操作，而没有让 OpenCode
 绕过 Codex 修改文件。当前最多允许一次纠正性重试；上游访问拒绝、配额错误、已经
@@ -22,8 +22,9 @@ Codex 把对话和工具定义发给桥接；桥接通过 OpenCode 官方 v2 插
 补丁由 Codex 自己执行，结果再进入下一次模型请求。这里没有把文本中的 JSON 或标签
 冒充成工具调用，也没有让第二个 OpenCode 代理替 Codex 完成工作。
 
-当前对话历史仍通过带角色标记的序列化内容传给上游，并非上游原生角色消息。
-OpenCode 的系统上下文也会参与，因此不能宣称与 GPT 模型完全相同。
+当前已经使用 OpenCode 原生消息结构传递对话和配对的工具调用/结果。系统与开发者
+指令映射到 OpenCode 的同一种指令角色，其系统上下文仍参与，因此不能宣称与 GPT
+模型完全相同。原生模式的最终文本会缓冲到调度完成，不伪装逐字流式输出。
 
 ## 运行
 
@@ -33,7 +34,7 @@ OpenCode 2.0.18、Codex 0.157.1。旧的 v1 服务接口不兼容。
 ```sh
 npm ci --ignore-scripts
 node bin/bridge.mjs init
-BRIDGE_MODE=native-tools npm start
+BRIDGE_MODE=native-tools BRIDGE_MODELS=opencode/space-bunny-free npm start
 ```
 
 如果 OpenCode 不在 PATH 中，设置 `OPENCODE_BIN` 为已安装可执行文件的绝对路径。
@@ -44,7 +45,7 @@ BRIDGE_MODE=native-tools npm start
 运行实际验收：
 
 ```sh
-node scripts/native-acceptance.mjs --live
+BRIDGE_TEST_MODEL=opencode/space-bunny-free node scripts/native-acceptance.mjs --live
 ```
 
 验收默认使用另一对端口 4596/4597、临时工作区和临时 Codex 会话；不修改当前
@@ -63,7 +64,11 @@ Codex/Router 配置，不迁移已有模型。脱敏结果保存在 `generated/`
 
 [Codex 配置说明](codex.md)提供独立测试样例。安装服务不会自动增加桌面模型菜单项。
 与 GPT、DeepSeek 等现有模型共存需要已有路由器的独立提供方和模型目录配置；
-这部分的隔离演练和可恢复安装仍是发布门槛，当前没有改动用户正在使用的菜单。
+独立 Router → 网关 → 转发层的协议演练已通过，保留原目录条目并完成清理；这使用的是
+模拟上游，不等于桌面界面已经部署。当前没有改动用户正在使用的菜单。
+
+`prepare` 命令在新目录生成配置、目录副本和本地令牌；`remove-prepared` 可以撤销，
+遇到用户修改或残留运行目录会拒绝删除。它们不会替换默认 Codex 配置或安装常驻服务。
 
 临时工作目录与插件限制不等于操作系统沙箱，仍需信任本机 OpenCode 和其插件配置。
 项目不提供账号、密钥或免费额度，不绕过供应商访问规则。MIT 许可证只覆盖本项目代码。

@@ -1,8 +1,8 @@
 {
   "models": [
     {
-      "slug": "opencode/nemotron-3-ultra-free",
-      "display_name": "Nemotron 3 Ultra Free (OpenCode Bridge)",
+      "slug": "opencode/space-bunny-free",
+      "display_name": "Space Bunny Free (OpenCode Bridge)",
       "description": "Experimental native client tools; text only; upstream-default reasoning. Context set to a conservative 32k test budget.",
       "default_reasoning_level": "default",
       "supported_reasoning_levels": [

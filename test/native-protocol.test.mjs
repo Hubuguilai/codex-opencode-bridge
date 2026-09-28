@@ -58,14 +58,27 @@ test('Runtime guard blocks every internal action and only records client transfe
  assert.throws(()=>hooks['tool.execute.before']({tool:'shell'}),/INTERNAL_TOOL_BLOCKED/);
  const permission={action:'read',effect:'allow'};hooks['permission.evaluate'](permission);assert.equal(permission.effect,'deny');
  assert.doesNotThrow(()=>hooks['tool.execute.before']({tool:manifest.tools[0].relayName}));
- const context={tools:{shell:{},read:{},bridge_client_0:{description:'client'}},system:[],options:{}};
+ const context={tools:{shell:{},read:{},[manifest.tools[0].relayName]:{description:'client'}},system:[],options:{}};
  hooks['session.context'](context);assert.ok(context.system[0].text.includes('NOT the client workspace'));
  assert.equal(fs.readFileSync(path.join(root,'bridge-plugin-ready'),'utf8'),'r1');
  await hooks['session.prompt']();
  const controller=new AbortController();const pending=registered.at(-1).execute({path:'client-file'},{signal:controller.signal});
  const capture=JSON.parse(fs.readFileSync(path.join(root,'bridge-call.json')));
- assert.deepEqual(capture,{requestId:'r1',kind:'call',relayName:'bridge_client_0',input:{path:'client-file'}});
+ assert.deepEqual(capture,{requestId:'r1',kind:'call',relayName:manifest.tools[0].relayName,input:{path:'client-file'}});
  controller.abort();await assert.rejects(pending,/CANCELLED/);
+ manifest.messages=[{role:'user',content:[{type:'text',text:'client history'}]}];manifest.toolTransport='codemode';fs.writeFileSync(path.join(root,'bridge-request.json'),JSON.stringify(manifest));await hooks['session.prompt']();
+ const firstContext={tools:{},system:[],options:{},messages:[{role:'user',content:[{type:'text',text:'seed'}]}]};hooks['session.context'](firstContext);
+ assert.equal(firstContext.messages[0].content[0].text,'client history');
+ const continuation={tools:{},system:[],options:{},messages:[{role:'user',content:[{type:'text',text:'seed'}]},{role:'assistant',content:[{type:'text',text:'dispatch result'}]}]};hooks['session.context'](continuation);
+ assert.equal(continuation.messages.length,2);assert.equal(continuation.messages[1].content[0].text,'dispatch result');
+ assert.doesNotThrow(()=>hooks['tool.execute.before']({tool:'execute'}));
+ const dispatch={action:'execute'};hooks['permission.evaluate'](dispatch);assert.equal(dispatch.effect,'allow');
+ assert.throws(()=>hooks['tool.execute.before']({tool:'shell'}),/INTERNAL_TOOL_BLOCKED/);
+ const nestedShell={action:'shell'};hooks['permission.evaluate'](nestedShell);assert.equal(nestedShell.effect,'deny');
+ await hooks['session.prompt']();
+ for(let i=0;i<4;i++)hooks['session.context']({tools:{},system:[],options:{},messages:[]});
+ assert.throws(()=>hooks['session.context']({tools:{},system:[],options:{},messages:[]}),/DISPATCH_STEP_LIMIT/);
+ assert.equal(JSON.parse(fs.readFileSync(path.join(root,'bridge-call.json'))).kind,'limit');
 });
 
 test('Explicit upstream-default reasoning is accepted but adjustable effort is never silently ignored', () => {
@@ -73,3 +86,7 @@ test('Explicit upstream-default reasoning is accepted but adjustable effort is n
  assert.doesNotThrow(()=>normalizeNativeRequest(payload,'responses',config));
  for(const effort of ['low','medium','high','none']) assert.throws(()=>normalizeNativeRequest({...payload,reasoning:{effort}},'responses',config),{status:422});
 });
+
+ test('Invalid or conflicting generation limits fail before upstream dispatch',()=>{
+  for(const options of [{max_output_tokens:-1},{max_tokens:1.5},{top_p:2},{temperature:-1},{max_tokens:2,max_output_tokens:3}])assert.throws(()=>normalizeNativeRequest({model:'opencode/test',input:'hello',...options},'responses',config),{status:400});
+ });

@@ -2,11 +2,12 @@
 
 A local, authenticated **OpenCode v2 to Codex compatibility bridge**.
 Experimental native-tool mode relays structured tool calls to Codex for execution.
-The repository remains private while acceptance testing is in progress.
+Version **0.2.0-rc.1**. The repository remains private; no public release has been made.
 
 **Product target:** native Codex workspace and tool workflows for supported models.
-The first real file/command and same-thread follow-up tasks have passed. This is
-still a development build, not a claim of complete GPT feature parity.
+Space Bunny Free has passed a complete real-Codex acceptance suite. Nemotron 3
+Ultra Free remains experimental: individual tasks passed, but complete repair
+workflows were not reliable. See the [tested-model matrix](docs/verification.md).
 See the [native integration acceptance contract](docs/native-codex-target.md).
 
 [中文说明](docs/README.zh-CN.md) · [Prior art](docs/prior-art.md) · [Verification](docs/verification.md)
@@ -22,9 +23,10 @@ Codex / compatible client
 
 - `GET /health`, authenticated `GET /v1/models`.
 - `POST /v1/chat/completions` and `POST /v1/responses`: text, JSON and SSE.
-- Incremental text delivery by polling live OpenCode message snapshots. If a runtime
-  exposes text only at completion, it arrives as a single delta; no fake word streaming.
-- Full text history serialized into each fresh session; no silent truncation.
+- Text mode polls incremental OpenCode snapshots. Native mode buffers final text
+  until the dispatch outcome is known; it does not fake token-by-token streaming.
+- Native message roles and matched tool-call/result history are translated into
+  each fresh session; text mode serializes history. Neither silently truncates it.
 - Client disconnect/deadline → interrupt and delete the known upstream session.
 - Model allowlist, request/output byte limits, bounded concurrency, authenticated loopback.
 - No runtime npm dependencies; Node.js 22+ and a separately installed OpenCode v2 required.
@@ -40,8 +42,9 @@ Responses streaming errors arrive as `response.failed` after HTTP headers have b
 
 The upstream is the **official OpenCode runtime**, including its system context
 and user-level configuration. Native mode blocks internal actions before execution
-and transfers client calls without executing them. Conversation history currently
-uses serialized role labels, not native upstream roles. An empty working directory
+and transfers client calls without executing them. Client tool history uses native
+OpenCode message structures. Its single instruction role combines system/developer
+messages, and OpenCode retains its own system context. An empty working directory
 is **not an OS sandbox**. Run with trusted local OpenCode configuration. The legacy
 default `text` mode uses a Plan session, rejects client tools and only detects
 internal tools after observation; use native mode for Codex workflow experiments.
@@ -58,7 +61,7 @@ git clone https://github.com/Hubuguilai/codex-opencode-bridge.git
 cd codex-opencode-bridge
 npm ci --ignore-scripts
 node bin/bridge.mjs init
-BRIDGE_MODE=native-tools npm start
+BRIDGE_MODE=native-tools BRIDGE_MODELS=opencode/space-bunny-free npm start
 ```
 
 The repository is private, so cloning currently requires collaborator access.
@@ -77,7 +80,7 @@ export BRIDGE_TOKEN="$(cat "${BRIDGE_STATE_DIR:-$HOME/.local/share/codex-opencod
 curl http://127.0.0.1:4396/v1/models -H "Authorization: Bearer $BRIDGE_TOKEN"
 curl http://127.0.0.1:4396/v1/chat/completions \
   -H "Authorization: Bearer $BRIDGE_TOKEN" -H 'Content-Type: application/json' \
-  --data '{"model":"opencode/nemotron-3-ultra-free","messages":[{"role":"user","content":"Hello"}],"stream":true}'
+  --data '{"model":"opencode/space-bunny-free","messages":[{"role":"user","content":"Hello"}],"stream":true}'
 ```
 
 Shell-expanded curl headers may be visible in local process listings. For automated
@@ -89,6 +92,7 @@ on the command line. This token authenticates the local bridge, not the model pr
 | Environment variable | Default | Meaning |
 |---|---|---|
 | `BRIDGE_MODE` | `text` | `native-tools` enables guarded client-tool relay |
+| `BRIDGE_TOOL_TRANSPORT` | `direct` | Optional experimental `codemode` dispatcher; not the verified default |
 | `OPENCODE_BIN` | PATH, then `~/.opencode/bin/opencode` | Installed executable |
 | `BRIDGE_MODELS` | `opencode/nemotron-3-ultra-free` | Comma-separated exact `provider/model` IDs |
 | `BRIDGE_PORT` | `4396` | Loopback bridge port |
@@ -114,6 +118,20 @@ router. **Installing this service alone does not add a Desktop model picker entr
 Provider/catalog integration is separate. Use the supplied isolated acceptance
 harness before preparing a picker integration. Keep working providers intact.
 
+## Reversible preparation
+
+```sh
+node bin/bridge.mjs prepare /absolute/new/directory --model opencode/space-bunny-free
+# Optional: --catalog /absolute/existing/models.json preserves its entries in a copy.
+node bin/bridge.mjs remove-prepared /absolute/new/directory
+```
+
+Preparation creates a dedicated token/state directory, client configuration
+fragment, model catalog and bridge environment descriptor. It never edits the
+active Codex configuration or installs a background service. Removal refuses user
+edits, extra files or active/leftover runtime work directories. See
+[installation and router rehearsal](docs/codex.md).
+
 ## Development and tests
 
 ```sh
@@ -122,7 +140,7 @@ npm test
 # Explicitly sends two real requests using your own OpenCode access:
 npm run smoke -- --live
 # Real ephemeral Codex threads: file operations, follow-up, repair and denial:
-node scripts/native-acceptance.mjs --live
+BRIDGE_TEST_MODEL=opencode/space-bunny-free node scripts/native-acceptance.mjs --live
 ```
 
 CI runs offline protocol tests on macOS/Linux and Node 22/24. The live smoke test

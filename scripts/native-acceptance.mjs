@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawn, spawnSync} from 'node:child_process';
 import {createInterface} from 'node:readline';
-import {randomUUID} from 'node:crypto';
+import {randomUUID,createHash} from 'node:crypto';
 import {readConfig} from '../src/config.mjs';
 import {startOpenCode} from '../src/opencode.mjs';
 import {createBridge} from '../src/server.mjs';
@@ -15,10 +15,14 @@ const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-acceptance-'));
 const work=path.join(root,'client');fs.mkdirSync(work);
 const marker=randomUUID();
 fs.writeFileSync(path.join(work,'input.json'),JSON.stringify({marker,values:[137,281]}));
-const config=readConfig({...process.env,BRIDGE_MODE:'native-tools',BRIDGE_STATE_DIR:path.join(root,'state'),BRIDGE_PORT:process.env.BRIDGE_PORT||'4596',OPENCODE_PORT:process.env.OPENCODE_PORT||'4597'});
-const catalog=path.resolve(new URL('../examples/native-models.json',import.meta.url).pathname);
+const testModel=process.env.BRIDGE_TEST_MODEL||'opencode/nemotron-3-ultra-free';
+const config=readConfig({...process.env,BRIDGE_MODELS:testModel,BRIDGE_MODE:'native-tools',BRIDGE_STATE_DIR:path.join(root,'state'),BRIDGE_PORT:process.env.BRIDGE_PORT||'4596',OPENCODE_PORT:process.env.OPENCODE_PORT||'4597'});
+const catalog=path.join(root,'client-models.json');
+const modelTemplate=JSON.parse(fs.readFileSync(new URL('../examples/native-models.json',import.meta.url)));
+modelTemplate.models[0].slug=testModel;modelTemplate.models[0].display_name=testModel+' (acceptance)';
+fs.writeFileSync(catalog,JSON.stringify(modelTemplate),{mode:0o600});
 const overrides={
- model_provider:'bridge_acceptance',model:'opencode/nemotron-3-ultra-free',
+ model_provider:'bridge_acceptance',model:testModel,
  'model_providers.bridge_acceptance.name':'Bridge acceptance',
  'model_providers.bridge_acceptance.base_url':`http://127.0.0.1:${config.port}/v1`,
  'model_providers.bridge_acceptance.wire_api':'responses',
@@ -29,7 +33,9 @@ const overrides={
  model_catalog_json:catalog,model_reasoning_effort:'default',model_reasoning_summary:'none',
  web_search:'disabled','features.apps':false,'features.multi_agent':false,'features.memories':false,
 };
-const receipt={date:new Date().toISOString(),model:overrides.model,node:process.version,codex:spawnSync('codex',['--version'],{encoding:'utf8'}).stdout.trim(),scenarios:[]};
+const sourceHash=createHash('sha256');
+for(const name of fs.readdirSync(new URL('../src/',import.meta.url)).filter(x=>x.endsWith('.mjs')).sort()){sourceHash.update(name);sourceHash.update(fs.readFileSync(new URL('../src/'+name,import.meta.url)));}
+const receipt={sourceSha256:sourceHash.digest('hex'),gitHead:spawnSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).stdout.trim(),date:new Date().toISOString(),model:overrides.model,toolTransport:config.toolTransport,node:process.version,codex:spawnSync('codex',['--version'],{encoding:'utf8'}).stdout.trim(),scenarios:[]};
 let runtime,bridge,child,sequence=0,approvalCount=0,stderr='';
 const pending=new Map(),events=[];
 const send=value=>child.stdin.write(JSON.stringify(value)+'\n');

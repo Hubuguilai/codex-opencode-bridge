@@ -9,8 +9,10 @@
   privileges and OpenCode configuration (including configured plugins/MCP).
 - Native mode registers client tools through the official v2 plugin API. Its
   executors only record structured arguments; they never execute client work.
-  Both permission evaluation and before-execution hooks block OpenCode internal
-  actions. Each request waits for its own plugin-ready acknowledgement and uses
+  Both permission evaluation and before-execution hooks block OpenCode workspace
+  actions. The opt-in Code Mode experiment permits only the restricted dispatcher
+  itself; nested workspace tools are still denied. Its official runtime has no
+  direct filesystem, import, timer or fetch access. Each request waits for its own plugin-ready acknowledgement and uses
   one atomic tool capture. Only one native request is admitted at a time.
 - Legacy text mode uses a Plan session and refuses client tools. Detection of
   unexpected upstream tools in that mode is not a pre-execution boundary.
@@ -25,6 +27,8 @@
 - No prompts or responses are logged by this bridge. OpenCode has its own database,
   logging, telemetry and provider data handling; deleting a session is not a promise
   of secure data erasure or zero upstream retention.
+- Each upstream session has a four-model-step dispatch limit; intermediate
+  dispatch text is buffered and never presented as completed client work.
 - One corrective generation is allowed only after a bridge-disabled internal-tool
   choice, before any text is streamed, within the original deadline. User tool
   denials, provider access/quota errors, timeouts and partial streams are never
@@ -38,5 +42,7 @@ if no longer wanted. The user-controlled `BRIDGE_STATE_DIR` can be removed separ
 once this service has stopped; this removes its local token and leftover work dirs.
 Do not remove `~/.local/share/opencode` or Codex auth/config as part of uninstall.
 
-No LaunchAgent, model catalog or Codex configuration is installed by this project.
+No LaunchAgent or active Codex configuration is installed automatically. The
+`prepare` command writes an isolated model catalog/configuration copy, and
+`remove-prepared` refuses modified files or runtime leftovers.
 The older prototype's existing LaunchAgent is separate and remains unaffected.

@@ -13,6 +13,8 @@ export default {
     let manifest;
     let registration;
     let captured = false;
+    let baseMessageCount;
+    let dispatchSteps = 0;
     const capture = value => {
       if (captured) return;
       const temporary = capturePath + '.tmp';
@@ -23,6 +25,8 @@ export default {
     await ctx.session.hook('prompt', async () => {
       manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
       captured = false;
+      baseMessageCount = undefined;
+      dispatchSteps = 0;
       if (registration) await registration.dispose();
       registration = await ctx.tool.transform(editor => {
         for (const tool of manifest.tools) {
@@ -30,7 +34,7 @@ export default {
             name: tool.relayName,
             description: `Codex client tool ${tool.namespace ? tool.namespace + '.' : ''}${tool.name}. ${tool.description || ''}`,
             input: tool.parameters,
-            options: { codemode: false },
+            options: { codemode: manifest.toolTransport === 'codemode' },
             execute: async (input, context) => {
               // Wait until the bridge has returned this structured call and
               // interrupts the upstream session. Never fabricate a tool result.
@@ -47,10 +51,20 @@ export default {
     });
     await ctx.session.hook('context', event => {
       if (!manifest) throw new Error('Missing bridge request manifest.');
+      if (++dispatchSteps > 4) {
+        capture({kind:'limit'});
+        throw new Error('DISPATCH_STEP_LIMIT');
+      }
+      if (manifest.messages) {
+        baseMessageCount ??= event.messages.length;
+        event.messages = [...structuredClone(manifest.messages), ...event.messages.slice(baseMessageCount)];
+      }
       event.system.push({ type: 'text', text: [
-        'This session is a Codex client compatibility turn. The user conversation is serialized in the prompt.',
+        'This session is a Codex client compatibility turn. The client conversation and tool results are supplied as native messages.',
         'All requested workspace actions MUST be requested through the bridge_client_* top-level function tools.',
-        'Call them directly, NOT through execute/Code Mode. OpenCode internal tools are blocked before execution.',
+        manifest.toolTransport === 'codemode'
+          ? 'Use execute Code Mode to call the bridge_client_* tools by their catalog names. Code Mode is only a dispatcher; all non-client workspace tools remain blocked.'
+          : 'Call them directly, NOT through execute/Code Mode. OpenCode internal tools are blocked before execution.',
         'The actual work is executed by the Codex client. Your OpenCode working directory is NOT the client workspace.',
         'Tool results already in the conversation are authoritative client results; do not repeat completed calls.',
         'A client tool denial or failure is real: respect it and do not circumvent it with another tool.',
@@ -60,13 +74,14 @@ export default {
       if (manifest.options) Object.assign(event.options, manifest.options);
     });
     await ctx.tool.hook('execute.before', event => {
+      if (event.tool === 'execute' && manifest?.toolTransport === 'codemode') return;
       if (!manifest?.tools.some(tool => tool.relayName === event.tool)) {
         if (manifest) capture({ kind: 'blocked', tool: event.tool });
         throw new Error('OPENCODE_INTERNAL_TOOL_BLOCKED');
       }
     });
     await ctx.permission.hook('evaluate', event => {
-      const clientTool = manifest?.tools.some(tool => tool.relayName === event.action);
+      const clientTool = (event.action === 'execute' && manifest?.toolTransport === 'codemode') || manifest?.tools.some(tool => tool.relayName === event.action);
       event.effect = clientTool ? 'allow' : 'deny';
       if (!clientTool && manifest) capture({ kind: 'blocked', tool: event.action });
     });

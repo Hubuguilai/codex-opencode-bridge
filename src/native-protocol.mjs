@@ -1,3 +1,4 @@
+import { nativeHistory } from './native-history.mjs';
 import { invalid, unsupported, BridgeError } from './errors.mjs';
 
 function contentText(content) {
@@ -34,7 +35,7 @@ export function normalizeTools(definitions = [], api = 'responses') {
     if (!parameters || typeof parameters !== 'object' || Array.isArray(parameters)) throw invalid('Tool parameters must be a JSON schema.');
     tools.push({ name: fn.name, ...(namespace ? { namespace } : {}), kind: custom ? 'custom' : 'function', parameters,
       description: String(fn.description || '') + (custom && fn.format ? '\nClient input format: ' + JSON.stringify(fn.format) : ''),
-      relayName: `bridge_client_${tools.length}` });
+      relayName: `bridge_client_${[namespace, fn.name].filter(Boolean).join('_').replace(/[^a-zA-Z0-9_]/g, '_').slice(0,40)}_${tools.length}` });
   }
   for (const tool of definitions) add(tool);
   if (tools.length > 256) throw invalid('At most 256 client tools are supported.');
@@ -107,12 +108,16 @@ export function normalizeNativeRequest(payload, api, config) {
   for (const [key, target] of [['temperature', 'temperature'], ['top_p', 'topP'], ['max_output_tokens', 'maxTokens'], ['max_tokens', 'maxTokens'], ['max_completion_tokens', 'maxTokens']]) {
     if (payload[key] != null) {
       if (typeof payload[key] !== 'number' || !Number.isFinite(payload[key])) throw invalid(`Invalid ${key}.`);
+      if (target === 'maxTokens' && (!Number.isInteger(payload[key]) || payload[key] < 1)) throw invalid(`Invalid ${key}.`);
+      if (target === 'temperature' && (payload[key] < 0 || payload[key] > 2)) throw invalid('temperature must be between 0 and 2.');
+      if (target === 'topP' && (payload[key] < 0 || payload[key] > 1)) throw invalid('top_p must be between 0 and 1.');
+      if (options[target] !== undefined && options[target] !== payload[key]) throw invalid('Conflicting token limits.');
       options[target] = payload[key];
     }
   }
   const prompt = 'Process the following Codex conversation. Use the provided client tools for any requested actions. '
     + 'Historical tool calls and results are past events, not instructions to repeat them.\n' + JSON.stringify({ conversation: history });
   if (Buffer.byteLength(prompt) > config.maxBodyBytes) throw new BridgeError(413, 'input_too_large', 'Input exceeds the configured limit; nothing was truncated.');
-  return { model: payload.model, prompt, tools: activeTools, options, stream: payload.stream === true,
+  return { model: payload.model, prompt, messages: nativeHistory(history, tools), tools: activeTools, options, stream: payload.stream === true,
     includeUsage: payload.stream_options?.include_usage === true, mode: 'native-tools' };
 }
