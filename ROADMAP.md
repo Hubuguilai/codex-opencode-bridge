@@ -1,5 +1,12 @@
 # Roadmap
 
+## Product objective (2026-09-29)
+
+Support native Codex workflows, including client-executed file/command tools and
+multi-step continuations. Text-only operation is a baseline, not the intended end
+product. The first milestone is a real Codex read/write/command round trip in a
+disposable project. See [acceptance criteria](docs/native-codex-target.md).
+
 ## v0.1 foundation
 
 - [x] Standalone dependency-free Node package and private GitHub repository

@@ -4,6 +4,10 @@ A local, authenticated **text-response bridge for the OpenCode v2 session API**.
 Exposes OpenAI-compatible Chat Completions and a text subset of Responses.
 Experimental v0.1.0; this repository is currently private.
 
+**Product target:** native Codex workspace and tool workflows for supported models.
+The text-only implementation below is a baseline, not completion of that goal.
+See the [native integration acceptance contract](docs/native-codex-target.md).
+
 [中文说明](docs/README.zh-CN.md) · [Prior art](docs/prior-art.md) · [Verification](docs/verification.md)
 
 ```text
