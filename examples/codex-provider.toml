@@ -1,0 +1,12 @@
+# Wiring example only: v0.1 supports text, not normal Codex native tool requests.
+# Merge manually; do not overwrite ~/.codex/config.toml with this file.
+[model_providers.opencode_bridge]
+name = "OpenCode Local Bridge (experimental text)"
+base_url = "http://127.0.0.1:4396/v1"
+wire_api = "responses"
+env_key = "BRIDGE_TOKEN"
+requires_openai_auth = false
+
+[profiles.opencode_bridge_text]
+model_provider = "opencode_bridge"
+model = "opencode/nemotron-3-ultra-free"
