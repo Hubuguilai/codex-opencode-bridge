@@ -7,11 +7,16 @@
 - Each server run creates its own empty working directory; sessions are temporary.
   This directory is not a sandbox. The OpenCode process inherits the user's OS
   privileges and OpenCode configuration (including configured plugins/MCP).
-- The Plan agent retains its upstream defaults. A prototype experiment denying
-  every internal tool produced an upstream free-tier rejection. Do not describe
-  this implementation as an isolated or tool-free inference service.
-- The API refuses client-supplied tools. Detection of unexpected upstream tool
-  parts aborts the answer but is not a pre-execution security boundary.
+- Native mode registers client tools through the official v2 plugin API. Its
+  executors only record structured arguments; they never execute client work.
+  Both permission evaluation and before-execution hooks block OpenCode internal
+  actions. Each request waits for its own plugin-ready acknowledgement and uses
+  one atomic tool capture. Only one native request is admitted at a time.
+- Legacy text mode uses a Plan session and refuses client tools. Detection of
+  unexpected upstream tools in that mode is not a pre-execution boundary.
+- Plugin guards do not constrain trusted third-party plugins or arbitrary local
+  processes. They are not a replacement for OS sandboxing. The bridge bearer token
+  is removed from the managed child's environment.
 - On cancellation, deadlines and errors the known session is interrupted and deleted.
   Cleanup calls have independent bounded deadlines and report failure codes.
   A process crash, lost create response, or unavailable server can leave a session
@@ -20,7 +25,10 @@
 - No prompts or responses are logged by this bridge. OpenCode has its own database,
   logging, telemetry and provider data handling; deleting a session is not a promise
   of secure data erasure or zero upstream retention.
-- No retries of a generation, account rotation or automatic quota fallback.
+- One corrective generation is allowed only after a bridge-disabled internal-tool
+  choice, before any text is streamed, within the original deadline. User tool
+  denials, provider access/quota errors, timeouts and partial streams are never
+  retried. No account rotation or automatic quota fallback.
 - Do not expose this service to the Internet or treat it as a multi-user gateway.
 
 ## Removing it

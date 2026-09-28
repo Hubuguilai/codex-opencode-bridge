@@ -1,12 +1,21 @@
-# Wiring example only: v0.1 supports text, not normal Codex native tool requests.
-# Merge manually; do not overwrite ~/.codex/config.toml with this file.
+# Standalone native-tool test configuration. Do not overwrite a working config.
+# Start the bridge with BRIDGE_MODE=native-tools and load its local BRIDGE_TOKEN.
+model_provider = "opencode_bridge"
+model = "opencode/nemotron-3-ultra-free"
+model_reasoning_effort = "default"
+model_reasoning_summary = "none"
+web_search = "disabled"
+# Set model_catalog_json to the absolute path of examples/native-models.json.
+
 [model_providers.opencode_bridge]
-name = "OpenCode Local Bridge (experimental text)"
+name = "OpenCode Local Bridge (experimental native tools)"
 base_url = "http://127.0.0.1:4396/v1"
 wire_api = "responses"
 env_key = "BRIDGE_TOKEN"
 requires_openai_auth = false
+request_max_retries = 0
+stream_max_retries = 0
 
-[profiles.opencode_bridge_text]
-model_provider = "opencode_bridge"
-model = "opencode/nemotron-3-ultra-free"
+[features]
+apps = false
+multi_agent = false

@@ -9,6 +9,8 @@ export function stateDirectory(env = process.env) {
 
 export function readConfig(env = process.env) {
   const stateDir = stateDirectory(env);
+  const mode = env.BRIDGE_MODE || 'text';
+  if (!['text', 'native-tools'].includes(mode)) throw new Error('BRIDGE_MODE must be text or native-tools.');
   fs.mkdirSync(stateDir, { recursive: true, mode: 0o700 });
   const tokenPath = path.join(stateDir, 'local-token');
   let token = env.BRIDGE_TOKEN;
@@ -31,12 +33,12 @@ export function readConfig(env = process.env) {
     throw new Error('BRIDGE_MODELS must be comma-separated provider/model IDs.');
   }
   return {
-    host: '127.0.0.1', port, upstreamPort, stateDir, tokenPath, token, models,
+    host: '127.0.0.1', port, upstreamPort, stateDir, tokenPath, token, models, mode,
     timeoutMs: number('BRIDGE_TIMEOUT_MS', 180000, 3600000),
     pollMs: number('BRIDGE_POLL_MS', 250, 10000),
     maxBodyBytes: number('BRIDGE_MAX_BODY_BYTES', 16000000, 100000000),
     maxOutputBytes: number('BRIDGE_MAX_OUTPUT_BYTES', 8000000, 100000000),
-    maxConcurrent: number('BRIDGE_MAX_CONCURRENT', 2, 32),
+    maxConcurrent: mode === 'native-tools' ? 1 : number('BRIDGE_MAX_CONCURRENT', 2, 32),
   };
 }
 

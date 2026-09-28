@@ -1,11 +1,12 @@
 # codex-opencode-bridge
 
-A local, authenticated **text-response bridge for the OpenCode v2 session API**.
-Exposes OpenAI-compatible Chat Completions and a text subset of Responses.
-Experimental v0.1.0; this repository is currently private.
+A local, authenticated **OpenCode v2 to Codex compatibility bridge**.
+Experimental native-tool mode relays structured tool calls to Codex for execution.
+The repository remains private while acceptance testing is in progress.
 
 **Product target:** native Codex workspace and tool workflows for supported models.
-The text-only implementation below is a baseline, not completion of that goal.
+The first real file/command and same-thread follow-up tasks have passed. This is
+still a development build, not a claim of complete GPT feature parity.
 See the [native integration acceptance contract](docs/native-codex-target.md).
 
 [中文说明](docs/README.zh-CN.md) · [Prior art](docs/prior-art.md) · [Verification](docs/verification.md)
@@ -13,7 +14,7 @@ See the [native integration acceptance contract](docs/native-codex-target.md).
 ```text
 Codex / compatible client
   → local bridge (Bearer authentication, 127.0.0.1)
-  → official OpenCode v2 server (temporary Plan session)
+  → official OpenCode v2 server + guarded client-tool plugin
   → model available to the user's OpenCode installation
 ```
 
@@ -28,16 +29,22 @@ Codex / compatible client
 - Model allowlist, request/output byte limits, bounded concurrency, authenticated loopback.
 - No runtime npm dependencies; Node.js 22+ and a separately installed OpenCode v2 required.
 
-**Not a full Codex coding backend.** Native Codex tool definitions/calls are rejected
-with HTTP 422. Images, audio, files, sampling/reasoning controls, structured output,
+With `BRIDGE_MODE=native-tools`, Responses function tools, namespaces and custom
+freeform tools are relayed to Codex. Chat supports function tools. The managed
+OpenCode plugin captures arguments and waits; Codex performs the actual action.
+See [real-client evidence and remaining gates](docs/native-tool-progress.md).
+
+Images, audio, file uploads, adjustable reasoning controls, structured output,
 `previous_response_id`, stored responses and background responses are unsupported.
 Responses streaming errors arrive as `response.failed` after HTTP headers have been sent.
 
-The upstream is an **OpenCode Plan agent**, not a raw model endpoint. OpenCode's own
-system prompt, tools, permissions and user-level configuration can affect behavior.
-An empty working directory is **not an OS sandbox**. Internal tools are not forwarded
-to Codex; if observed in the response, this adapter aborts the request, but they may
-already have run inside OpenCode. Run only with trusted local OpenCode configuration.
+The upstream is the **official OpenCode runtime**, including its system context
+and user-level configuration. Native mode blocks internal actions before execution
+and transfers client calls without executing them. Conversation history currently
+uses serialized role labels, not native upstream roles. An empty working directory
+is **not an OS sandbox**. Run with trusted local OpenCode configuration. The legacy
+default `text` mode uses a Plan session, rejects client tools and only detects
+internal tools after observation; use native mode for Codex workflow experiments.
 See [security and lifecycle boundaries](docs/security.md).
 
 ## Quick start
@@ -51,7 +58,7 @@ git clone https://github.com/Hubuguilai/codex-opencode-bridge.git
 cd codex-opencode-bridge
 npm ci --ignore-scripts
 node bin/bridge.mjs init
-npm start
+BRIDGE_MODE=native-tools npm start
 ```
 
 The repository is private, so cloning currently requires collaborator access.
@@ -81,6 +88,7 @@ on the command line. This token authenticates the local bridge, not the model pr
 
 | Environment variable | Default | Meaning |
 |---|---|---|
+| `BRIDGE_MODE` | `text` | `native-tools` enables guarded client-tool relay |
 | `OPENCODE_BIN` | PATH, then `~/.opencode/bin/opencode` | Installed executable |
 | `BRIDGE_MODELS` | `opencode/nemotron-3-ultra-free` | Comma-separated exact `provider/model` IDs |
 | `BRIDGE_PORT` | `4396` | Loopback bridge port |
@@ -91,7 +99,7 @@ on the command line. This token authenticates the local bridge, not the model pr
 | `BRIDGE_POLL_MS` | `250` | Snapshot polling interval |
 | `BRIDGE_MAX_BODY_BYTES` | `16000000` | Raw JSON and serialized prompt byte limit |
 | `BRIDGE_MAX_OUTPUT_BYTES` | `8000000` | Output byte limit |
-| `BRIDGE_MAX_CONCURRENT` | `2` | Simultaneous admitted requests; overflow returns 429 |
+| `BRIDGE_MAX_CONCURRENT` | `2` (text) | Native mode always admits one request per managed runtime; overflow returns 429 |
 
 A configured model ID is an allowlist entry, not proof of availability. No token
 context limit, price or multimodal capability is invented in `/v1/models`.
@@ -103,8 +111,8 @@ model evidence and real long-input validation.
 See [integration notes](docs/codex.md). The Responses endpoint permits experiments
 with a custom provider; the Chat Completions endpoint can sit behind an existing
 router. **Installing this service alone does not add a Desktop model picker entry.**
-Provider/catalog integration is separate, and a normal Codex request with tools
-will be rejected in v0.1. Do not replace a working provider with this build blindly.
+Provider/catalog integration is separate. Use the supplied isolated acceptance
+harness before preparing a picker integration. Keep working providers intact.
 
 ## Development and tests
 
@@ -113,6 +121,8 @@ npm run check
 npm test
 # Explicitly sends two real requests using your own OpenCode access:
 npm run smoke -- --live
+# Real ephemeral Codex threads: file operations, follow-up, repair and denial:
+node scripts/native-acceptance.mjs --live
 ```
 
 CI runs offline protocol tests on macOS/Linux and Node 22/24. The live smoke test

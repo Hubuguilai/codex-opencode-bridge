@@ -1,47 +1,60 @@
-# Codex connection notes
+# Codex integration and coexistence
 
-There are two distinct integration layers:
+Native mode requires `BRIDGE_MODE=native-tools`. The first tested combination is
+OpenCode 2.0.18, Codex 0.157.1 and `opencode/nemotron-3-ultra-free`. The bridge uses
+Responses for Codex's function/custom tools. Chat supports ordinary function tools.
+It never performs the client file/command operations itself.
 
-1. This process serves model-like HTTP interfaces.
-2. Codex or an existing router chooses the endpoint and publishes model metadata.
+## Isolated, repeatable verification
 
-The project does not modify the global Codex configuration or its model picker.
-Keep existing native GPT and other provider entries intact.
+```sh
+node scripts/native-acceptance.mjs --live
+```
 
-## Existing router
+This starts separate bridge/OpenCode ports 4596/4597, creates disposable client
+workspaces and ephemeral Codex app-server threads, and writes a sanitized receipt
+under `generated/`. It does not edit the normal Codex or Router configuration.
+Set both port environment variables if occupied. Each turn has a 180-second cap.
+The operator's installed OpenCode and existing provider access are used.
+`--repair-only` and `--lifecycle-only` select focused diagnostic runs.
 
-Use `http://127.0.0.1:4396/v1` as an OpenAI Chat Completions upstream, with the local
-bridge token as its credential. Use the exact model ID returned by `/v1/models`,
-for example `opencode/nemotron-3-ultra-free`.
+The fixture checks actual files independently. A completed model message alone
+is not a passed file-work test. Approval requests in the harness are declined;
+there is no automatic approval of unknown operations.
 
-The router must support a **text-only** route with no native tool definitions or
-unsupported reasoning/sampling fields. v0.1 rejects these with 422; it never silently
-pretends to execute tools. No new Desktop picker entry has been installed by this
-project. The older prototype was less strict and silently ignored tools; do not
-replace it with this version without testing the router request shape first.
+## Client settings
 
-## Responses provider experiment
+`examples/codex-provider.toml` is a wiring example; `examples/native-models.json`
+is the companion model catalog. The catalog uses a **conservative 32k test budget**,
+not a claim about the model's maximum context. Set `model_catalog_json` to its
+absolute path in a dedicated client configuration.
 
-The example `examples/codex-provider.toml` shows the API wiring, not a claim that all
-Codex workflows are compatible. Load `BRIDGE_TOKEN` into the environment of the
-client process, and merge only the relevant provider/profile sections after review.
-An ordinary coding request includes tools and will fail deliberately in v0.1.
-The API protocol is validated independently by tests and live smoke requests.
+Use `model_reasoning_effort="default"` and `model_reasoning_summary="none"`.
+An inherited high/medium effort or detailed summary is explicitly rejected. The
+single `default` choice means keep the upstream setting, not disable reasoning.
+Hosted web search, image input and structured final-output schemas are unsupported.
+The example disables app and subagent tools to match the acceptance test scope;
+this is not a claim that arbitrary Desktop tools have been certified.
 
-Model token limits are not inferred from the adapter's byte limit. Add catalog
-metadata only after verifying the exact upstream model. Do not clone another
-model's tool capabilities to make the picker look enabled.
+The complete conversation must accompany each request. `previous_response_id`,
+stored/background responses and foreign encrypted reasoning are unsupported.
+Serial function calls and matching tool outputs are carried through each turn.
+Custom freeform input is transported through a string field; the Codex client
+remains responsible for validating and executing its own tool.
 
-## Future complete coding support
+## Existing Desktop picker / router
 
-Required proof before claiming native Codex tools:
+A custom provider and a model catalog do not automatically create cross-provider
+routing in an existing Desktop installation. To keep native GPT and existing
+providers together, integrate this service with an existing router that supports
+Responses forwarding and explicit model metadata. Use a **new provider/model ID**
+for this development build; do not overwrite the older prototype route.
 
-1. Carry genuine client tool definitions to the intended model without replacing
-   them with OpenCode's own filesystem/shell tools.
-2. Return structured function calls and stream their arguments correctly.
-3. Execute through Codex's normal approval/runtime path.
-4. Send tool results back to the same logical model turn and finish the answer.
-5. Verify no tool executes in the bridge's working directory instead.
+Upstream URL: `http://127.0.0.1:4396/v1`; upstream model ID:
+`opencode/nemotron-3-ultra-free`; credential: the bridge's private local token.
+Preserve the single upstream-default reasoning setting. Prefer Responses passthrough
+so namespaces and custom tools do not have to be flattened by another layer.
 
-This is intentionally not simulated by parsing model-written JSON as if it were
-native function calling.
+The current work has not migrated the operator's active picker or live router.
+A separate router integration rehearsal and reversible install are release gates.
+Do not describe the CLI/app-server proof as a completed Desktop installation.

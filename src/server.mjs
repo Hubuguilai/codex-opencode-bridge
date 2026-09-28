@@ -1,8 +1,10 @@
+import { generateWithCorrection } from './tool-correction.mjs';
 import http from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
 import { once } from 'node:events';
 import { BridgeError, invalid, publicError } from './errors.mjs';
 import { normalizeRequest, makeWriter, json } from './protocol.mjs';
+import { normalizeNativeRequest } from './native-protocol.mjs';
 
 function authorized(req, token) {
   const expected = Buffer.from(`Bearer ${token}`);
@@ -44,13 +46,13 @@ export function createBridge(config, backend) {
     try {
       if (req.headers.origin) throw new BridgeError(403, 'browser_origin_denied', 'Browser-origin requests are not supported.');
       if (req.method === 'GET' && req.url === '/health') {
-        try { const health = await backend.health(); return json(res, 200, { ok: true, upstream: health, mode: 'text-only', active: active.size }); }
-        catch { return json(res, 503, { ok: false, mode: 'text-only' }); }
+        try { const health = await backend.health(); return json(res, 200, { ok: true, upstream: health, mode: config.mode || 'text', active: active.size }); }
+        catch { return json(res, 503, { ok: false, mode: config.mode || 'text' }); }
       }
       if (!authorized(req, config.token)) throw new BridgeError(401, 'unauthorized', 'A valid local bridge Bearer token is required.');
       if (req.method === 'GET' && req.url === '/v1/models') return json(res, 200, {
         object: 'list', data: config.models.map(id => ({ id, object: 'model', owned_by: id.split('/')[0],
-          supported_parameters: ['stream'], architecture: { input_modalities: ['text'], output_modalities: ['text'] },
+          supported_parameters: config.mode === 'native-tools' ? ['stream', 'tools', 'tool_choice'] : ['stream'], architecture: { input_modalities: ['text'], output_modalities: ['text'] },
         })),
       });
       const api = req.url === '/v1/responses' ? 'responses' : req.url === '/v1/chat/completions' ? 'chat' : null;
@@ -63,16 +65,17 @@ export function createBridge(config, backend) {
       active.add(controller);
       res.on('close', () => { if (!res.writableEnded) controller.abort(); });
       const payload = await readBody(req, res, config.maxBodyBytes);
-      const request = normalizeRequest(payload, api, config);
+      const request = config.mode === 'native-tools' ? normalizeNativeRequest(payload, api, config) : normalizeRequest(payload, api, config);
       controller.signal.throwIfAborted();
       deadline = setTimeout(() => controller.abort(), config.timeoutMs);
       writer = makeWriter(res, api, request);
-      const result = await backend.generate(request, { signal: controller.signal, onDelta: async delta => {
+      const result = await generateWithCorrection(backend, request, { signal: controller.signal, onDelta: async delta => {
         controller.signal.throwIfAborted();
         writer.delta(delta);
         if (res.writableNeedDrain) await once(res, 'drain', { signal: controller.signal });
       } });
       controller.signal.throwIfAborted();
+      if (result.calls) writer.calls(result.calls);
       writer.finish(result.tokens);
     } catch (error) {
       if (!res.destroyed && !res.writableEnded) {

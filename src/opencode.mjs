@@ -1,18 +1,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { findOpenCode } from './config.mjs';
 import { BridgeError } from './errors.mjs';
 
 export class OpenCodeBackend {
-  constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, warn = () => {} }) {
+  constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', warn = () => {} }) {
     this.url = url;
     this.directory = directory;
     this.pollMs = pollMs;
     this.maxOutputBytes = maxOutputBytes;
     this.warn = warn;
+    this.mode = mode;
     this.authorization = `Basic ${Buffer.from(`opencode:${password}`).toString('base64')}`;
   }
   async call(route, { method = 'GET', body, signal = AbortSignal.timeout(10000) } = {}) {
@@ -35,22 +36,58 @@ export class OpenCodeBackend {
     return { version: info.version };
   }
   async generate(request, { signal, onDelta }) {
+    if (this.mode === 'native-tools' && this.busy) throw new BridgeError(429, 'bridge_busy', 'OpenCode runtime is busy.');
+    this.busy = true;
     const [providerID, id] = request.model.split('/');
+    const native = this.mode === 'native-tools';
+    const requestId = randomUUID();
+    const capturePath = path.join(this.directory, 'bridge-call.json');
     let route;
     let completed = false;
     let previous = '';
     try {
       signal.throwIfAborted();
+      if (native) {
+        fs.rmSync(capturePath, { force: true });
+        fs.rmSync(path.join(this.directory, 'bridge-plugin-ready'), { force: true });
+        fs.writeFileSync(path.join(this.directory, 'bridge-request.json'), JSON.stringify({ requestId, tools: request.tools || [], options: request.options }), { mode: 0o600 });
+      }
       const created = await this.call('/api/session', { method: 'POST', body: {
         title: 'Temporary bridge request', model: { id, providerID },
-        location: { directory: this.directory }, agent: 'plan',
+        location: { directory: this.directory }, agent: native ? 'build' : 'plan',
+        ...(native ? { permissions: [{ action: '*', resource: '*', effect: 'ask' }] } : {}),
       } });
       if (typeof created?.data?.id !== 'string' || !created.data.id.startsWith('ses_')) throw new BridgeError(502, 'opencode_protocol_error', 'OpenCode returned no session ID.');
       route = `/api/session/${encodeURIComponent(created.data.id)}`;
       signal.throwIfAborted();
       await this.call(`${route}/prompt`, { method: 'POST', body: { text: request.prompt }, signal });
+      // OpenCode initializes location plugins lazily when the first prompt runs.
+      // All runtime actions require approval until the plugin is active; the
+      // plugin then denies internal actions and permits only transfer stubs.
+      if (native) {
+        const ready = () => {
+          try { return fs.readFileSync(path.join(this.directory, 'bridge-plugin-ready'), 'utf8') === requestId; } catch { return false; }
+        };
+        for (let i = 0; i < 100 && !ready(); i++) await delay(50, undefined, { signal });
+        if (!ready()) throw new BridgeError(502, 'relay_plugin_unavailable', 'Client tool guard plugin did not load; refusing generation.');
+      }
       while (true) {
         signal.throwIfAborted();
+        if (native && fs.existsSync(capturePath)) {
+          let capture;
+          try { capture = JSON.parse(fs.readFileSync(capturePath, 'utf8')); } catch { await delay(this.pollMs, undefined, { signal }); continue; }
+          if (capture.requestId !== requestId) throw new BridgeError(502, 'relay_state_mismatch', 'Unexpected client tool relay state.');
+          if (capture.kind === 'blocked') throw new BridgeError(422, 'internal_tool_blocked', 'The model selected an OpenCode internal tool; execution was blocked. Retry the task using client tools.');
+          const tool = request.tools.find(x => x.relayName === capture.relayName);
+          if (!tool || capture.kind !== 'call') throw new BridgeError(502, 'unknown_client_tool', 'Unrecognized client tool call.');
+          if (!capture.input || typeof capture.input !== 'object' || Array.isArray(capture.input)) throw new BridgeError(502, 'invalid_tool_arguments', 'Invalid client tool arguments.');
+          if (tool.kind === 'custom' && typeof capture.input.input !== 'string') throw new BridgeError(502, 'invalid_tool_arguments', 'Invalid custom tool input.');
+          return { calls: [{ type: tool.kind === 'custom' ? 'custom_tool_call' : 'function_call',
+            id: `fc_${randomUUID().replaceAll('-', '')}`, call_id: `call_${randomUUID().replaceAll('-', '')}`,
+            name: tool.name, ...(tool.namespace ? { namespace: tool.namespace } : {}),
+            ...(tool.kind === 'custom' ? { input: capture.input.input } : { arguments: JSON.stringify(capture.input) }),
+          }], tokens: null };
+        }
         const result = await this.call(`${route}/message?limit=100`, { signal });
         if (!Array.isArray(result.data)) throw new BridgeError(502, 'opencode_protocol_error', 'Invalid OpenCode message response.');
         const assistants = result.data.filter(x => x.type === 'assistant');
@@ -61,7 +98,7 @@ export class OpenCodeBackend {
             throw new BridgeError(assistant.error.status, 'upstream_access_or_quota', 'OpenCode provider denied access or quota. Check your model entitlement in OpenCode.');
           }
           if (assistant.finish === 'error' || assistant.error) throw new BridgeError(502, 'generation_failed', 'OpenCode generation failed.');
-          if ((assistant.content || []).some(x => x.type === 'tool' || x.type === 'tool-call')) {
+          if (!native && (assistant.content || []).some(x => x.type === 'tool' || x.type === 'tool-call')) {
             throw new BridgeError(502, 'unexpected_tool_call', 'OpenCode attempted a tool call in text-only mode.');
           }
           const text = (assistant.content || []).filter(x => x.type === 'text' && typeof x.text === 'string').map(x => x.text).join('');
@@ -69,7 +106,7 @@ export class OpenCodeBackend {
           if (Buffer.byteLength(text) > this.maxOutputBytes) throw new BridgeError(502, 'output_too_large', 'Output exceeded the configured byte limit.');
           if (text.length > previous.length) await onDelta(text.slice(previous.length));
           previous = text;
-          if (assistant.time?.completed) {
+          if (assistant.time?.completed && !(native && assistant.finish === 'tool-calls')) {
             if (assistant.finish === 'tool-calls' || assistant.finish === 'length') {
               throw new BridgeError(502, 'incomplete_generation', 'OpenCode did not complete a plain text answer.');
             }
@@ -88,6 +125,11 @@ export class OpenCodeBackend {
         await this.call(`${route}/interrupt`, { method: 'POST', signal: AbortSignal.timeout(2000) }).catch(() => this.warn('session_interrupt_failed'));
       }
       if (route) await this.call(route, { method: 'DELETE', signal: AbortSignal.timeout(2000) }).catch(() => this.warn('session_cleanup_failed'));
+      if (native) {
+        fs.rmSync(capturePath, { force: true });
+        fs.rmSync(path.join(this.directory, 'bridge-request.json'), { force: true });
+      }
+      this.busy = false;
     }
   }
 }
@@ -95,15 +137,23 @@ export class OpenCodeBackend {
 export async function startOpenCode(config, env = process.env) {
   const binary = findOpenCode(env);
   const directory = fs.mkdtempSync(path.join(config.stateDir, 'work-'));
+  if (config.mode === 'native-tools') {
+    const pluginDir = path.join(directory, '.opencode/plugins/codex-relay');
+    fs.mkdirSync(pluginDir, { recursive: true });
+    fs.writeFileSync(path.join(pluginDir, 'index.js'), `export { default } from ${JSON.stringify(new URL('./runtime-plugin.mjs', import.meta.url).href)};\n`);
+    fs.writeFileSync(path.join(directory, 'opencode.json'), JSON.stringify({ plugins: [pluginDir], share: 'disabled', snapshots: false, lsp: false, formatter: false, update: 'disable' }));
+  }
   const password = randomBytes(32).toString('base64url');
+  const childEnv = { ...env, OPENCODE_SERVER_PASSWORD: password };
+  delete childEnv.BRIDGE_TOKEN;
   const child = spawn(binary, ['serve', '--hostname', '127.0.0.1', '--port', String(config.upstreamPort)], {
-    cwd: directory, env: { ...env, OPENCODE_SERVER_PASSWORD: password }, stdio: 'ignore',
+    cwd: directory, env: childEnv, stdio: 'ignore',
   });
   let ended = false;
   child.on('error', () => { ended = true; });
   child.on('exit', () => { ended = true; });
   const backend = new OpenCodeBackend({ url: `http://127.0.0.1:${config.upstreamPort}`, password, directory,
-    pollMs: config.pollMs, maxOutputBytes: config.maxOutputBytes,
+    pollMs: config.pollMs, maxOutputBytes: config.maxOutputBytes, mode: config.mode,
     warn: code => process.stderr.write(`[bridge] ${code}\n`),
   });
   const stop = async () => {
