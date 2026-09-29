@@ -33,11 +33,25 @@ finally:
 print('Updated '+str(target))
 `;
 const validKeys=(input,keys)=>input&&typeof input==='object'&&!Array.isArray(input)&&Object.keys(input).every(key=>keys.includes(key));
-export function clientAliases(tools){
- const candidates=tools.filter(tool=>tool.kind==='function'&&tool.name==='exec_command'&&(!tool.namespace||tool.namespace==='functions'));
+function patchAliases(tools){
+ const candidates=tools.filter(tool=>tool.kind==='custom'&&tool.name==='apply_patch'&&(!tool.namespace||tool.namespace==='functions'));
  if(candidates.length!==1)return [];
+ const target=candidates[0];
+ return [{name:'apply_patch',registerIfMissing:true,target,
+  description:'Apply a patch using the original Codex apply_patch tool. Prefer this tool for file changes so Codex can display its native diff and enforce approvals. Supply the complete patch text, including Begin Patch and End Patch markers. The patch is transferred unchanged; no file is modified by OpenCode.\n'+(target.description||''),
+  input:{type:'object',properties:{patchText:{type:'string'}},required:['patchText'],additionalProperties:false},
+  translate:input=>{
+   if(!validKeys(input,['patchText'])||typeof input.patchText!=='string')throw new Error('UNSUPPORTED_PATCH_ALIAS_INPUT');
+   return {input:input.patchText};
+  },
+ }];
+}
+export function clientAliases(tools){
+ const patches=patchAliases(tools);
+ const candidates=tools.filter(tool=>tool.kind==='function'&&tool.name==='exec_command'&&(!tool.namespace||tool.namespace==='functions'));
+ if(candidates.length!==1)return patches;
  const target=candidates[0],schema=target.parameters;
- if(schema?.type!=='object'||schema.properties?.cmd?.type!=='string'||(schema.required||[]).some(key=>key!=='cmd'))return [];
+ if(schema?.type!=='object'||schema.properties?.cmd?.type!=='string'||(schema.required||[]).some(key=>key!=='cmd'))return patches;
  const make=(name,description,properties,required,translate)=>({name,description,input:{type:'object',properties,required,additionalProperties:false},target,translate});
  const string={type:'string'};
  const command=(program,input)=>{
@@ -49,6 +63,7 @@ export function clientAliases(tools){
   };
  };
  return [
+  ...patches,
   make('shell','Client-executed shell command. Runs through Codex exec_command in the Codex workspace, subject to Codex approval. Long commands can return a client session ID; use the supplied client write_stdin tool to continue. Background and execution timeout options are not supported.',{command:string,...(schema.properties.workdir?.type==='string'?{workdir:string}:{})},['command'],input=>{
    if(!input||typeof input.command!=='string'||Object.keys(input).some(key=>!['command','workdir'].includes(key)))throw new Error('UNSUPPORTED_SHELL_ALIAS_INPUT');
    if(input.workdir!==undefined&&(typeof input.workdir!=='string'||schema.properties.workdir?.type!=='string'))throw new Error('UNSUPPORTED_SHELL_ALIAS_WORKDIR');

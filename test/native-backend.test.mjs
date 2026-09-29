@@ -25,6 +25,14 @@ function fixture(t, behavior) {
 }
 const request={model:'opencode/test',prompt:'client task',tools:[{relayName:'bridge_client_0',kind:'function',name:'exec_command',namespace:'functions'}]};
 
+test('Native backend returns captured patch aliases as the original custom tool, without rewriting patch bytes',async t=>{
+ const patch='*** Begin Patch\n*** Add File: β.txt\n+hello\n*** End Patch\n';
+ const {backend}=fixture(t,({directory,manifest})=>fs.writeFileSync(path.join(directory,'bridge-call.json'),JSON.stringify({requestId:manifest.requestId,kind:'call',relayName:'bridge_patch',alias:'apply_patch',input:{input:patch}})));
+ const result=await backend.generate({...request,tools:[{relayName:'bridge_patch',kind:'custom',name:'apply_patch',namespace:'functions'}]},{signal:AbortSignal.timeout(1000),onDelta:()=>{}});
+ assert.equal(result.calls[0].type,'custom_tool_call');assert.equal(result.calls[0].name,'apply_patch');assert.equal(result.calls[0].namespace,'functions');assert.equal(result.calls[0].input,patch);
+ assert.equal(result.calls[0].arguments,undefined);
+});
+
 test('Native backend transfers original identity and arguments then interrupts and deletes upstream',async t=>{
  const {backend,directory,routes}=fixture(t,({directory,manifest})=>fs.writeFileSync(path.join(directory,'bridge-call.json'),JSON.stringify({requestId:manifest.requestId,kind:'call',relayName:'bridge_client_0',input:{cmd:'echo π'}})));
  const result=await backend.generate(request,{signal:AbortSignal.timeout(1000),onDelta:()=>{throw new Error('No fake text');}});

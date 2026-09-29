@@ -245,3 +245,24 @@ unrelated control survives; preparation removal succeeds. Thus the evidence cove
 one concrete late-commit and abrupt-driver-exit sequence, not arbitrary crash
 scheduling or a live orphan runtime. Crashes during recovery and the child-spawn
 ownership-recording window remain unproven. All 76 offline tests still pass.
+
+
+## Native patch alias and real Codex file events
+
+The optional client-alias mode now registers `apply_patch` when the client supplies
+one compatible original custom patch tool. Patch bytes, original identity and
+namespace are retained; the plugin captures the call before runtime execution.
+The supplied patch format/description is included in alias guidance. Command/file
+aliases retain their distinct semantics and are not converted into patches.
+
+[The real Codex client probe](receipts/patch-client-probe.json) uses Codex 0.157.1
+with a deterministic fake model and the actual plugin hook implementation. Create
+and update each produce a native fileChange item with diff content and exact file
+bytes; denial produces an approval request, leaves the file absent and returns the
+real tool result. No commandExecution occurs. There is no provider inference, and
+this is not a visual Desktop test or a live OpenCode registry/model validation.
+
+All 79 offline tests pass, including patch alias registration/replacement,
+ambiguous target rejection, byte preservation and backend custom-call identity.
+The updated model-facing tool surface and preference need per-model live
+regression; older five-model passes remain bound to their recorded source.

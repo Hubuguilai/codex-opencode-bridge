@@ -43,18 +43,20 @@ export default {
         }
         for (const alias of aliases) {
           const original = editor.list().find(tool => tool.name === alias.name);
-          if (!original) continue;
-          editor.update(original.id, tool => {
-            tool.description = alias.description;
-            tool.input = alias.input;
-            tool.execute = async (input, context) => {
+          if (!original && !alias.registerIfMissing) continue;
+          const replacement={
+            description: alias.description,
+            input: alias.input,
+            execute: async (input, context) => {
               transferAlias(alias, input);
               await new Promise((resolve,reject)=>{
                 if(context.signal.aborted)return reject(new Error('CLIENT_TRANSFER_CANCELLED'));
                 context.signal.addEventListener('abort',()=>reject(new Error('CLIENT_TRANSFER_CANCELLED')),{once:true});
               });
-            };
-          });
+            },
+          };
+          if(original)editor.update(original.id,tool=>Object.assign(tool,replacement));
+          else editor.add({name:alias.name,...replacement});
         }
         for (const tool of manifest.tools) {
           editor.add({
@@ -97,7 +99,8 @@ export default {
       }
       event.system.push({ type: 'text', text: [
         'This session is a Codex client compatibility turn. The client conversation and tool results are supplied as native messages.',
-        aliases.length ? 'The read, shell, write and edit tools are client-executed aliases. They transfer calls to Codex exec_command and do not execute in OpenCode. For other actions, use the bridge_client_* tools. File aliases use client Python and return real client command output.' : 'All requested workspace actions MUST be requested through the bridge_client_* top-level function tools.',
+        aliases.length ? 'Client-executed aliases: '+aliases.map(alias=>alias.name+' -> '+alias.target.name).join(', ')+'. They transfer calls to Codex and never execute in OpenCode. Read/write/edit aliases use client Python through exec_command.' : 'All requested workspace actions MUST be requested through the bridge_client_* top-level function tools.',
+        aliases.some(alias=>alias.name==='apply_patch') ? 'Prefer apply_patch for file changes. Pass patchText unchanged to the native Codex patch tool; its diff, approval and result belong to Codex. Do not retry a denied patch through write/edit/shell.' : 'Use the supplied client apply_patch tool for native file diffs when available.',
         manifest.toolTransport === 'codemode'
           ? 'Use execute Code Mode to call the bridge_client_* tools by their catalog names. Code Mode is only a dispatcher; all non-client workspace tools remain blocked.'
           : 'Call the supplied client tools directly, NOT through execute/Code Mode. Other OpenCode internal tools are blocked before execution.',

@@ -23,6 +23,8 @@
 ## Remaining product work
 
 - [x] Complete client-alias workflows on Nemotron, MiMo, LongCat, Big Pickle and Bunny
+- [x] Native apply_patch alias with real Codex create/edit/denial and diff-event checks against a fake model
+- [ ] Per-model native patch selection/quality regression and graphical Desktop diff acceptance
 - [ ] Broader repeated-task reliability beyond the small acceptance fixture
 - [x] Export-only Desktop plan and five-route isolated Router/catalog validation
 - [ ] Live Desktop picker migration and UI acceptance, coordinated with the user

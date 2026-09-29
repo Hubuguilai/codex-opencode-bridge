@@ -7,6 +7,35 @@ import {spawnSync} from 'node:child_process';
 import {clientAliases} from '../src/client-aliases.mjs';
 import plugin from '../src/runtime-plugin.mjs';
 const target={kind:'function',name:'exec_command',namespace:'functions',relayName:'bridge_client_exec_command_0',parameters:{type:'object',properties:{cmd:{type:'string'},workdir:{type:'string'}},required:['cmd']}};
+const patchTarget={kind:'custom',name:'apply_patch',namespace:'functions',relayName:'bridge_client_functions_apply_patch_1'};
+
+test('Patch alias preserves freeform bytes and requires one original custom patch tool',()=>{
+ const alias=clientAliases([patchTarget])[0];
+ const patch='*** Begin Patch\n*** Add File: β.txt\n+hello\n*** End Patch\n';
+ assert.equal(alias.name,'apply_patch');assert.equal(alias.target,patchTarget);
+ assert.deepEqual(alias.translate({patchText:patch}),{input:patch});
+ assert.throws(()=>alias.translate({patchText:patch,force:true}),/UNSUPPORTED/);
+ assert.throws(()=>alias.translate({patchText:{text:patch}}),/UNSUPPORTED/);
+ assert.deepEqual(clientAliases([patchTarget,patchTarget]),[]);
+ assert.deepEqual(clientAliases([{...patchTarget,namespace:'unrelated'}]),[]);
+ assert.deepEqual(clientAliases([{...patchTarget,kind:'function'}]),[]);
+ assert.equal(clientAliases([target,patchTarget]).length,5);
+});
+
+test('Patch alias is registered or replaced and captured before any runtime executor runs',async t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-patch-alias-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ for(const existing of [false,true]){
+  fs.writeFileSync(path.join(root,'bridge-request.json'),JSON.stringify({requestId:'patch-test',internalTools:'client-aliases',tools:[patchTarget]}));
+  const hooks={},registry=existing?[{id:'patch',name:'apply_patch',execute:()=>assert.fail('Original executor must not run')}]:[];
+  const ctx={location:{directory:root},session:{hook:async(n,f)=>{hooks['session.'+n]=f;}},permission:{hook:async(n,f)=>{hooks['permission.'+n]=f;}},tool:{hook:async(n,f)=>{hooks['tool.'+n]=f;},transform:async f=>{f({list:()=>registry,update:(id,change)=>change(registry.find(t=>t.id===id)),add:tool=>registry.push(tool)});return{dispose:async()=>{}};}}};
+  await plugin.setup(ctx);await hooks['session.prompt']();
+  assert.equal(registry.filter(tool=>tool.name==='apply_patch').length,1);
+  const patch='*** Begin Patch\n*** Add File: client.txt\n+client-only\n*** End Patch';
+  assert.throws(()=>hooks['tool.execute.before']({tool:'apply_patch',input:{patchText:patch}}),/CLIENT_TRANSFER_RECORDED/);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'bridge-call.json'))),{requestId:'patch-test',kind:'call',relayName:patchTarget.relayName,input:{input:patch},alias:'apply_patch'});
+  assert.equal(fs.existsSync(path.join(root,'client.txt')),false);
+ }
+});
 
 test('Aliases require a unique compatible client executor and reject unsupported timeout semantics',()=>{
  assert.deepEqual(clientAliases([]),[]);assert.deepEqual(clientAliases([target,target]),[]);

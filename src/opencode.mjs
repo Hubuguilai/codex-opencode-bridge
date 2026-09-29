@@ -116,7 +116,7 @@ export class OpenCodeBackend {
           if (!tool || capture.kind !== 'call') throw new BridgeError(502, 'unknown_client_tool', 'Unrecognized client tool call.');
           if (!capture.input || typeof capture.input !== 'object' || Array.isArray(capture.input)) throw new BridgeError(502, 'invalid_tool_arguments', 'Invalid client tool arguments.');
           if (tool.kind === 'custom' && typeof capture.input.input !== 'string') throw new BridgeError(502, 'invalid_tool_arguments', 'Invalid custom tool input.');
-          if (['read','shell','write','edit'].includes(capture.alias)) this.warn('client_alias_' + capture.alias);
+          if (['read','shell','write','edit','apply_patch'].includes(capture.alias)) this.warn('client_alias_' + capture.alias);
           if (live) await live.finish(assistants);
           else await nativeText.update(assistants, onDelta);
           return { calls: [{ type: tool.kind === 'custom' ? 'custom_tool_call' : 'function_call',
