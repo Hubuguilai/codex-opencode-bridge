@@ -14,6 +14,7 @@
   "scripts": {
     "start": "node bin/bridge.mjs serve",
     "test": "node --test",
+    "test:package": "node scripts/package-check.mjs",
     "check": "node scripts/check.mjs",
     "smoke": "node scripts/smoke.mjs",
     "acceptance": "node scripts/native-acceptance.mjs"

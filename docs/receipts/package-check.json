@@ -1,0 +1,25 @@
+{
+  "date": "2026-09-29T05:24:09.708Z",
+  "node": "v24.4.1",
+  "platform": "darwin",
+  "checks": {
+    "requiredAssets": true,
+    "noLocalStateFiles": true,
+    "noKnownCredentialOrPersonalPathPatterns": true,
+    "offlineDependencyFreeInstall": true,
+    "installedBinHelpWithoutState": true,
+    "privateLocalToken": true,
+    "fiveModelPreparationWithPreservation": true,
+    "installedRouterPlanExport": true,
+    "installedRemoval": true
+  },
+  "providerRequests": 0,
+  "package": {
+    "name": "codex-opencode-bridge",
+    "version": "0.2.0-rc.1",
+    "files": 116,
+    "compressedBytes": 118721,
+    "sha256": "b7a91487a7cb077a7c3f4f43a8b131a6912068ef6bdecd17e0c39085bbe345c9"
+  },
+  "passed": true
+}

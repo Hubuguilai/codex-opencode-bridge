@@ -6,9 +6,12 @@ Version **0.2.0-rc.1**. The repository remains private; no public release has be
 
 **Product target:** native Codex workspace and tool workflows for supported models.
 Space Bunny Free, Nemotron 3 Ultra Free, MiMo V2.6 Flash Free, LongCat 2.5
-Preview Free and Big Pickle have passed complete real-Codex suites with client-executed aliases.
-Nemotron passed two complete suites on the same runtime source. This remains
-experimental text/tool compatibility; see the [tested-model matrix](docs/verification.md).
+Preview Free and Big Pickle passed historical seven-scenario real-Codex suites
+with client-executed aliases. Nemotron passed twice on that recorded runtime
+source. The current full suite adds three native patch scenarios; those ten-case
+results are not yet available. The latest Nemotron generation regression was
+blocked by upstream access/quota rejection. This remains experimental text/tool
+compatibility; see the [revision-specific evidence](docs/verification.md).
 See the [native integration acceptance contract](docs/native-codex-target.md).
 
 [中文说明](docs/README.zh-CN.md) · [Prior art](docs/prior-art.md) · [Verification](docs/verification.md)
@@ -45,6 +48,10 @@ See [the tool-surface comparison](docs/tool-surface.md).
 and `shell` names transfer to the client’s actual `exec_command`. All actions and
 permissions stay in Codex. File aliases require client Python 3 and appear as
 command execution, not native patch diffs. See [alias semantics and limits](docs/client-aliases.md).
+When a compatible custom client `apply_patch` is supplied, the patch alias forwards
+its input unchanged and prefers native file changes. Create/update/denial and diff
+events have real Codex client evidence against a deterministic fake model; the
+updated tool surface still needs live per-model regression.
 See [real-client evidence and remaining gates](docs/native-tool-progress.md).
 
 Images, audio, file uploads, adjustable reasoning controls, structured output,
@@ -170,13 +177,17 @@ edits, extra files or active/leftover runtime work directories. See
 ```sh
 npm run check
 npm test
+npm run test:package
 # Explicitly sends two real requests using your own OpenCode access:
 npm run smoke -- --live
 # Real ephemeral Codex threads: file operations, follow-up, repair and denial:
 BRIDGE_TEST_MODEL=opencode/space-bunny-free node scripts/native-acceptance.mjs --live
 ```
 
-CI runs offline protocol tests on macOS/Linux and Node 22/24. The live smoke test
+CI runs offline protocol and tarball-installation tests on macOS/Linux and Node
+22/24. The package check installs the local archive into a temporary prefix with
+no registry access, then exercises its executable and five-model setup; it does
+not publish a package. The live smoke test
 starts a separate managed server, exercises Chat JSON and Responses SSE, and tears
 it down. Change both ports if occupied. It does not edit Codex/Router settings.
 

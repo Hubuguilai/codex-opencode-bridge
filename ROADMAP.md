@@ -11,6 +11,7 @@
 - [x] Independent Router/LiteLLM/forwarder protocol rehearsal with mock upstream
 - [x] Reversible multi-model preparation and direct prepared startup; no live settings overwritten
 - [x] English/Chinese documentation, MIT license, prior-art review and CI
+- [x] Offline tarball installation and installed five-model CLI checks in cross-platform CI
 
 ## Follow-up: tool visibility
 

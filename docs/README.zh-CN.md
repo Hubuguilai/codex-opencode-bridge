@@ -1,6 +1,6 @@
 # codex-opencode-bridge
 
-把用户有权使用的 OpenCode 模型接入 Codex 的本地兼容服务。当前为私有候选版本 **0.2.0-rc.1**。Space Bunny Free、Nemotron 3 Ultra Free、MiMo V2.6 Flash Free 、LongCat 2.5 Preview Free 和 Big Pickle 已通过真实客户端完整验收。整体仍属于实验性文本与工具兼容，不代表所有模型和界面功能完全一致。
+把用户有权使用的 OpenCode 模型接入 Codex 的本地兼容服务。当前为私有候选版本 **0.2.0-rc.1**。Space Bunny Free、Nemotron 3 Ultra Free、MiMo V2.6 Flash Free、LongCat 2.5 Preview Free 和 Big Pickle 曾在已记录的源码版本上通过真实客户端七项验收。当前完整套件已扩展为十项，尚无新版五模型全部通过的结果；最近一次 Nemotron 生成回归受到上游访问或配额拒绝。整体仍属于实验性文本与工具兼容，不代表所有模型和界面功能完全一致。
 
 ## 已经验证到哪一步
 
@@ -8,6 +8,10 @@
 执行验证命令、同一会话继续修改、修复失败的 Python 测试。修复过程中出现了 Codex
 原生文件修改事件。审批拒绝后目标文件不存在；取消、超时及后续恢复测试也已经通过。
 客户端工具别名模式下，以上模型已通过七项验收；Nemotron 在同一运行时源码上连续两次完整通过。旧版本的失败记录仍然保留。
+
+新增 `apply_patch` 转发入口已通过真实 Codex 客户端的创建、修改、拒绝批准和原生差异事件检查。
+这项测试使用模拟模型，没有上游推理；不能替代真实模型的补丁质量回归。原来的 `write`、`edit`
+仍通过客户端命令执行，不会被悄悄转换为语义不同的补丁。详见[别名与原生补丁说明](client-aliases.md)。
 
 曾发生模型误选 OpenCode 内部工具的失败。桥接阻止了该操作，而没有让 OpenCode
 绕过 Codex 修改文件。当前最多允许一次纠正性重试；上游访问拒绝、配额错误、已经

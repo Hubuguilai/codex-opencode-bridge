@@ -283,3 +283,22 @@ All 83 offline tests pass, including deliberate partial-success fixtures that
 must fail the verifier. No live generation was run for this harness update:
 upstream access has not been confirmed restored. Existing historical generation
 receipts have not been upgraded to the new contract.
+
+
+## Distributable installation
+
+`npm run test:package` creates an actual local npm tarball, installs it offline
+into an isolated temporary prefix with lifecycle scripts disabled, and uses its
+installed executable. It verifies help has no configuration side effects, token
+permissions are private, five-model preparation preserves an existing catalog,
+Router plan export remains unapplied, and removal succeeds. The package must
+include the runtime/plugin/template/docs assets and contain no known local-state
+filenames, credential patterns or personal paths. Pattern scanning is not an
+exhaustive secret audit.
+
+[The local candidate receipt](receipts/package-check.json) passes with no provider
+requests. Its tarball checksum describes that pre-commit package snapshot, not a
+published release checksum. The check now runs in CI for macOS/Linux and Node
+22/24 against each checked-out commit. Local syntax checks and 83 offline tests
+also pass. This verifies distribution/setup behavior, not live model access or
+Desktop installation; no package or repository was published.
