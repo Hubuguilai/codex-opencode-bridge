@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-29T14:44:46.021166+00:00",
+  "model": "opencode/muse-spark-1.3-contributor-free",
+  "advertisedContextTokens": 1048576,
+  "sourceSha256AfterAccountingFix": "91ddb98ae970f9a8a9468963db41accca8345f2c7eb7f6b4d3bb65ceb26581f2",
+  "outputBudgetTokens": 8192,
+  "method": "Synthetic random nine-digit numbers with five independent 20-hex markers at start/25%/50%/75%/end; all markers requested without tools; single requests, no client auto-compaction",
+  "rows": [
+    {
+      "name": "calibration",
+      "route": "isolated official-runtime bridge",
+      "inputTokens": 32214,
+      "outputTokensIncludingReasoning": 426,
+      "totalTokens": 32640,
+      "elapsedSeconds": 6.25,
+      "httpStatus": 200,
+      "correctMarkers": 5,
+      "markers": 5,
+      "inputBytes": 60620,
+      "inputSha256": "fb128179bd5956ff129c8e24f9b045a346492975151163951571b833c2e7c765"
+    },
+    {
+      "name": "target-500000",
+      "route": "isolated official-runtime bridge",
+      "inputTokens": 501525,
+      "outputTokensIncludingReasoning": 422,
+      "totalTokens": 501947,
+      "elapsedSeconds": 23.255,
+      "httpStatus": 200,
+      "correctMarkers": 5,
+      "markers": 5,
+      "inputBytes": 1233880,
+      "inputSha256": "170417b37dca00a3938e957f1318da410a5d6c33f90f65c80286d29547edd4e4"
+    },
+    {
+      "name": "target-1000000",
+      "route": "isolated official-runtime bridge",
+      "inputTokens": 998381,
+      "outputTokensIncludingReasoning": 1395,
+      "totalTokens": 999776,
+      "elapsedSeconds": 82.143,
+      "httpStatus": 200,
+      "correctMarkers": 5,
+      "markers": 5,
+      "inputBytes": 2476020,
+      "inputSha256": "e87e3b12830b326c9d5aeee352d240ca2d64d422cb85b114a15ce283f12a51f7"
+    },
+    {
+      "name": "installed-near-full",
+      "route": "installed Router and bridge",
+      "inputTokens": 1039790,
+      "outputTokensIncludingReasoning": 1810,
+      "totalTokens": 1041600,
+      "elapsedSeconds": 94.387,
+      "httpStatus": 200,
+      "correctMarkers": 5,
+      "markers": 5,
+      "inputBytes": 2579643,
+      "inputSha256": "9a53c54518251e41a41cb2a7cbd8aefa1611b466046ac9b50ccf2a1ecb733357"
+    }
+  ],
+  "overLimitProbe": {
+    "approximateInputTokens": 1072000,
+    "httpStatus": 429,
+    "providerErrorType": "provider.rate-limit",
+    "exactUpperBoundaryEstablished": false
+  },
+  "excludedControls": [
+    "Initial 768-output-token request produced an incomplete answer; output budget raised to 8192.",
+    "An adaptive probe misread uncached-only usage after a cache hit, generated no data, and is excluded. The accounting bug was then fixed and the near-full installed-route probe was fresh."
+  ],
+  "validation": {
+    "unitTests": 94,
+    "syntax": true,
+    "package": true
+  },
+  "scopeLimits": [
+    "One near-full successful request, not a sustained-load or concurrent benchmark",
+    "Five-marker retrieval does not establish long-document reasoning quality",
+    "Text only; no near-full multimodal testing",
+    "GUI still automatically compacts near its existing 891289-token setting"
+  ]
+}

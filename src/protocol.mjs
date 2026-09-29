@@ -57,11 +57,15 @@ export function normalizeRequest(payload, api, config) {
 
 export function usage(tokens = {}) {
   const nonnegative = x => typeof x === 'number' && Number.isFinite(x) && x >= 0 ? x : 0;
-  const input = nonnegative(tokens.input);
+  // OpenCode's input is uncached input; cached reads/writes are separate.
+  // Responses input_tokens includes the complete prompt, including cache hits.
+  const cached = nonnegative(tokens.cache?.read);
+  const input = nonnegative(tokens.input) + cached + nonnegative(tokens.cache?.write);
   const output = nonnegative(tokens.output);
   const reasoning = nonnegative(tokens.reasoning);
   // OpenCode reports visible output and reasoning separately.
   return { input_tokens: input, output_tokens: output + reasoning, total_tokens: input + output + reasoning,
+    input_tokens_details: { cached_tokens: cached },
     output_tokens_details: { reasoning_tokens: reasoning } };
 }
 
