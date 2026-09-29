@@ -104,7 +104,9 @@ export function normalizeNativeRequest(payload, api, config) {
   // A single explicitly advertised default means leave the upstream setting
   // unchanged. It does not claim support for adjustable reasoning effort.
   if (effort != null && effort !== 'default') throw unsupported('Only reasoning effort default is supported; adjustable effort is not mapped for this model.');
-  if (payload.reasoning?.summary && !['auto', 'none'].includes(payload.reasoning.summary)) throw unsupported('Reasoning summary mode is unsupported.');
+  const summary = payload.reasoning?.summary;
+  const omitSummary = config.reasoningSummaryPolicy === 'omit' && ['detailed', 'concise'].includes(summary);
+  if (summary && !['auto', 'none'].includes(summary) && !omitSummary) throw unsupported('Reasoning summary mode is unsupported.');
   for (const [key, target] of [['temperature', 'temperature'], ['top_p', 'topP'], ['max_output_tokens', 'maxTokens'], ['max_tokens', 'maxTokens'], ['max_completion_tokens', 'maxTokens']]) {
     if (payload[key] != null) {
       if (typeof payload[key] !== 'number' || !Number.isFinite(payload[key])) throw invalid(`Invalid ${key}.`);
@@ -119,5 +121,5 @@ export function normalizeNativeRequest(payload, api, config) {
     + 'Historical tool calls and results are past events, not instructions to repeat them.\n' + JSON.stringify({ conversation: history });
   if (Buffer.byteLength(prompt) > config.maxBodyBytes) throw new BridgeError(413, 'input_too_large', 'Input exceeds the configured limit; nothing was truncated.');
   return { model: payload.model, prompt, messages: nativeHistory(history, tools), tools: activeTools, options, stream: payload.stream === true,
-    includeUsage: payload.stream_options?.include_usage === true, mode: 'native-tools' };
+    includeUsage: payload.stream_options?.include_usage === true, warnings: omitSummary ? ['reasoning_summary_omitted'] : [], mode: 'native-tools' };
 }

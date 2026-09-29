@@ -11,6 +11,8 @@ export function readConfig(env = process.env) {
   const stateDir = stateDirectory(env);
   const mode = env.BRIDGE_MODE || 'text';
   if (!['text', 'native-tools'].includes(mode)) throw new Error('BRIDGE_MODE must be text or native-tools.');
+  const reasoningSummaryPolicy = env.BRIDGE_REASONING_SUMMARY_POLICY || 'strict';
+  if (!['strict', 'omit'].includes(reasoningSummaryPolicy)) throw new Error('Invalid BRIDGE_REASONING_SUMMARY_POLICY.');
   const toolTransport = env.BRIDGE_TOOL_TRANSPORT || 'direct';
   if (!['direct', 'codemode'].includes(toolTransport)) throw new Error('BRIDGE_TOOL_TRANSPORT must be direct or codemode.');
   const internalTools = env.BRIDGE_INTERNAL_TOOLS || 'guarded';
@@ -38,7 +40,7 @@ export function readConfig(env = process.env) {
     throw new Error('BRIDGE_MODELS must be comma-separated provider/model IDs.');
   }
   return {
-    host: '127.0.0.1', port, upstreamPort, stateDir, tokenPath, token, models, mode, toolTransport, internalTools,
+    host: '127.0.0.1', port, upstreamPort, stateDir, tokenPath, token, models, mode, toolTransport, internalTools, reasoningSummaryPolicy,
     timeoutMs: number('BRIDGE_TIMEOUT_MS', 180000, 3600000),
     pollMs: number('BRIDGE_POLL_MS', 250, 10000),
     maxBodyBytes: number('BRIDGE_MAX_BODY_BYTES', 16000000, 100000000),

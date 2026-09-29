@@ -66,6 +66,10 @@ export function createBridge(config, backend) {
       res.on('close', () => { if (!res.writableEnded) controller.abort(); });
       const payload = await readBody(req, res, config.maxBodyBytes);
       const request = config.mode === 'native-tools' ? normalizeNativeRequest(payload, api, config) : normalizeRequest(payload, api, config);
+      if (request.warnings?.length) {
+        res.setHeader('x-bridge-warning', request.warnings.join(','));
+        for (const warning of request.warnings) backend.warn?.(warning);
+      }
       controller.signal.throwIfAborted();
       deadline = setTimeout(() => controller.abort(), config.timeoutMs);
       writer = makeWriter(res, api, request);

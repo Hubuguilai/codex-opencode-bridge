@@ -345,3 +345,10 @@ User-authorized real Codex/OpenCode full-suite attempts ran serially on commit `
 The preceding 403 diagnosis was incomplete. Big Pickle failed with UUID-derived preallocated IDs even without the plugin, while official CLI and server-generated IDs succeeded. Native-format preallocation fixes access without changing credentials or tool guards. [Controlled diagnosis](session-id-regression.md) and [current matrix](receipts/native-id-four-models/matrix.json).
 
 Latest results: Big Pickle 10/10, MiMo V2.6 Flash Free 10/10, LongCat 9/10 (patch-update exact content), Nemotron 9/10 (repair generation failed). All four have identical source digests and no 403. Matrix remains failed. 87 offline tests, syntax, package installation, and real-runtime crash recovery passed. Existing historical failures are retained; Desktop activation is still pending.
+
+
+## Desktop summary mismatch
+
+The earlier acceptance harness explicitly set reasoning summary to none, missing the actual Desktop global detailed preference. A real user request therefore failed with 422 before inference despite earlier passing fixtures. Added strict-by-default, explicit summary-omission policy; enabled only on the local Big Pickle service, preserving global GPT settings. 88 offline tests and syntax checks passed. Real Codex CLI through the installed Router with the existing detailed preference returned the expected greeting marker without errors. This is a real-client check, not proof of a successful user GUI turn.
+
+The same real-client route also executed one command to read a temporary random-marker file and returned its exact contents, with no client errors. Receipt: `receipts/desktop-summary-client.json`.

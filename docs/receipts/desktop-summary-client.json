@@ -1,0 +1,15 @@
+{
+  "scope": "Real Codex CLI using installed Router and existing global detailed summary preference; not GUI acceptance",
+  "summaryPolicy": "omit",
+  "greeting": {
+    "exitCode": 0,
+    "marker": true,
+    "errors": []
+  },
+  "fileRead": {
+    "exitCode": 0,
+    "marker": true,
+    "commands": 1,
+    "errors": []
+  }
+}

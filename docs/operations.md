@@ -149,3 +149,8 @@ The older failed Nemotron receipt did not record an exact status and cannot be
 retroactively classified. Confirm access in the official client or obtain a
 fresh authorized diagnostic before attributing that failure to exhausted credit,
 expired authentication or a tool compatibility restriction.
+
+
+## Desktop reasoning summary preference
+
+Codex global `model_reasoning_summary = "detailed"` overrides catalog defaults even when a model advertises no summaries. Default bridge behavior remains strict (422). An operator may explicitly start native-tool `serve` with `BRIDGE_REASONING_SUMMARY_POLICY=omit` to ignore the unsupported concise/detailed summary preference. This emits `reasoning_summary_omitted` in runtime warnings and `x-bridge-warning` on the bridge response; it does not provide reasoning summaries or alter conversation/tool content. Unknown summary values still fail. `serve-prepared` intentionally strips extra BRIDGE environment overrides; use explicit `serve` settings for this policy.

@@ -104,3 +104,13 @@ test('Explicit upstream-default reasoning is accepted but adjustable effort is n
  test('Invalid or conflicting generation limits fail before upstream dispatch',()=>{
   for(const options of [{max_output_tokens:-1},{max_tokens:1.5},{top_p:2},{temperature:-1},{max_tokens:2,max_output_tokens:3}])assert.throws(()=>normalizeNativeRequest({model:'opencode/test',input:'hello',...options},'responses',config),{status:400});
  });
+
+ test('Desktop detailed summary is strict by default and explicitly omittable without changing conversation', () => {
+ const payload={model:'opencode/test',input:'hola',tools:[fn],reasoning:{effort:'default',summary:'detailed'}};
+ assert.throws(()=>normalizeNativeRequest(payload,'responses',config),{status:422});
+ const actual=normalizeNativeRequest(payload,'responses',{...config,reasoningSummaryPolicy:'omit'});
+ const reference=normalizeNativeRequest({...payload,reasoning:{effort:'default',summary:'none'}},'responses',config);
+ assert.deepEqual(actual.messages,reference.messages);assert.deepEqual(actual.tools,reference.tools);
+ assert.deepEqual(actual.warnings,['reasoning_summary_omitted']);assert.equal(payload.reasoning.summary,'detailed');
+ assert.throws(()=>normalizeNativeRequest({...payload,reasoning:{summary:'invented'}},'responses',{...config,reasoningSummaryPolicy:'omit'}),{status:422});
+ });
