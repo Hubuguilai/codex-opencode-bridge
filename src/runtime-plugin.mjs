@@ -2,6 +2,7 @@
 // interface without an npm helper dependency. All client tools are transfer stubs:
 // their arguments go back to Codex; no client operation executes in OpenCode.
 import fs from 'node:fs';
+import { clientAliases } from './client-aliases.mjs';
 import path from 'node:path';
 
 export default {
@@ -12,6 +13,7 @@ export default {
     const capturePath = path.join(root, 'bridge-call.json');
     let manifest;
     let registration;
+    let aliases = [];
     let captured = false;
     let baseMessageCount;
     let dispatchSteps = 0;
@@ -22,15 +24,37 @@ export default {
       fs.renameSync(temporary, capturePath);
       captured = true;
     };
+    const transferAlias = (alias, input) => {
+      let translated;
+      try { translated = alias.translate(input); }
+      catch { capture({kind:'unsupported_alias',alias:alias.name}); throw new Error('CLIENT_ALIAS_UNSUPPORTED'); }
+      capture({kind:'call',relayName:alias.target.relayName,input:translated,alias:alias.name});
+    };
     await ctx.session.hook('prompt', async () => {
       manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
       captured = false;
+      aliases = manifest.internalTools === 'client-aliases' ? clientAliases(manifest.tools) : [];
       baseMessageCount = undefined;
       dispatchSteps = 0;
       if (registration) await registration.dispose();
       registration = await ctx.tool.transform(editor => {
         if (manifest.internalTools === 'hidden') {
           for (const tool of editor.list()) editor.remove(tool.id);
+        }
+        for (const alias of aliases) {
+          const original = editor.list().find(tool => tool.name === alias.name);
+          if (!original) continue;
+          editor.update(original.id, tool => {
+            tool.description = alias.description;
+            tool.input = alias.input;
+            tool.execute = async (input, context) => {
+              transferAlias(alias, input);
+              await new Promise((resolve,reject)=>{
+                if(context.signal.aborted)return reject(new Error('CLIENT_TRANSFER_CANCELLED'));
+                context.signal.addEventListener('abort',()=>reject(new Error('CLIENT_TRANSFER_CANCELLED')),{once:true});
+              });
+            };
+          });
         }
         for (const tool of manifest.tools) {
           editor.add({
@@ -73,10 +97,10 @@ export default {
       }
       event.system.push({ type: 'text', text: [
         'This session is a Codex client compatibility turn. The client conversation and tool results are supplied as native messages.',
-        'All requested workspace actions MUST be requested through the bridge_client_* top-level function tools.',
+        aliases.length ? 'The read, shell, write and edit tools are client-executed aliases. They transfer calls to Codex exec_command and do not execute in OpenCode. For other actions, use the bridge_client_* tools. File aliases use client Python and return real client command output.' : 'All requested workspace actions MUST be requested through the bridge_client_* top-level function tools.',
         manifest.toolTransport === 'codemode'
           ? 'Use execute Code Mode to call the bridge_client_* tools by their catalog names. Code Mode is only a dispatcher; all non-client workspace tools remain blocked.'
-          : 'Call them directly, NOT through execute/Code Mode. OpenCode internal tools are blocked before execution.',
+          : 'Call the supplied client tools directly, NOT through execute/Code Mode. Other OpenCode internal tools are blocked before execution.',
         'The actual work is executed by the Codex client. Your OpenCode working directory is NOT the client workspace.',
         'Tool results already in the conversation are authoritative client results; do not repeat completed calls.',
         'A client tool denial or failure is real: respect it and do not circumvent it with another tool.',
@@ -109,13 +133,20 @@ export default {
     });
     await ctx.tool.hook('execute.before', event => {
       if (event.tool === 'execute' && manifest?.toolTransport === 'codemode') return;
+      const alias = aliases.find(alias => alias.name === event.tool);
+      if (alias) {
+        transferAlias(alias, event.input);
+        // Stop before the original executor even if another registry transform
+        // has replaced our stub. Codex receives and executes the captured call.
+        throw new Error('CLIENT_TRANSFER_RECORDED');
+      }
       if (!manifest?.tools.some(tool => tool.relayName === event.tool)) {
         if (manifest) capture({ kind: 'blocked', tool: event.tool });
         throw new Error('OPENCODE_INTERNAL_TOOL_BLOCKED');
       }
     });
     await ctx.permission.hook('evaluate', event => {
-      const clientTool = (event.action === 'execute' && manifest?.toolTransport === 'codemode') || manifest?.tools.some(tool => tool.relayName === event.action);
+      const clientTool = (event.action === 'execute' && manifest?.toolTransport === 'codemode') || aliases.some(alias => alias.name === event.action) || manifest?.tools.some(tool => tool.relayName === event.action);
       event.effect = clientTool ? 'allow' : 'deny';
       if (!clientTool && manifest) capture({ kind: 'blocked', tool: event.action });
     });

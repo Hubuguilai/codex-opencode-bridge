@@ -67,6 +67,11 @@ function record(name,result,checks){const item={name,...result,checks,passed:res
 function output(){try{return fs.readFileSync(path.join(work,'output.md'),'utf8');}catch{return '';}}
 try{
  runtime=await startOpenCode(config);
+ const originalWarn=runtime.backend.warn;
+ runtime.backend.warn=code=>{
+  if(/^(client_alias_|internal_tool_blocked_)/.test(code)){receipt.toolEvents??={};receipt.toolEvents[code]=(receipt.toolEvents[code]||0)+1;}
+  originalWarn?.(code);
+ };
  if(process.env.BRIDGE_DEBUG_ERRORS){
   const originalCall=runtime.backend.call.bind(runtime.backend);
   runtime.backend.call=async(...args)=>{
@@ -88,7 +93,13 @@ try{
    if(event.method.endsWith('/requestApproval')){approvalCount++;send({id:event.id,result:{decision:'decline'}});}
    else send({id:event.id,error:{code:-32601,message:'Unsupported acceptance-harness request'}});
   }else if(event.id!==undefined){const waiter=pending.get(event.id);pending.delete(event.id);if(waiter)event.error?waiter.reject(new Error(event.error.message)):waiter.resolve(event.result);}
-  else {events.push(event);if(event.method==='item/completed')console.log(JSON.stringify({event:event.method,type:event.params.item.type}));}
+  else {events.push(event);if(event.method==='item/completed'){
+   const item=event.params.item;console.log(JSON.stringify({event:event.method,type:item.type}));
+   if(item.type==='commandExecution'){
+    receipt.commandOutcomes??=[];
+    receipt.commandOutcomes.push({status:item.status,exitCode:item.exitCode,usesRuntimePath:typeof item.command==='string'&&item.command.includes(runtime.backend.directory),outputBytes:Buffer.byteLength(item.aggregatedOutput||''),missingFile:/FileNotFoundError|No such file or directory/.test(item.aggregatedOutput||''),syntaxError:/SyntaxError/.test(item.aggregatedOutput||''),permissionDenied:/PermissionError|Permission denied/.test(item.aggregatedOutput||'')});
+   }
+  }}
  });
  await rpc('initialize',{clientInfo:{name:'bridge_acceptance',version:'0.2.0'},capabilities:{experimentalApi:true}});send({method:'initialized'});
  const thread=await startThread();

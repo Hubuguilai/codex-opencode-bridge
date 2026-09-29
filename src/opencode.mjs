@@ -92,12 +92,18 @@ export class OpenCodeBackend {
           let capture;
           try { capture = JSON.parse(fs.readFileSync(capturePath, 'utf8')); } catch { await delay(this.pollMs, undefined, { signal }); continue; }
           if (capture.requestId !== requestId) throw new BridgeError(502, 'relay_state_mismatch', 'Unexpected client tool relay state.');
+          if (capture.kind === 'unsupported_alias') throw new BridgeError(422, 'unsupported_tool_alias', 'The selected client alias does not support these parameters. Use the original supplied Codex tool.');
           if (capture.kind === 'limit') throw new BridgeError(502, 'dispatch_step_limit', 'OpenCode dispatch exceeded four model steps without a client transfer.');
-          if (capture.kind === 'blocked') throw new BridgeError(422, 'internal_tool_blocked', 'The model selected an OpenCode internal tool; execution was blocked. Retry the task using client tools.');
+          if (capture.kind === 'blocked') {
+            const name = ['read','shell','write','edit','execute','glob','grep','question','skill','subagent','webfetch','websearch'].includes(capture.tool) ? capture.tool : 'unknown';
+            this.warn('internal_tool_blocked_' + name);
+            throw new BridgeError(422, 'internal_tool_blocked', 'The model selected an OpenCode internal tool; execution was blocked. Retry the task using client tools.');
+          }
           const tool = request.tools.find(x => x.relayName === capture.relayName);
           if (!tool || capture.kind !== 'call') throw new BridgeError(502, 'unknown_client_tool', 'Unrecognized client tool call.');
           if (!capture.input || typeof capture.input !== 'object' || Array.isArray(capture.input)) throw new BridgeError(502, 'invalid_tool_arguments', 'Invalid client tool arguments.');
           if (tool.kind === 'custom' && typeof capture.input.input !== 'string') throw new BridgeError(502, 'invalid_tool_arguments', 'Invalid custom tool input.');
+          if (['read','shell','write','edit'].includes(capture.alias)) this.warn('client_alias_' + capture.alias);
           if (live) await live.finish(assistants);
           else await nativeText.update(assistants, onDelta);
           return { calls: [{ type: tool.kind === 'custom' ? 'custom_tool_call' : 'function_call',

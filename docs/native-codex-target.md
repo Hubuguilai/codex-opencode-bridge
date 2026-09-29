@@ -70,8 +70,8 @@ Passing a greeting, a mocked tool event, a model-written JSON snippet or an HTTP
 | Gate | Evidence required | Current state |
 |---|---|---|
 | Text transport | Real short responses, JSON and SSE | Passed for Nemotron prototype / v0.1 smoke |
-| Native tools | Real file read/write/command/result loop executed by Codex | Passed complete Space Bunny suites; Nemotron remains experimental |
-| Continuations | Multiple tool steps, follow-up edits, stable IDs/history | Passed same-thread Space Bunny create/follow-up/repair |
+| Native tools | Real file read/write/command/result loop executed by Codex | Five exact models passed complete client-alias suites; Nemotron repeated twice |
+| Continuations | Multiple tool steps, follow-up edits, stable IDs/history | Passed same-thread create/follow-up/repair on five exact models |
 | Lifecycle | Cancel, timeout, permission refusal, bounded retries | Real Codex app-server cancel/timeout/denial/recovery passed |
 | Desktop UX | Picker coexistence, restart, reversible install/uninstall | Isolated Router protocol/catalog rehearsal and reversible preparation passed; live UI activation excluded |
 | Optional features | Per-model vision, reasoning and context tests | No blanket claim |
@@ -90,3 +90,13 @@ generate endpoints without arbitrary client tool-definition fields. This only
 establishes a limitation of those endpoints, not that all extension approaches
 are impossible. The official v2 plugin extension subsequently passed an exact-model structured
 tool probe and real Codex execution; see [development evidence](native-tool-progress.md).
+
+
+## Multi-model alias milestone
+
+The optional client-alias implementation keeps all file/command execution in
+Codex. Five exact models have passed complete suites and Nemotron repeated the
+suite twice on the same runtime source. This advances the original runtime-only
+model objective beyond the Space Bunny control. File aliases still appear as
+commands, not patch diffs, and failed/unknown models remain explicit. See the
+[model matrix](verification.md) and [alias contract](client-aliases.md).

@@ -5,9 +5,10 @@ Experimental native-tool mode relays structured tool calls to Codex for executio
 Version **0.2.0-rc.1**. The repository remains private; no public release has been made.
 
 **Product target:** native Codex workspace and tool workflows for supported models.
-Space Bunny Free has passed a complete real-Codex acceptance suite. Nemotron 3
-Ultra Free remains experimental: individual tasks passed, but complete repair
-workflows were not reliable. See the [tested-model matrix](docs/verification.md).
+Space Bunny Free, Nemotron 3 Ultra Free, MiMo V2.6 Flash Free, LongCat 2.5
+Preview Free and Big Pickle have passed complete real-Codex suites with client-executed aliases.
+Nemotron passed two complete suites on the same runtime source. This remains
+experimental text/tool compatibility; see the [tested-model matrix](docs/verification.md).
 See the [native integration acceptance contract](docs/native-codex-target.md).
 
 [中文说明](docs/README.zh-CN.md) · [Prior art](docs/prior-art.md) · [Verification](docs/verification.md)
@@ -39,6 +40,11 @@ An opt-in `BRIDGE_INTERNAL_TOOLS=hidden` mode removes internal tool registration
 filters the model context and rejects unexpected tool names in outgoing HTTP
 requests. This changes tool visibility, not upstream access eligibility.
 See [the tool-surface comparison](docs/tool-surface.md).
+
+`BRIDGE_INTERNAL_TOOLS=client-aliases` also makes familiar `read`, `write`, `edit`
+and `shell` names transfer to the client’s actual `exec_command`. All actions and
+permissions stay in Codex. File aliases require client Python 3 and appear as
+command execution, not native patch diffs. See [alias semantics and limits](docs/client-aliases.md).
 See [real-client evidence and remaining gates](docs/native-tool-progress.md).
 
 Images, audio, file uploads, adjustable reasoning controls, structured output,
@@ -99,7 +105,7 @@ on the command line. This token authenticates the local bridge, not the model pr
 | Environment variable | Default | Meaning |
 |---|---|---|
 | `BRIDGE_MODE` | `text` | `native-tools` enables guarded client-tool relay |
-| `BRIDGE_INTERNAL_TOOLS` | `guarded` | Experimental `hidden` removes internal registrations and schemas; direct transport only. See [A/B evidence](docs/tool-surface.md). |
+| `BRIDGE_INTERNAL_TOOLS` | `guarded` | `guarded` blocks originals; `hidden` removes schemas (direct only); `client-aliases` transfers read/write/edit/shell to Codex. See [alias contract](docs/client-aliases.md). |
 | `BRIDGE_TOOL_TRANSPORT` | `direct` | Optional experimental `codemode` dispatcher; not the verified default |
 | `OPENCODE_BIN` | PATH, then `~/.opencode/bin/opencode` | Installed executable |
 | `BRIDGE_MODELS` | `opencode/nemotron-3-ultra-free` | Comma-separated exact `provider/model` IDs |

@@ -120,3 +120,24 @@ Snapshots alone did not yield incremental text in the live control. Explicit
 reader cancellation resolved the reproduced shutdown stall in the subsequent
 probe; chronological snapshot order also avoids selecting an older dispatch step.
 A full Space Bunny Codex suite passed on this implementation. See [streaming evidence](native-streaming.md).
+
+
+## 2026-09-29 — multiple real-client models through explicit aliases
+
+Official plugin transforms now turn `read`, `shell`, `write` and `edit` into
+honestly described client-executed aliases. A separate before hook prevents
+original runtime execution. File translations return fixed Python commands to
+Codex; client approvals and actual output remain authoritative.
+
+On runtime source `e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298`,
+Nemotron 3 Ultra Free passed two complete suites; Space Bunny Free, MiMo V2.6
+Flash Free, LongCat 2.5 Preview Free and Big Pickle each passed a complete suite.
+The prior read/shell-only Nemotron failure is retained. Lightning repair timed
+out twice; Ling reported an unavailable endpoint; explicitly registered Jev
+returned upstream 500. These are not silently dropped from the support matrix.
+
+Five added regression tests cover alias compatibility, argument injection,
+file mutation bytes/modes/ambiguous matches and prevention of original executor
+use. There are 53 offline tests at this transport milestone. File aliases show
+command activity, so native patch UI parity remains incomplete. All receipts and
+exact support boundaries are in [verification](verification.md).

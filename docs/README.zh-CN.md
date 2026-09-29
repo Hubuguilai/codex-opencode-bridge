@@ -1,14 +1,13 @@
 # codex-opencode-bridge
 
-把用户有权使用的 OpenCode 模型接入 Codex 的本地兼容服务。当前为私有候选版本 **0.2.0-rc.1**。Space Bunny Free 已通过完整真实客户端验收；
-优先测试的 Nemotron 3 Ultra Free 仍有工具误选和超时，明确列为实验支持。
+把用户有权使用的 OpenCode 模型接入 Codex 的本地兼容服务。当前为私有候选版本 **0.2.0-rc.1**。Space Bunny Free、Nemotron 3 Ultra Free、MiMo V2.6 Flash Free 、LongCat 2.5 Preview Free 和 Big Pickle 已通过真实客户端完整验收。整体仍属于实验性文本与工具兼容，不代表所有模型和界面功能完全一致。
 
 ## 已经验证到哪一步
 
 通过真实 Codex CLI 和会话服务，已经分别完成：读取随机标记、计算并写入 Markdown、
 执行验证命令、同一会话继续修改、修复失败的 Python 测试。修复过程中出现了 Codex
 原生文件修改事件。审批拒绝后目标文件不存在；取消、超时及后续恢复测试也已经通过。
-Space Bunny 的完整套件已通过七项验收；Nemotron 的各项成功记录不代表完整验收通过。
+客户端工具别名模式下，以上模型已通过七项验收；Nemotron 在同一运行时源码上连续两次完整通过。旧版本的失败记录仍然保留。
 
 曾发生模型误选 OpenCode 内部工具的失败。桥接阻止了该操作，而没有让 OpenCode
 绕过 Codex 修改文件。当前最多允许一次纠正性重试；上游访问拒绝、配额错误、已经
@@ -84,3 +83,25 @@ HTTP 工具名称。模型仅看到桥接的 Codex 工具；执行前的权限�
 真实 A/B/A 对照中，Nemotron 的 guarded 两次成功，hidden 返回 HTTP 403；
 Space Bunny 三次均成功返回客户端工具调用。这证明隐藏机制可以生效，但不能保证
 每个模型允许这样的请求。完整工作流及适用范围见 [工具屏蔽验证](tool-surface.md)。
+
+
+## 多模型与客户端工具别名
+
+`BRIDGE_INTERNAL_TOOLS=client-aliases` 把模型惯用的 `read`、`write`、`edit`、`shell`
+转换成实际 Codex `exec_command` 调用。OpenCode 的原始工具执行器仍被拦截，文件修改和
+命令运行由 Codex 执行，并遵守其审批结果。模型也可以直接选用原本的 Codex 工具。
+
+文件别名需要客户端环境中的 Python 3，文本修改会在 Codex 里显示为命令执行；这条
+路径不会伪造 `apply_patch` 文件差异界面。因此现在可以报告真实工作流通过，仍不能
+宣称所有使用细节与 GPT 一模一样。[语义与限制](client-aliases.md)给出了完整边界。
+
+多模型验收可以复现：
+
+```sh
+BRIDGE_MATRIX_DIR=generated/my-matrix node scripts/model-matrix.mjs --live \
+  --models opencode/nemotron-3-ultra-free,opencode/mimo-v2.6-flash-free,opencode/space-bunny-free
+```
+
+每个精确模型 ID 独立运行，记录源码摘要、真实文件校验、拒绝权限和取消恢复。
+可加 `--repair-only` 先检查修复任务；它不能替代完整验收。模型列表不等于访问权限，
+官网 API 列表、models.dev 和当前 OpenCode 运行时列表也可能不同；以实际调用结果为准。

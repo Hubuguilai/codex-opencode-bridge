@@ -1,8 +1,8 @@
 # Codex integration and coexistence
 
 Native mode requires `BRIDGE_MODE=native-tools`. The first tested combination is
-OpenCode 2.0.18, Codex 0.157.1 and `opencode/nemotron-3-ultra-free`. Space Bunny Free has since passed the full control suite; Nemotron remains
-experimental (see verification.md). The bridge uses Responses for Codex's function/custom tools. Chat supports ordinary function tools.
+OpenCode 2.0.18, Codex 0.157.1 and `opencode/nemotron-3-ultra-free`. Five models have now passed complete real-client suites with `client-aliases`;
+see [the exact matrix](verification.md). The bridge uses Responses for Codex's function/custom tools. Chat supports ordinary function tools.
 It never performs the client file/command operations itself.
 
 ## Isolated, repeatable verification

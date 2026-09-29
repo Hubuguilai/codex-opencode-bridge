@@ -1,0 +1,78 @@
+{
+  "date": "2026-09-29T03:53:55.209Z",
+  "mode": "repair-only",
+  "internalTools": "client-aliases",
+  "models": [
+    {
+      "model": "opencode/jev-1.13-free",
+      "exitCode": 1,
+      "receipt": "jev-1.13-free.json",
+      "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "repair",
+          "passed": false
+        }
+      ],
+      "passed": false
+    },
+    {
+      "model": "opencode/mimo-v2.6-flash-free",
+      "exitCode": 0,
+      "receipt": "mimo-v2.6-flash-free.json",
+      "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "repair",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model": "opencode/longcat-2.5-preview-free",
+      "exitCode": 0,
+      "receipt": "longcat-2.5-preview-free.json",
+      "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "repair",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model": "opencode/nemotron-3.5-lightning-free",
+      "exitCode": 1,
+      "receipt": "nemotron-3.5-lightning-free.json",
+      "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "repair",
+          "passed": false
+        }
+      ],
+      "passed": false
+    },
+    {
+      "model": "opencode/deepseek-v4-flash-free",
+      "exitCode": 1,
+      "receipt": "deepseek-v4-flash-free.json",
+      "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "repair",
+          "passed": false
+        }
+      ],
+      "passed": false
+    }
+  ],
+  "passed": false
+}

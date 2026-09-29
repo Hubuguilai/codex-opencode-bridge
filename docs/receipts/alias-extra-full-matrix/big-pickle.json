@@ -1,0 +1,162 @@
+{
+  "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+  "gitHead": "6e781a07d7065d8b221bed8621e312959951efe4",
+  "date": "2026-09-29T04:00:36.245Z",
+  "model": "opencode/big-pickle",
+  "toolTransport": "direct",
+  "internalTools": "client-aliases",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "create",
+      "status": "completed",
+      "commands": 3,
+      "durationMs": 19203,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "followup",
+      "status": "completed",
+      "commands": 3,
+      "durationMs": 19859,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "product": true
+      },
+      "passed": true
+    },
+    {
+      "name": "repair",
+      "status": "completed",
+      "commands": 4,
+      "durationMs": 19130,
+      "checks": {
+        "testPassed": true,
+        "testUnchanged": true
+      },
+      "passed": true
+    },
+    {
+      "name": "denial",
+      "status": "completed",
+      "commands": 1,
+      "durationMs": 9684,
+      "checks": {
+        "approvalWasDenied": true,
+        "fileAbsent": true
+      },
+      "passed": true
+    },
+    {
+      "name": "cancel",
+      "status": "completed",
+      "checks": {
+        "reachedBackend": true,
+        "interrupted": true,
+        "backendReleased": true,
+        "manifestRemoved": true
+      },
+      "passed": true
+    },
+    {
+      "name": "timeout",
+      "status": "completed",
+      "checks": {
+        "deadlineReported": true,
+        "backendReleased": true
+      },
+      "passed": true
+    },
+    {
+      "name": "recovery",
+      "status": "completed",
+      "commands": 0,
+      "durationMs": 5388,
+      "checks": {
+        "backendReleased": true
+      },
+      "passed": true
+    }
+  ],
+  "opencode": "2.0.18",
+  "commandOutcomes": [
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 246
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 99
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 72
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 66
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 23
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 162
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 452
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 278
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 68
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 7
+    },
+    {
+      "status": "declined",
+      "exitCode": null,
+      "usesRuntimePath": false,
+      "outputBytes": 0
+    }
+  ],
+  "toolEvents": {
+    "client_alias_write": 1
+  },
+  "passed": true,
+  "sourceChangedDuringRun": false
+}

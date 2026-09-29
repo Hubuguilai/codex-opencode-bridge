@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-29",
+  "model": "opencode/jev-1.13-free",
+  "opencode": "2.0.18",
+  "mode": "temporary documented provider model registration",
+  "config": {
+    "providers": {
+      "opencode": {
+        "models": {
+          "jev-1.13-free": {
+            "modelID": "jev-1.13-free",
+            "name": "Jev 1.13 Free"
+          }
+        }
+      }
+    }
+  },
+  "checks": {
+    "presentInTemporaryRuntimeInventory": true,
+    "textGenerationSucceeded": false
+  },
+  "upstreamError": {
+    "type": "provider.internal",
+    "status": 500,
+    "message": "Internal server error"
+  },
+  "boundary": "One greeting diagnostic, no client workflow; no global config edited; does not establish cause or permanent unavailability."
+}

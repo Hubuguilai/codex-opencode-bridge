@@ -22,9 +22,11 @@
 
 ## Remaining product work
 
-- [ ] Reliable native workflows for Nemotron and other runtime-only free models
+- [x] Complete client-alias workflows on Nemotron, MiMo, LongCat, Big Pickle and Bunny
+- [ ] Broader repeated-task reliability beyond the small acceptance fixture
 - [ ] Live Desktop picker migration and UI acceptance, separately authorized
-- [ ] More models certified with their own repeated real-client receipts
+- [x] Multiple exact models checked with independent real-client receipts
+- [ ] Repeated full suites for every supported model and diagnostics for Lightning
 - [ ] Long-context/multimodal validation and per-model maximum capability evidence
 - [ ] Crash-recovery journal for sessions whose creation response was lost
 - [ ] Stronger isolation of third-party plugins/MCP beyond trusted local configuration

@@ -14,7 +14,7 @@ export function readConfig(env = process.env) {
   const toolTransport = env.BRIDGE_TOOL_TRANSPORT || 'direct';
   if (!['direct', 'codemode'].includes(toolTransport)) throw new Error('BRIDGE_TOOL_TRANSPORT must be direct or codemode.');
   const internalTools = env.BRIDGE_INTERNAL_TOOLS || 'guarded';
-  if (!['guarded', 'hidden'].includes(internalTools)) throw new Error('BRIDGE_INTERNAL_TOOLS must be guarded or hidden.');
+  if (!['guarded', 'hidden', 'client-aliases'].includes(internalTools)) throw new Error('BRIDGE_INTERNAL_TOOLS must be guarded, hidden or client-aliases.');
   if (internalTools === 'hidden' && toolTransport !== 'direct') throw new Error('Hidden internal tools require direct transport.');
   fs.mkdirSync(stateDir, { recursive: true, mode: 0o700 });
   const tokenPath = path.join(stateDir, 'local-token');

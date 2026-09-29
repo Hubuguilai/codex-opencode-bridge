@@ -5,19 +5,34 @@ certify every model, every Desktop tool, or future provider availability.
 
 ## Current support matrix
 
-| Model / route | Actual evidence | Status |
-|---|---|---|
-| `opencode/space-bunny-free`, native tools, direct dispatch | Complete real Codex app-server suite: create, follow-up, repair, denied approval, cancellation, timeout and recovery | Verified for this text/tool test scope |
-| `opencode/nemotron-3-ultra-free`, direct dispatch | File/command workflows and individual repairs succeeded; repeated complete suites failed on internal-tool choices or generation failure | Experimental; not a verified full workflow |
-| Nemotron, Code Mode dispatch | File repair reached an independently passing test, but the turn exceeded its 180-second limit | Experimental; failed terminal completion gate |
-| Other OpenCode models | Configurable allowlist, no acceptance receipt | Unverified |
-| Images/audio/files, hosted search, adjustable reasoning | Rejected rather than silently dropped | Unsupported |
+All new alias suites below used the same runtime source digest
+`e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298`.
+Each complete suite has seven gates: creation, same-thread follow-up, repair,
+approval denial, cancellation, deadline and recovery. These are small fixtures,
+not a production success-rate estimate or full GPT feature parity.
 
-Space Bunny is a useful control because its direct external API was already an
-option; success here validates the bridge's client-tool protocol, not a claim that
-this model requires a runtime bridge. Nemotron's failure is the primary remaining
-limitation for the original free-model use case. The project does not promise
-unlimited access or reinterpret a provider rejection as permission to bypass it.
+| Exact model / route | Evidence | Current status |
+|---|---|---|
+| `opencode/nemotron-3-ultra-free`, client aliases | Two consecutive complete suites, plus a focused repair | Passed this text/tool workflow scope |
+| `opencode/space-bunny-free`, client aliases | Complete suite; earlier guarded/hidden suites also passed | Passed this text/tool workflow scope |
+| `opencode/mimo-v2.6-flash-free`, client aliases | Complete suite and focused repair | Passed this text/tool workflow scope |
+| `opencode/longcat-2.5-preview-free`, client aliases | Complete suite and focused repair | Passed this text/tool workflow scope |
+| `opencode/big-pickle`, client aliases | Complete suite | Passed this text/tool workflow scope |
+| `opencode/nemotron-3.5-lightning-free`, client aliases | Repair reached client calls but timed out without fixing the fixture | Experimental; failed workflow gate |
+| `opencode/ling-3.0-flash-fin-free` | Suite failed; separate short diagnostic reported provider HTTP 400, endpoint unavailable | Unavailable in this run |
+| `opencode/jev-1.13-free` | Absent from default runtime inventory; explicit temporary registration succeeded, but text generation returned provider HTTP 500 | Not verified; upstream failure |
+| `opencode/deepseek-v4-flash-free` | Absent from runtime inventory; repair failed before a client command | Not verified; do not confuse with paid/Go DeepSeek routes |
+| `opencode/muse-spark-1.3-contributor-free` | Listed by runtime; no acceptance run | Unverified; eligibility not inferred |
+| Images/audio/files, hosted search, adjustable reasoning | Explicitly rejected | Unsupported |
+
+[Client-alias semantics](client-aliases.md) explain why file aliases show command
+execution instead of a native patch diff. Original supplied Codex tools remain
+available. All actions still execute in Codex under client permissions.
+
+The [initialized runtime inventory](receipts/free-model-runtime-inventory.json)
+contained eight free-labelled/zero-cost candidates. It differed from both the
+public Zen API list and models.dev. Model listing is not an access guarantee;
+the bridge does not provide accounts, unlimited access or quota circumvention.
 
 ## Real client method
 
@@ -26,9 +41,12 @@ runtime, an isolated bridge, and a real Codex app-server with ephemeral threads.
 It uses fresh markers and temporary files, checks generated files independently,
 re-runs the repaired test, refuses approvals, interrupts a live turn, injects a
 short deadline, and verifies a subsequent turn completes. Tool actions run in the
-Codex workspace. OpenCode's own workspace tools remain blocked.
+Codex workspace. Original OpenCode workspace executors remain blocked; optional
+alias names transfer back to the client instead.
 
-Use `BRIDGE_TEST_MODEL=opencode/space-bunny-free` for the verified control.
+Use `BRIDGE_INTERNAL_TOOLS=client-aliases` and set `BRIDGE_TEST_MODEL` to an
+exact model ID from the table for the new workflow evidence. The default guarded
+mode does not include alias translation.
 `BRIDGE_TOOL_TRANSPORT=codemode` opts into the experimental dispatcher.
 OpenCode 2.0.18 / Codex 0.157.1 / Node 24.4.1 / macOS were exercised live.
 The 32k catalog value is an acceptance-test budget, not the provider's maximum.
@@ -41,6 +59,13 @@ or personal workspace paths. Later receipts include a source digest. Early
 receipts do not identify every intermediate uncommitted revision; they are
 exploratory history, not an exact release-build certificate.
 
+- [Multi-model complete suites: Bunny, Nemotron, MiMo](receipts/alias-full-matrix/matrix.json).
+- [Additional suites: LongCat, Big Pickle and failed Ling](receipts/alias-extra-full-matrix/matrix.json).
+- [Initial repair screen including unsuccessful models](receipts/free-model-repairs/matrix.json).
+- [First complete Nemotron alias suite](receipts/nemotron-alias-suite.json).
+- [Earlier read/shell-only alias failure](receipts/nemotron-alias-repair.json).
+- [Jev explicit registration diagnostic](receipts/jev-explicit-registration.json).
+- [Ling endpoint diagnostic](receipts/ling-endpoint-diagnostic.json).
 - [Space Bunny release-candidate suite with source digest](receipts/space-bunny-rc-suite.json).
 - [Space Bunny first complete suite](receipts/space-bunny-first-suite.json).
 - [Nemotron initial suite](receipts/nemotron-initial-suite.json).
@@ -89,19 +114,15 @@ See [implementation and evidence](tool-surface.md). This replaces the earlier
 assumption that removing the internal surface requires an upstream API change:
 the official plugin API can remove it, but model access restrictions remain.
 
-## Release decision and concrete options
+## Release boundary
 
-The candidate can be reviewed as an experimental native-tool bridge with a
-verified control model. It is **not ready to advertise Nemotron as equivalent to
-native GPT integration**. For that narrower requirement, the concrete options are:
+The private candidate now has complete real-client evidence for five exact
+models, rather than only a control model. The new behavior is opt-in; historical
+guarded/hidden/Code Mode failures remain in the receipt set. Multi-model results
+do not upgrade untested modalities, long context, provider availability, UI
+integration or all future runtime versions.
 
-1. Keep Nemotron experimental and use the verified Space Bunny path for client
-   workflows now; direct API access may be simpler for that particular model.
-2. Validate another officially available model or route that reliably accepts
-   arbitrary client tool schemas; publish its own receipt before enabling it.
-3. Use the official plugin-based hidden-tool mode where permitted, and seek
-   upstream clarification of the reproducible Nemotron rejection. Do not spoof
-   identity or bypass access checks to obtain it.
-
+Remaining release work includes broader tasks and repetitions, human-readable
+file-edit UI parity, live Desktop picker acceptance and crash-recovery hardening.
 No public release, account sharing, live-router restart or active Desktop-model
-migration is included in this candidate.
+migration has occurred.

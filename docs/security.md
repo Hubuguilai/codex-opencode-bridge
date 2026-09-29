@@ -49,3 +49,13 @@ No LaunchAgent or active Codex configuration is installed automatically. The
 `prepare` command writes an isolated model catalog/configuration copy, and
 `remove-prepared` refuses modified files or runtime leftovers.
 The older prototype's existing LaunchAgent is separate and remains unaffected.
+
+
+## Optional client-executed aliases
+
+`client-aliases` transforms four builtins into honest client transfer stubs and
+blocks their original executors in an independent before hook. The resulting
+Codex `exec_command` is subject to client permissions. Encoded file content is
+ordinary command data, not an independent security boundary. File aliases use
+Python on the client, retain limited metadata, and show command activity rather
+than patch diffs. See [the exact alias contract](client-aliases.md).
