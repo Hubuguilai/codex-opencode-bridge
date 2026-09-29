@@ -302,3 +302,17 @@ published release checksum. The check now runs in CI for macOS/Linux and Node
 22/24 against each checked-out commit. Local syntax checks and 83 offline tests
 also pass. This verifies distribution/setup behavior, not live model access or
 Desktop installation; no package or repository was published.
+
+
+## Distinguishable upstream denials
+
+Provider HTTP 401, 403 and 429 now produce separate fixed, non-sensitive messages
+with the exact status in both JSON and Responses SSE failure output. The existing
+machine code remains unchanged. Regression tests exercise all three statuses,
+check that private provider text is absent, and confirm one upstream session per
+request rather than automatic retries. All 85 offline tests and the local package
+installation check pass. No new model request was made.
+
+The old Nemotron denial receipt lacks the exact status. A read-only inspection of
+available local runtime logs did not recover a matching HTTP status for that run;
+it remains unclassified and must not be called proven quota exhaustion.

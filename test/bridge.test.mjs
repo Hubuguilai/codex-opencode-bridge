@@ -196,17 +196,23 @@ test('Concurrent overflow is rejected without creating another session', async t
   assert.equal(calls.filter(x => x.path === '/api/session').length, 1);
 });
 
-test('Upstream access denial is preserved without reflecting provider error text', async t => {
-  const { request } = await fixture(t, (req, res) => {
+for (const status of [401,403,429]) test(`Upstream HTTP ${status} is explicit in JSON and SSE without exposing provider text or retrying`, async t => {
+  const { request,calls } = await fixture(t, (req, res) => {
     if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end(JSON.stringify({ data: [
       { type: 'idle', outcome: 'failed' },
-      { type: 'assistant', finish: 'error', error: { status: 403, message: 'private upstream detail' } },
+      { type: 'assistant', finish: 'error', error: { status, message: 'private upstream detail' } },
     ] })); return true;
   });
   const response = await request('/v1/chat/completions', payload);
-  assert.equal(response.status, 403);
-  assert.doesNotMatch(await response.text(), /private upstream detail/);
+  assert.equal(response.status, status);
+  const error=(await response.json()).error;
+  assert.equal(error.code,'upstream_access_or_quota');assert.match(error.message,new RegExp('HTTP '+status));
+  assert.doesNotMatch(error.message,/private upstream detail/);
+  assert.match(error.message,status===401?/authentication was rejected/:status===403?/access was rejected/:/rate or quota limit/);
+  const stream=await request('/v1/responses',{model,input:'test',stream:true});
+  const wire=await stream.text();assert.match(wire,/response.failed/);assert.match(wire,new RegExp('HTTP '+status));assert.doesNotMatch(wire,/private upstream detail/);
+  assert.equal(calls.filter(call=>call.path==='/api/session').length,2);
 });
 
 test('Changed upstream text fails instead of silently corrupting a streamed answer', async t => {

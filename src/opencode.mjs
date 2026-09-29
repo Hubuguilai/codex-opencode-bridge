@@ -10,6 +10,12 @@ import { NativeTextStream } from './native-text-stream.mjs';
 import { SessionJournal } from './session-journal.mjs';
 import { RuntimeOwnership } from './runtime-ownership.mjs';
 
+const providerDenialMessages = {
+  401: 'OpenCode provider returned HTTP 401: authentication was rejected. Check the provider authentication configured in OpenCode.',
+  403: 'OpenCode provider returned HTTP 403: access was rejected. Check model entitlement or provider access restrictions in OpenCode; this does not establish quota exhaustion.',
+  429: 'OpenCode provider returned HTTP 429: a rate or quota limit was reached. Check the provider allowance or retry timing; the bridge will not retry automatically.',
+};
+
 export class OpenCodeBackend {
   constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', toolTransport = 'direct', internalTools = 'guarded', journal, warn = () => {} }) {
     this.url = url;
@@ -128,7 +134,7 @@ export class OpenCodeBackend {
         const assistant = assistants.at(-1);
         if (assistant) {
           if ([401, 403, 429].includes(assistant.error?.status)) {
-            throw new BridgeError(assistant.error.status, 'upstream_access_or_quota', 'OpenCode provider denied access or quota. Check your model entitlement in OpenCode.');
+            throw new BridgeError(assistant.error.status, 'upstream_access_or_quota', providerDenialMessages[assistant.error.status]);
           }
           if (assistant.finish === 'error' || assistant.error) throw new BridgeError(502, 'generation_failed', 'OpenCode generation failed.');
           if (!native && (assistant.content || []).some(x => x.type === 'tool' || x.type === 'tool-call')) {

@@ -136,3 +136,16 @@ no alternate account or model is used to escape that quota. Preserve the negativ
 receipt and inspect the provider's account/availability state before a later run.
 The full-suite regression after the session-ID change encountered access/quota
 denial; it must not be described as a successful generation regression.
+
+New provider-denial messages distinguish HTTP 401 (authentication rejected), 403
+(access rejected) and 429 (rate/quota limit). The exact status appears in both
+JSON errors and streamed failure messages; this matters after SSE headers have
+already been sent. The machine-readable `upstream_access_or_quota` code is retained
+so existing stop-on-denial behavior remains intact. Provider response text is not
+copied into the public error. A 403 does not establish exhausted quota, and a 429
+does not identify a reset time or prove a daily rather than short-term limit.
+
+The older failed Nemotron receipt did not record an exact status and cannot be
+retroactively classified. Confirm access in the official client or obtain a
+fresh authorized diagnostic before attributing that failure to exhausted credit,
+expired authentication or a tool compatibility restriction.
