@@ -1,5 +1,12 @@
 # Running a prepared multi-model bridge
 
+Commands reject unknown or repeated options, missing values and extra arguments
+before creating configuration or removing files. Use `COMMAND --help` to inspect
+usage without starting a runtime. There is no `--dry-run` removal option; passing
+one fails and preserves the preparation. `prepare-router` is itself export-only.
+Quote paths containing spaces. Options may precede or follow the directory; use
+`--` before a directory whose name starts with a hyphen.
+
 After `prepare`, start the exact saved configuration:
 
 ```sh

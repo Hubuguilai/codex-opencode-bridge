@@ -166,8 +166,7 @@ Local syntax checks and 59 offline tests pass at this milestone. See
 `prepare-router` exports a reviewable additions-only provider/model plan and a
 combined menu preview. In the current local snapshot it preserved 53 entries and
 added five. Unit tests check identity conflicts, original-file preservation and
-absence of the bridge token in every output artifact. There are now 61 offline
-tests. [The five-route rehearsal](receipts/router-five-model-rehearsal.json)
+absence of the bridge token in every output artifact. There were 61 offline tests at that milestone. [The five-route rehearsal](receipts/router-five-model-rehearsal.json)
 validated the exported entries in the real installed Router stack against a mock
 upstream, including completed call identity/namespace/arguments and real Codex
 catalog parsing. It also verifies the source documents remain unchanged.
@@ -175,3 +174,17 @@ catalog parsing. It also verifies the source documents remain unchanged.
 Actual live registration, service refresh, application restart and graphical
 picker acceptance are still pending. The export must be revalidated against its
 source hashes before applying. See [Desktop integration](desktop-integration.md).
+
+
+## CLI installation regression
+
+The CLI validates the complete command before configuration or filesystem
+operations. Four subprocess regressions fail against the CLI from `a347585`
+and pass with the strict parser: unknown/missing/duplicate arguments; preserving
+a preparation when an unsupported `--dry-run` is supplied to removal; exact
+multi-model selection with equals syntax/options before the path; and help with
+no token creation or runtime launch. These use temporary directories only.
+
+Current syntax checks and all 65 offline tests pass. This improves installation
+behavior; it adds no new evidence of provider availability or graphical picker
+activation.
