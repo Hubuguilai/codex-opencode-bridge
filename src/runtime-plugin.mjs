@@ -29,6 +29,9 @@ export default {
       dispatchSteps = 0;
       if (registration) await registration.dispose();
       registration = await ctx.tool.transform(editor => {
+        if (manifest.internalTools === 'hidden') {
+          for (const tool of editor.list()) editor.remove(tool.id);
+        }
         for (const tool of manifest.tools) {
           editor.add({
             name: tool.relayName,
@@ -55,6 +58,15 @@ export default {
         capture({kind:'limit'});
         throw new Error('DISPATCH_STEP_LIMIT');
       }
+      if (manifest.internalTools === 'hidden') {
+        const allowed = new Set(manifest.tools.map(tool => tool.relayName));
+        event.tools = Object.fromEntries(Object.entries(event.tools).filter(([name]) => allowed.has(name)));
+      }
+      // Metadata only: never persist prompts, tool arguments, headers or credentials.
+      fs.writeFileSync(path.join(root, 'bridge-tool-surface.json'), JSON.stringify({
+        requestId: manifest.requestId, mode: manifest.internalTools || 'guarded',
+        step: dispatchSteps, tools: Object.keys(event.tools).sort(),
+      }), { mode: 0o600 });
       if (manifest.messages) {
         baseMessageCount ??= event.messages.length;
         event.messages = [...structuredClone(manifest.messages), ...event.messages.slice(baseMessageCount)];
@@ -72,6 +84,28 @@ export default {
         'Tool mapping: ' + manifest.tools.map(t => `${t.namespace ? t.namespace + '.' : ''}${t.name} = ${t.relayName}`).join(', '),
       ].join('\n') });
       if (manifest.options) Object.assign(event.options, manifest.options);
+    });
+    await ctx.session.hook('http.request', async event => {
+      if (!manifest || event.kind !== 'primary') return;
+      let body;
+      try { body = await event.request.clone().json(); } catch {
+        if (manifest.internalTools === 'hidden') throw new Error('UNVERIFIABLE_TOOL_SURFACE');
+        return;
+      }
+      if (body.tools !== undefined && !Array.isArray(body.tools)) throw new Error('INVALID_TOOL_SURFACE');
+      const names = (body.tools || []).map(tool => tool.function?.name || tool.name || tool.type).sort();
+      if (manifest.internalTools === 'hidden' && names.some(name => !manifest.tools.some(tool => tool.relayName === name))) {
+        throw new Error('UNEXPECTED_WIRE_TOOL');
+      }
+      fs.writeFileSync(path.join(root, 'bridge-wire-surface.json'), JSON.stringify({
+        requestId: manifest.requestId, mode: manifest.internalTools || 'guarded', tools: names,
+      }), { mode: 0o600 });
+    });
+    await ctx.session.hook('http.response', event => {
+      if (!manifest || event.kind !== 'primary') return;
+      fs.writeFileSync(path.join(root, 'bridge-wire-status.json'), JSON.stringify({
+        requestId: manifest.requestId, status: event.response.status,
+      }), { mode: 0o600 });
     });
     await ctx.tool.hook('execute.before', event => {
       if (event.tool === 'execute' && manifest?.toolTransport === 'codemode') return;

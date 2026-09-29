@@ -72,3 +72,14 @@ Codex/Router 配置，不迁移已有模型。脱敏结果保存在 `generated/`
 
 临时工作目录与插件限制不等于操作系统沙箱，仍需信任本机 OpenCode 和其插件配置。
 项目不提供账号、密钥或免费额度，不绕过供应商访问规则。MIT 许可证只覆盖本项目代码。
+
+## 彻底隐藏内部工具（实验功能）
+
+`BRIDGE_INTERNAL_TOOLS=hidden` 配合 `BRIDGE_MODE=native-tools` 和默认的 direct
+传输，会移除 OpenCode 内部工具注册、过滤模型上下文工具列表，并检查发送给上游的
+HTTP 工具名称。模型仅看到桥接的 Codex 工具；执行前的权限保护仍保留。
+默认的 `guarded` 模式继续保留内部定义但禁止执行。
+
+真实 A/B/A 对照中，Nemotron 的 guarded 两次成功，hidden 返回 HTTP 403；
+Space Bunny 三次均成功返回客户端工具调用。这证明隐藏机制可以生效，但不能保证
+每个模型允许这样的请求。完整工作流及适用范围见 [工具屏蔽验证](tool-surface.md)。

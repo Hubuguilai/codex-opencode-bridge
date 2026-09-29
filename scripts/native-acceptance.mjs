@@ -33,9 +33,12 @@ const overrides={
  model_catalog_json:catalog,model_reasoning_effort:'default',model_reasoning_summary:'none',
  web_search:'disabled','features.apps':false,'features.multi_agent':false,'features.memories':false,
 };
-const sourceHash=createHash('sha256');
-for(const name of fs.readdirSync(new URL('../src/',import.meta.url)).filter(x=>x.endsWith('.mjs')).sort()){sourceHash.update(name);sourceHash.update(fs.readFileSync(new URL('../src/'+name,import.meta.url)));}
-const receipt={sourceSha256:sourceHash.digest('hex'),gitHead:spawnSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).stdout.trim(),date:new Date().toISOString(),model:overrides.model,toolTransport:config.toolTransport,node:process.version,codex:spawnSync('codex',['--version'],{encoding:'utf8'}).stdout.trim(),scenarios:[]};
+function sourceDigest(){
+ const hash=createHash('sha256');
+ for(const name of fs.readdirSync(new URL('../src/',import.meta.url)).filter(x=>x.endsWith('.mjs')).sort()){hash.update(name);hash.update(fs.readFileSync(new URL('../src/'+name,import.meta.url)));}
+ return hash.digest('hex');
+}
+const receipt={sourceSha256:sourceDigest(),gitHead:spawnSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).stdout.trim(),date:new Date().toISOString(),model:overrides.model,toolTransport:config.toolTransport,internalTools:config.internalTools,node:process.version,codex:spawnSync('codex',['--version'],{encoding:'utf8'}).stdout.trim(),scenarios:[]};
 let runtime,bridge,child,sequence=0,approvalCount=0,stderr='';
 const pending=new Map(),events=[];
 const send=value=>child.stdin.write(JSON.stringify(value)+'\n');
@@ -63,7 +66,18 @@ async function turn(threadId,text){
 function record(name,result,checks){const item={name,...result,checks,passed:result.status==='completed'&&Object.values(checks).every(Boolean)};receipt.scenarios.push(item);console.log(JSON.stringify(item));}
 function output(){try{return fs.readFileSync(path.join(work,'output.md'),'utf8');}catch{return '';}}
 try{
- runtime=await startOpenCode(config);receipt.opencode=(await runtime.backend.health()).version;
+ runtime=await startOpenCode(config);
+ if(process.env.BRIDGE_DEBUG_ERRORS){
+  const originalCall=runtime.backend.call.bind(runtime.backend);
+  runtime.backend.call=async(...args)=>{
+   const result=await originalCall(...args);
+   for(const item of Array.isArray(result?.data)?result.data:[])if(item.type==='assistant'&&item.error){
+    fs.appendFileSync(process.env.BRIDGE_DEBUG_ERRORS,JSON.stringify(item.error)+'\n',{mode:0o600});
+   }
+   return result;
+  };
+ }
+ receipt.opencode=(await runtime.backend.health()).version;
  bridge=createBridge(config,runtime.backend);await bridge.listen();
  child=spawn('codex',['app-server','--stdio',...Object.entries(overrides).flatMap(([key,value])=>['-c',key+'='+JSON.stringify(value)])],{cwd:work,env:{...process.env,BRIDGE_TOKEN:config.token},stdio:['pipe','pipe','pipe']});
  child.stderr.on('data',data=>{stderr+=data;});
@@ -117,6 +131,8 @@ try{
 }catch(error){receipt.error=error.message.replaceAll(root,'<temporary-workspace>');receipt.passed=false;}
 finally{
  if(child)child.kill('SIGTERM');if(bridge)await bridge.close();if(runtime)await runtime.stop();
+ receipt.sourceChangedDuringRun=receipt.sourceSha256!==sourceDigest();
+ if(receipt.sourceChangedDuringRun)receipt.passed=false;
  // No prompts, raw model output, credentials or machine paths in the receipt.
  const destination=path.resolve(process.env.BRIDGE_RECEIPT||'generated/native-acceptance.json');fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,JSON.stringify(receipt,null,2)+'\n');
  if(receipt.error)console.error(receipt.error);

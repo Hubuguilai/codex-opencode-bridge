@@ -67,6 +67,17 @@ remain intact, upstream model mapping, namespace/call identity, reasoning fields
 and removal of temporary state. It does not execute a Desktop GUI turn or prove
 that a live menu has been migrated.
 
+## Hidden internal tools follow-up
+
+The bridge now offers opt-in `BRIDGE_INTERNAL_TOOLS=hidden`. The actual outgoing
+HTTP tool list was checked in a guarded/hidden/guarded comparison. Nemotron
+returned 200/403/200; Space Bunny returned 200/200/200 with correct client calls.
+Space Bunny also passed two consecutive complete hidden-tool Codex suites. A prior development
+run had a follow-up failure; reliability remains under investigation.
+See [implementation and evidence](tool-surface.md). This replaces the earlier
+assumption that removing the internal surface requires an upstream API change:
+the official plugin API can remove it, but model access restrictions remain.
+
 ## Release decision and concrete options
 
 The candidate can be reviewed as an experimental native-tool bridge with a
@@ -77,9 +88,9 @@ native GPT integration**. For that narrower requirement, the concrete options ar
    workflows now; direct API access may be simpler for that particular model.
 2. Validate another officially available model or route that reliably accepts
    arbitrary client tool schemas; publish its own receipt before enabling it.
-3. Wait for/support an upstream raw-inference or tool-selection interface that
-   removes the competing internal-tool surface. Do not spoof identity or bypass
-   access checks to obtain it.
+3. Use the official plugin-based hidden-tool mode where permitted, and seek
+   upstream clarification of the reproducible Nemotron rejection. Do not spoof
+   identity or bypass access checks to obtain it.
 
 No public release, account sharing, live-router restart or active Desktop-model
 migration is included in this candidate.

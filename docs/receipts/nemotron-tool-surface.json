@@ -1,0 +1,124 @@
+{
+  "date": "2026-09-29T03:09:57.802Z",
+  "model": "opencode/nemotron-3-ultra-free",
+  "sourceSha256": "aea154165128b2bb25a8478389cc4c8d7f44d9e0590c0ab5ee2ae0f9939a4dcd",
+  "scenarios": [
+    {
+      "mode": "guarded",
+      "opencode": "2.0.18",
+      "returnedClientCall": true,
+      "durationMs": 7155,
+      "context": {
+        "mode": "guarded",
+        "step": 1,
+        "tools": [
+          "bridge_client_echo_0",
+          "edit",
+          "execute",
+          "glob",
+          "grep",
+          "question",
+          "read",
+          "shell",
+          "skill",
+          "subagent",
+          "webfetch",
+          "websearch",
+          "write"
+        ]
+      },
+      "wire": {
+        "mode": "guarded",
+        "tools": [
+          "bridge_client_echo_0",
+          "edit",
+          "execute",
+          "glob",
+          "grep",
+          "question",
+          "read",
+          "shell",
+          "skill",
+          "subagent",
+          "webfetch",
+          "websearch",
+          "write"
+        ]
+      },
+      "upstream": {
+        "status": 200
+      }
+    },
+    {
+      "mode": "hidden",
+      "opencode": "2.0.18",
+      "error": {
+        "code": "upstream_access_or_quota",
+        "status": 403
+      },
+      "durationMs": 1242,
+      "context": {
+        "mode": "hidden",
+        "step": 1,
+        "tools": [
+          "bridge_client_echo_0"
+        ]
+      },
+      "wire": {
+        "mode": "hidden",
+        "tools": [
+          "bridge_client_echo_0"
+        ]
+      },
+      "upstream": {
+        "status": 403
+      }
+    },
+    {
+      "mode": "guarded",
+      "opencode": "2.0.18",
+      "returnedClientCall": true,
+      "durationMs": 8924,
+      "context": {
+        "mode": "guarded",
+        "step": 1,
+        "tools": [
+          "bridge_client_echo_0",
+          "edit",
+          "execute",
+          "glob",
+          "grep",
+          "question",
+          "read",
+          "shell",
+          "skill",
+          "subagent",
+          "webfetch",
+          "websearch",
+          "write"
+        ]
+      },
+      "wire": {
+        "mode": "guarded",
+        "tools": [
+          "bridge_client_echo_0",
+          "edit",
+          "execute",
+          "glob",
+          "grep",
+          "question",
+          "read",
+          "shell",
+          "skill",
+          "subagent",
+          "webfetch",
+          "websearch",
+          "write"
+        ]
+      },
+      "upstream": {
+        "status": 200
+      }
+    }
+  ]
+}

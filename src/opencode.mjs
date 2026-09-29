@@ -7,7 +7,7 @@ import { findOpenCode } from './config.mjs';
 import { BridgeError } from './errors.mjs';
 
 export class OpenCodeBackend {
-  constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', toolTransport = 'direct', warn = () => {} }) {
+  constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', toolTransport = 'direct', internalTools = 'guarded', warn = () => {} }) {
     this.url = url;
     this.directory = directory;
     this.pollMs = pollMs;
@@ -15,6 +15,7 @@ export class OpenCodeBackend {
     this.warn = warn;
     this.mode = mode;
     this.toolTransport = toolTransport;
+    this.internalTools = internalTools;
     this.authorization = `Basic ${Buffer.from(`opencode:${password}`).toString('base64')}`;
   }
   async call(route, { method = 'GET', body, signal = AbortSignal.timeout(10000) } = {}) {
@@ -51,7 +52,7 @@ export class OpenCodeBackend {
       if (native) {
         fs.rmSync(capturePath, { force: true });
         fs.rmSync(path.join(this.directory, 'bridge-plugin-ready'), { force: true });
-        fs.writeFileSync(path.join(this.directory, 'bridge-request.json'), JSON.stringify({ requestId, tools: request.tools || [], messages: request.messages, toolTransport: this.toolTransport, options: request.options }), { mode: 0o600 });
+        fs.writeFileSync(path.join(this.directory, 'bridge-request.json'), JSON.stringify({ requestId, tools: request.tools || [], messages: request.messages, toolTransport: this.toolTransport, internalTools: this.internalTools, options: request.options }), { mode: 0o600 });
       }
       const created = await this.call('/api/session', { method: 'POST', body: {
         title: 'Temporary bridge request', model: { id, providerID },
@@ -157,7 +158,7 @@ export async function startOpenCode(config, env = process.env) {
   child.on('error', () => { ended = true; });
   child.on('exit', () => { ended = true; });
   const backend = new OpenCodeBackend({ url: `http://127.0.0.1:${config.upstreamPort}`, password, directory,
-    pollMs: config.pollMs, maxOutputBytes: config.maxOutputBytes, mode: config.mode, toolTransport: config.toolTransport,
+    pollMs: config.pollMs, maxOutputBytes: config.maxOutputBytes, mode: config.mode, toolTransport: config.toolTransport, internalTools: config.internalTools,
     warn: code => process.stderr.write(`[bridge] ${code}\n`),
   });
   const stop = async () => {

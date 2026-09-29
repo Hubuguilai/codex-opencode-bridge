@@ -12,6 +12,14 @@
 - [x] Reversible isolated configuration preparation; no live settings overwritten
 - [x] English/Chinese documentation, MIT license, prior-art review and CI
 
+## Follow-up: tool visibility
+
+- [x] Official plugin removal of internal registrations and context schemas
+- [x] HTTP request tool-name checks with sanitized A/B/A receipts
+- [x] Full real-Codex Space Bunny hidden-tool workflow receipt
+- [ ] Repeated hidden-tool workflow reliability and failure diagnosis
+- [ ] Upstream-supported path for Nemotron hidden-tool requests (currently 403)
+
 ## Remaining product work
 
 - [ ] Reliable native workflows for Nemotron and other runtime-only free models

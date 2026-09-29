@@ -13,6 +13,9 @@ export function readConfig(env = process.env) {
   if (!['text', 'native-tools'].includes(mode)) throw new Error('BRIDGE_MODE must be text or native-tools.');
   const toolTransport = env.BRIDGE_TOOL_TRANSPORT || 'direct';
   if (!['direct', 'codemode'].includes(toolTransport)) throw new Error('BRIDGE_TOOL_TRANSPORT must be direct or codemode.');
+  const internalTools = env.BRIDGE_INTERNAL_TOOLS || 'guarded';
+  if (!['guarded', 'hidden'].includes(internalTools)) throw new Error('BRIDGE_INTERNAL_TOOLS must be guarded or hidden.');
+  if (internalTools === 'hidden' && toolTransport !== 'direct') throw new Error('Hidden internal tools require direct transport.');
   fs.mkdirSync(stateDir, { recursive: true, mode: 0o700 });
   const tokenPath = path.join(stateDir, 'local-token');
   let token = env.BRIDGE_TOKEN;
@@ -35,7 +38,7 @@ export function readConfig(env = process.env) {
     throw new Error('BRIDGE_MODELS must be comma-separated provider/model IDs.');
   }
   return {
-    host: '127.0.0.1', port, upstreamPort, stateDir, tokenPath, token, models, mode, toolTransport,
+    host: '127.0.0.1', port, upstreamPort, stateDir, tokenPath, token, models, mode, toolTransport, internalTools,
     timeoutMs: number('BRIDGE_TIMEOUT_MS', 180000, 3600000),
     pollMs: number('BRIDGE_POLL_MS', 250, 10000),
     maxBodyBytes: number('BRIDGE_MAX_BODY_BYTES', 16000000, 100000000),

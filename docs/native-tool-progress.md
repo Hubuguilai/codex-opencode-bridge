@@ -100,3 +100,14 @@ a source digest. The final offline suite has 36 passing tests. An independent
 Router/LiteLLM/API-forwarder rehearsal with generated credentials and a mock
 upstream also passed and removed its temporary state. See the current matrix and
 committed receipts rather than pooling exploratory runs into performance scores.
+
+## Hidden internal tool surface follow-up
+
+Official registry transforms plus context filtering now implement opt-in hidden
+internal tools. The primary outgoing HTTP tool list is audited and unexpected
+names are rejected. A guarded/hidden/guarded probe measured Nemotron 200/403/200
+and Space Bunny 200/200/200. The hidden requests contained only the client stub.
+This replaces any earlier inference that the plugin cannot remove internal tools.
+Two consecutive complete Space Bunny Codex suites passed with the same runtime
+source digest. A prior development run had a failed follow-up and is retained;
+no causal claim about that transient failure is made. See [tool surface evidence](tool-surface.md).

@@ -34,6 +34,10 @@ Codex / compatible client
 With `BRIDGE_MODE=native-tools`, Responses function tools, namespaces and custom
 freeform tools are relayed to Codex. Chat supports function tools. The managed
 OpenCode plugin captures arguments and waits; Codex performs the actual action.
+An opt-in `BRIDGE_INTERNAL_TOOLS=hidden` mode removes internal tool registrations,
+filters the model context and rejects unexpected tool names in outgoing HTTP
+requests. This changes tool visibility, not upstream access eligibility.
+See [the tool-surface comparison](docs/tool-surface.md).
 See [real-client evidence and remaining gates](docs/native-tool-progress.md).
 
 Images, audio, file uploads, adjustable reasoning controls, structured output,
@@ -92,6 +96,7 @@ on the command line. This token authenticates the local bridge, not the model pr
 | Environment variable | Default | Meaning |
 |---|---|---|
 | `BRIDGE_MODE` | `text` | `native-tools` enables guarded client-tool relay |
+| `BRIDGE_INTERNAL_TOOLS` | `guarded` | Experimental `hidden` removes internal registrations and schemas; direct transport only. See [A/B evidence](docs/tool-surface.md). |
 | `BRIDGE_TOOL_TRANSPORT` | `direct` | Optional experimental `codemode` dispatcher; not the verified default |
 | `OPENCODE_BIN` | PATH, then `~/.opencode/bin/opencode` | Installed executable |
 | `BRIDGE_MODELS` | `opencode/nemotron-3-ultra-free` | Comma-separated exact `provider/model` IDs |
