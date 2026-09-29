@@ -31,7 +31,8 @@
 - [ ] Long-context/multimodal validation and per-model maximum capability evidence
 - [x] Preallocated session identity and cleanup after a committed creation reply is lost
 - [x] Durable session intents before creation; retain ambiguous/failed cleanup through stop and crash
-- [ ] Ownership-aware recovery replay, including creation completing after cleanup
+- [x] Explicit ownership-aware recovery for stopped/absent runtimes, exact sessions and absent intents
+- [ ] End-to-end crash-timing coverage during creation and recovery, including late commits
 - [ ] Stronger isolation of third-party plugins/MCP beyond trusted local configuration
 - [x] Incremental native visible-text events, explicit failure semantics and real-client regression
 - [ ] Public-release decision after support boundaries and upstream access are reviewed

@@ -60,12 +60,42 @@ Stopping preserves a work directory with pending intents and emits
 cannot be confirmed. `remove-prepared` refuses these leftovers. A process killed
 before cleanup leaves its intent available for subsequent inspection.
 
-Automatic replay/recovery is **not implemented**: the journal does not prove the
-runtime is dead, the session still exists, or the directory has not been modified.
-Ownership checks and late-commit reconciliation remain roadmap work. Do not
-bulk-delete sessions from the user's OpenCode database, or treat a retained intent
-as permission to kill a process or delete a session. Previously created work
-directories without a journal are not automatically adopted.
+## Recover abandoned sessions
+
+After stopping the bridge, run:
+
+```sh
+node bin/bridge.mjs recover-prepared /absolute/new/bridge-config
+```
+
+This starts a temporary managed OpenCode runtime using the preparation's saved
+upstream port and inherited OpenCode account environment. It sends no model
+prompts and does not resume tasks. It inspects only `work-*` directories under the
+preparation's state directory and skips its own temporary runtime.
+
+New preparations of runtime state include a random run identity and parent/child
+PIDs. Recovery requires the old child PID to be absent, plus either a confirmed
+stop record or an absent parent PID. A live or reused PID blocks recovery. The
+command never kills old processes. A crash between child spawn and ownership
+recording is deliberately not recoverable automatically.
+
+For each version-2 intent, run identity and directory must match the ownership
+record. If the exact session exists, OpenCode must report the matching session ID
+and directory before deletion. Recovery confirms absence afterwards; already
+absent sessions need no deletion. It never enumerates or deletes other sessions.
+This reconciles an ambiguous creation after the owning processes have stopped,
+including a session that was created after the original cleanup attempt.
+
+The command exits nonzero for unresolved state. Unexpected files or symlinks keep
+the work directory intact even if owned session cleanup succeeded. Old version-1
+intents, missing ownership records, and stale recovery locks require inspection;
+there is no force option. The command does not automatically run on service start.
+
+These records are accidental-misuse guards, not tamper-proof ownership proofs
+against someone who can edit local files. Recovery assumes trusted local bridge
+state and the same OpenCode data/account environment. Never bulk-delete sessions
+from the user's OpenCode database. See the verification record for tested crash
+boundaries; arbitrary crash timing and real generation recovery remain unproven.
 
 ## Reproduce without model generation
 
@@ -74,14 +104,18 @@ These commands launch the installed official runtime but send no model prompts:
 ```sh
 node scripts/prepared-startup.mjs --live-runtime
 node scripts/session-cleanup-probe.mjs --live-runtime
+node scripts/recovery-probe.mjs --live-runtime
 ```
 
 The first uses temporary directories and ports 5096/5097; the second uses
-5196/5197 plus an ephemeral local fault-injection proxy. They retain sanitized
+5196/5197 plus an ephemeral local fault-injection proxy; recovery uses 5296/5297.
+They retain sanitized
 receipts under `generated/` and clean their own sessions/directories. Startup
 checks include authentication, exact model listing, two cycles and refusal to
 remove a running preparation. The fault probe destroys the successful creation
 reply and checks both target deletion and preservation of an unrelated session.
+Recovery checks exact owned cleanup, already-absent intents, preservation of an
+unrelated session, and removability of the preparation after the CLI completes.
 These results prove lifecycle behavior, not current model access or Desktop UI
 installation. See [revision-specific receipts](verification.md).
 

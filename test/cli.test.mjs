@@ -35,7 +35,7 @@ test('CLI rejects incomplete, misspelled, duplicate and extra arguments before w
     ['prepare', '--models', models.join(',')],
     ['prepare-router', 'new', '--prepared', 'source'],
     ['serve', '--unknown'], ['init', '--unknown'], ['init', 'unexpected'],
-    ['serve-prepared'], ['remove-prepared'],
+    ['serve-prepared'], ['remove-prepared'], ['recover-prepared'], ['recover-prepared', 'new', '--force'],
   ]) {
     const result = run(args);
     assert.equal(result.status, 1, JSON.stringify(args));
@@ -75,7 +75,7 @@ test('CLI accepts equals syntax and options before a directory without changing 
 
 test('CLI command help never initializes configuration or launches a runtime', t => {
   const {root, run} = fixture(t);
-  for (const command of ['prepare', 'prepare-router', 'serve-prepared', 'remove-prepared', 'serve', 'init']) {
+  for (const command of ['prepare', 'prepare-router', 'serve-prepared', 'remove-prepared', 'recover-prepared', 'serve', 'init']) {
     const result = run([command, '--help']);
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /Commands:/);

@@ -8,6 +8,7 @@ import { BridgeError } from './errors.mjs';
 import { NativeEvents } from './native-events.mjs';
 import { NativeTextStream } from './native-text-stream.mjs';
 import { SessionJournal } from './session-journal.mjs';
+import { RuntimeOwnership } from './runtime-ownership.mjs';
 
 export class OpenCodeBackend {
   constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', toolTransport = 'direct', internalTools = 'guarded', journal, warn = () => {} }) {
@@ -27,7 +28,11 @@ export class OpenCodeBackend {
       method, signal, redirect: 'error', headers: { authorization: this.authorization, 'content-type': 'application/json' },
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     });
-    if (!response.ok) throw new BridgeError(502, 'opencode_http_error', `OpenCode returned HTTP ${response.status}.`);
+    if (!response.ok) {
+      const error = new BridgeError(502, 'opencode_http_error', `OpenCode returned HTTP ${response.status}.`);
+      error.upstreamStatus = response.status;
+      throw error;
+    }
     if (response.status === 204) return null;
     if (!response.headers.get('content-type')?.includes('application/json')) {
       throw new BridgeError(502, 'opencode_protocol_error', 'Expected OpenCode v2 JSON; received a non-JSON response.');
@@ -176,8 +181,9 @@ export class OpenCodeBackend {
 
 export async function startOpenCode(config, env = process.env) {
   const binary = findOpenCode(env);
-  const directory = fs.mkdtempSync(path.join(config.stateDir, 'work-'));
+  const directory = fs.realpathSync(fs.mkdtempSync(path.join(config.stateDir, 'work-')));
   const journal = new SessionJournal(directory);
+  const ownership = new RuntimeOwnership(directory, journal.runID);
   if (config.mode === 'native-tools') {
     const pluginDir = path.join(directory, '.opencode/plugins/codex-relay');
     fs.mkdirSync(pluginDir, { recursive: true });
@@ -198,7 +204,8 @@ export async function startOpenCode(config, env = process.env) {
     warn: code => process.stderr.write(`[bridge] ${code}\n`),
   });
   let directoryRemoved = false;
-  const stop = async () => {
+  let stopPromise;
+  const stop = () => stopPromise ??= (async () => {
     if (directoryRemoved) return;
     if (!ended) {
       child.kill('SIGTERM');
@@ -208,10 +215,12 @@ export async function startOpenCode(config, env = process.env) {
         for (let i = 0; i < 20 && !ended; i++) await delay(100);
       }
     }
+    if (ended) ownership.stopped();
     if (!ended || journal.hasPending()) backend.warn('runtime_recovery_pending');
     else { fs.rmSync(directory, { recursive: true, force: true }); directoryRemoved = true; }
-  };
+  })();
   try {
+    if (child.pid) ownership.started(child.pid);
     const deadline = Date.now() + 20000;
     while (Date.now() < deadline) {
       if (ended) throw new Error('OpenCode could not start. Check binary version and port availability.');

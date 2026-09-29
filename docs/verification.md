@@ -192,7 +192,7 @@ activation.
 
 ## Durable session intents
 
-Current syntax checks and all 69 offline tests pass. The new tests verify intent
+Syntax checks and all 69 offline tests passed at the durable-intent milestone. The new tests verify intent
 persistence before creation, refusal to call upstream on journal-write failure,
 retention on failed deletion or ambiguous creation, and readable exact identity
 after a separate process is killed with SIGKILL. The latter uses a fake upstream;
@@ -206,3 +206,24 @@ second-instance isolation and removal after clean stop. Both use OpenCode 2.0.18
 and send zero model generation requests. They record source hashes separately
 from the older model-generation receipts. Automatic recovery replay and ownership
 verification remain unimplemented; see [operations](operations.md).
+
+
+## Explicit ownership-aware recovery
+
+`recover-prepared` now uses version-2 intents and per-runtime ownership records.
+All 76 offline tests pass, including rejection of possibly live/reused PIDs,
+identity/location mismatches, legacy records, symlinked intents, recovery locks
+and unconfirmed deletion. Unknown files remain intact after session cleanup.
+
+[The real recovery CLI probe](receipts/recovery-probe.json) uses OpenCode 2.0.18
+without generation. It creates an owned session, an already-absent intent and an
+unrelated control; stops the original runtime; runs the new CLI; then starts a
+fresh verifier runtime. Both intended IDs are absent, the unrelated session is
+preserved, and the preparation is removable. The receipt hashes source plus CLI.
+This exercises confirmed-stop recovery, not arbitrary crash timing or a real
+model request committing late. Forced-process termination persistence has separate
+unit evidence; full crash/recovery timing coverage remains open.
+
+[The same-source prepared startup regression](receipts/prepared-startup-recovery.json)
+also passes two normal cycles, second-instance isolation and clean removal with
+all five configured model routes. This startup check sends no generation calls.

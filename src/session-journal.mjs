@@ -1,16 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
-
-function syncDirectory(directory) {
-  const fd = fs.openSync(directory, 'r');
-  try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
-}
+import {randomUUID} from 'node:crypto';
+import {syncDirectory} from './runtime-ownership.mjs';
 
 // Intents contain identifiers only, never prompts, model output or credentials.
 // Recovery must verify ownership against the runtime before acting on them.
 export class SessionJournal {
   constructor(directory) {
     this.directory = path.resolve(directory);
+    this.runID = randomUUID();
     this.root = path.join(this.directory, '.bridge-sessions');
     fs.mkdirSync(this.root, {mode: 0o700});
     syncDirectory(this.directory);
@@ -22,7 +20,7 @@ export class SessionJournal {
   begin(id) {
     const fd = fs.openSync(this.file(id), 'wx', 0o600);
     try {
-      fs.writeFileSync(fd, JSON.stringify({version: 1, sessionID: id, directory: this.directory, createdAt: new Date().toISOString()}) + '\n');
+      fs.writeFileSync(fd, JSON.stringify({version: 2, runID: this.runID, sessionID: id, directory: this.directory, createdAt: new Date().toISOString()}) + '\n');
       fs.fsyncSync(fd);
     } finally { fs.closeSync(fd); }
     syncDirectory(this.root);
