@@ -80,6 +80,12 @@ native feasibility probes remain described in [development history](native-tool-
 
 ## Offline and integration checks
 
+The transport milestone is commit `9f2a02e`; its source digest matches the new
+live receipts. Subsequent multi-model preparation changes only configuration
+artifact generation and the CLI, not the model transport. The final local suite
+has 55 tests, including catalog/default/allowlist alignment, duplicate refusal,
+argument injection and client-alias execution boundaries.
+
 `npm run check` and `npm test` cover authentication, SSE/event identities,
 cancellation/cleanup, schema validation, native message history, runtime guards,
 bounded corrective retry and reversible preparation. CI runs on macOS/Linux and

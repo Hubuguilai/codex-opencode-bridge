@@ -100,6 +100,19 @@ Shell-expanded curl headers may be visible in local process listings. For automa
 clients, load the token file directly in the client process instead of passing it
 on the command line. This token authenticates the local bridge, not the model provider.
 
+## Prepare multiple models together
+
+```sh
+node bin/bridge.mjs prepare /absolute/new/bridge-config \
+  --models opencode/space-bunny-free,opencode/nemotron-3-ultra-free,opencode/mimo-v2.6-flash-free,opencode/longcat-2.5-preview-free,opencode/big-pickle
+```
+
+This generates one catalog and matching bridge allowlist with client aliases
+selected. The first model is the default; `--model` may choose another selected
+ID. It writes only the new directory and refuses duplicate or unverified models.
+Follow [Codex integration](docs/codex.md) to run it. These artifacts do not install
+a live Desktop route or replace your existing native GPT configuration.
+
 ## Configuration
 
 | Environment variable | Default | Meaning |

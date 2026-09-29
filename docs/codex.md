@@ -64,11 +64,15 @@ Do not describe the CLI/app-server proof as a completed Desktop installation.
 
 ```sh
 node bin/bridge.mjs prepare /absolute/new/bridge-config --model opencode/space-bunny-free
+# Prepare several verified models together; first ID is the default:
+node bin/bridge.mjs prepare /absolute/new/multi-model-config \
+  --models opencode/space-bunny-free,opencode/nemotron-3-ultra-free,opencode/mimo-v2.6-flash-free,opencode/longcat-2.5-preview-free,opencode/big-pickle
+# Optional --model selects a different default within --models.
 # Copy an existing catalog without changing its source:
 node bin/bridge.mjs prepare /absolute/another/new-directory --catalog /absolute/models.json
 ```
 
-The command refuses an existing output directory or duplicate model ID. It writes
+The command accepts only the five documented workflow-tested models, rejects empty/duplicate selections and requires the default to be in the selection. It refuses an existing output directory or any ID already in the input catalog. It writes
 `models.json`, `codex.config.toml`, `bridge-env.json`, a private token under `state/`
 and an ownership manifest. These are reviewable installation artifacts, not an
 automatic switch of your current model provider. The root provider in the fragment
@@ -76,7 +80,9 @@ selects the standalone bridge; coexistence in one picker still needs the existin
 router route described above.
 
 To launch the prepared bridge, set `BRIDGE_STATE_DIR` to its `state` directory,
-`BRIDGE_MODE=native-tools` and `BRIDGE_MODELS` to the prepared model, then run
+`BRIDGE_MODE=native-tools`, `BRIDGE_INTERNAL_TOOLS=client-aliases`,
+`BRIDGE_TOOL_TRANSPORT=direct`, and `BRIDGE_MODELS` to the prepared comma-separated
+IDs (all values are recorded in `bridge-env.json`), then run
 `npm start`. Load `state/local-token` into the dedicated client's `BRIDGE_TOKEN`
 environment without putting it on a command line or committing it.
 

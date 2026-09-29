@@ -105,3 +105,15 @@ BRIDGE_MATRIX_DIR=generated/my-matrix node scripts/model-matrix.mjs --live \
 每个精确模型 ID 独立运行，记录源码摘要、真实文件校验、拒绝权限和取消恢复。
 可加 `--repair-only` 先检查修复任务；它不能替代完整验收。模型列表不等于访问权限，
 官网 API 列表、models.dev 和当前 OpenCode 运行时列表也可能不同；以实际调用结果为准。
+
+
+一次准备五个通过验收的模型：
+
+```sh
+node bin/bridge.mjs prepare /absolute/new/bridge-config \
+  --models opencode/space-bunny-free,opencode/nemotron-3-ultra-free,opencode/mimo-v2.6-flash-free,opencode/longcat-2.5-preview-free,opencode/big-pickle
+```
+
+生成的模型目录和服务允许列表保持一致，默认选用第一个模型，并启用客户端工具别名。
+可用 `--model` 指定列表中的另一个默认模型。生成配置仍与当前正在使用的桌面配置分开，
+不会自动重启服务或替换 GPT、DeepSeek 等已有路线。
