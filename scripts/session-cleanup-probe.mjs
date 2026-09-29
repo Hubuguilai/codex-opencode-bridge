@@ -24,14 +24,19 @@ try{
   res.writeHead(upstream.status,{'content-type':'application/json'});res.end(text);
  }catch{res.destroy();}});
  proxy.listen(0,'127.0.0.1');await once(proxy,'listening');
- const backend=new OpenCodeBackend({url:`http://127.0.0.1:${proxy.address().port}`,password:'fault-probe',directory:runtime.backend.directory});
+ const backend=new OpenCodeBackend({url:`http://127.0.0.1:${proxy.address().port}`,password:'fault-probe',directory:runtime.backend.directory,journal:runtime.backend.journal});
  await assert.rejects(backend.generate({model:'opencode/space-bunny-free',prompt:'This must never reach the runtime'},{signal:AbortSignal.timeout(15000),onDelta:()=>{}}));
  assert.ok(owned);assert.equal(prompts,0);receipt.checks.noPromptAfterLostReply=true;
  const status=await fetch(runtime.backend.url+'/api/session/'+owned,{headers:{authorization:runtime.backend.authorization},signal:AbortSignal.timeout(2000)});await status.body?.cancel();assert.equal(status.status,404);receipt.checks.committedSessionRemoved=true;
+ assert.equal(runtime.backend.journal.hasPending(),true);receipt.checks.ambiguousCreationIntentRetained=true;
+ assert.equal(JSON.parse(fs.readFileSync(runtime.backend.journal.file(owned),'utf8')).sessionID,owned);
+ receipt.checks.exactIntentIdentity=true;
  const unrelated=await runtime.backend.call('/api/session/'+sentinel);assert.equal(unrelated.data.id,sentinel);receipt.checks.unrelatedSessionPreserved=true;receipt.passed=true;
 }catch(error){receipt.passed=false;receipt.error=error.message.replaceAll(root,'<temporary-workspace>');process.exitCode=1;}
 finally{
  if(proxy){proxy.closeAllConnections();await new Promise(r=>proxy.close(r));}
- if(runtime){for(const id of [owned,sentinel].filter(Boolean))await runtime.backend.call('/api/session/'+id,{method:'DELETE'}).catch(()=>{});await runtime.stop();}
+ if(runtime){for(const id of [owned,sentinel].filter(Boolean))await runtime.backend.call('/api/session/'+id,{method:'DELETE'}).catch(()=>{});await runtime.stop();
+  if(receipt.passed){receipt.checks.stopPreservedRecoveryIntent=fs.existsSync(runtime.backend.journal.file(owned));if(!receipt.checks.stopPreservedRecoveryIntent){receipt.passed=false;process.exitCode=1;}}
+ }
  fs.rmSync(root,{recursive:true,force:true});const output=process.env.BRIDGE_RECEIPT||'generated/session-cleanup-probe.json';fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt,null,2));
 }

@@ -7,9 +7,10 @@ import { findOpenCode } from './config.mjs';
 import { BridgeError } from './errors.mjs';
 import { NativeEvents } from './native-events.mjs';
 import { NativeTextStream } from './native-text-stream.mjs';
+import { SessionJournal } from './session-journal.mjs';
 
 export class OpenCodeBackend {
-  constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', toolTransport = 'direct', internalTools = 'guarded', warn = () => {} }) {
+  constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', toolTransport = 'direct', internalTools = 'guarded', journal, warn = () => {} }) {
     this.url = url;
     this.directory = directory;
     this.pollMs = pollMs;
@@ -18,6 +19,7 @@ export class OpenCodeBackend {
     this.mode = mode;
     this.toolTransport = toolTransport;
     this.internalTools = internalTools;
+    this.journal = journal;
     this.authorization = `Basic ${Buffer.from(`opencode:${password}`).toString('base64')}`;
   }
   async call(route, { method = 'GET', body, signal = AbortSignal.timeout(10000) } = {}) {
@@ -46,7 +48,8 @@ export class OpenCodeBackend {
     const native = this.mode === 'native-tools';
     const requestId = randomUUID();
     const capturePath = path.join(this.directory, 'bridge-call.json');
-    let route, live;
+    let route, live, sessionID;
+    let creationConfirmed = false;
     let completed = false;
     let previous = '';
     const nativeText = new NativeTextStream(this.maxOutputBytes);
@@ -59,7 +62,8 @@ export class OpenCodeBackend {
       }
       // The official v2 create endpoint accepts a client-generated session ID.
       // Know the cleanup target even when creation commits but its reply is lost.
-      const sessionID = `ses_${randomUUID().replaceAll('-', '')}`;
+      sessionID = `ses_${randomUUID().replaceAll('-', '')}`;
+      this.journal?.begin(sessionID);
       route = `/api/session/${sessionID}`;
       const created = await this.call('/api/session', { method: 'POST', body: {
         id: sessionID, title: 'Temporary bridge request', model: { id, providerID },
@@ -67,6 +71,7 @@ export class OpenCodeBackend {
         ...(native ? { permissions: [{ action: '*', resource: '*', effect: 'ask' }] } : {}),
       } });
       if (created?.data?.id !== sessionID) throw new BridgeError(502, 'opencode_protocol_error', 'OpenCode did not preserve the requested session ID.');
+      creationConfirmed = true;
       signal.throwIfAborted();
       if (native && request.stream) {
         live = new NativeEvents({url:this.url,authorization:this.authorization,sessionID:created.data.id,signal,onDelta,maxBytes:this.maxOutputBytes});
@@ -150,7 +155,16 @@ export class OpenCodeBackend {
       if (route && !completed) {
         await this.call(`${route}/interrupt`, { method: 'POST', signal: AbortSignal.timeout(2000) }).catch(() => this.warn('session_interrupt_failed'));
       }
-      if (route) await this.call(route, { method: 'DELETE', signal: AbortSignal.timeout(2000) }).catch(() => this.warn('session_cleanup_failed'));
+      if (route) {
+        try {
+          await this.call(route, { method: 'DELETE', signal: AbortSignal.timeout(2000) });
+          // A failed create response can race a late commit even after DELETE.
+          // Keep its intent until a separate ownership-aware recovery can prove
+          // the old runtime is stopped and the session is absent.
+          if (creationConfirmed) this.journal?.complete(sessionID);
+          else if (this.journal) this.warn('session_recovery_pending');
+        } catch { this.warn('session_cleanup_failed'); }
+      }
       if (native) {
         fs.rmSync(capturePath, { force: true });
         fs.rmSync(path.join(this.directory, 'bridge-request.json'), { force: true });
@@ -163,6 +177,7 @@ export class OpenCodeBackend {
 export async function startOpenCode(config, env = process.env) {
   const binary = findOpenCode(env);
   const directory = fs.mkdtempSync(path.join(config.stateDir, 'work-'));
+  const journal = new SessionJournal(directory);
   if (config.mode === 'native-tools') {
     const pluginDir = path.join(directory, '.opencode/plugins/codex-relay');
     fs.mkdirSync(pluginDir, { recursive: true });
@@ -179,16 +194,22 @@ export async function startOpenCode(config, env = process.env) {
   child.on('error', () => { ended = true; });
   child.on('exit', () => { ended = true; });
   const backend = new OpenCodeBackend({ url: `http://127.0.0.1:${config.upstreamPort}`, password, directory,
-    pollMs: config.pollMs, maxOutputBytes: config.maxOutputBytes, mode: config.mode, toolTransport: config.toolTransport, internalTools: config.internalTools,
+    pollMs: config.pollMs, maxOutputBytes: config.maxOutputBytes, mode: config.mode, toolTransport: config.toolTransport, internalTools: config.internalTools, journal,
     warn: code => process.stderr.write(`[bridge] ${code}\n`),
   });
+  let directoryRemoved = false;
   const stop = async () => {
+    if (directoryRemoved) return;
     if (!ended) {
       child.kill('SIGTERM');
       for (let i = 0; i < 20 && !ended; i++) await delay(100);
-      if (!ended) child.kill('SIGKILL');
+      if (!ended) {
+        child.kill('SIGKILL');
+        for (let i = 0; i < 20 && !ended; i++) await delay(100);
+      }
     }
-    fs.rmSync(directory, { recursive: true, force: true });
+    if (!ended || journal.hasPending()) backend.warn('runtime_recovery_pending');
+    else { fs.rmSync(directory, { recursive: true, force: true }); directoryRemoved = true; }
   };
   try {
     const deadline = Date.now() + 20000;

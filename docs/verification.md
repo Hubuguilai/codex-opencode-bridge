@@ -185,6 +185,24 @@ a preparation when an unsupported `--dry-run` is supplied to removal; exact
 multi-model selection with equals syntax/options before the path; and help with
 no token creation or runtime launch. These use temporary directories only.
 
-Current syntax checks and all 65 offline tests pass. This improves installation
+Syntax checks and all 65 offline tests passed at that milestone. This improves installation
 behavior; it adds no new evidence of provider availability or graphical picker
 activation.
+
+
+## Durable session intents
+
+Current syntax checks and all 69 offline tests pass. The new tests verify intent
+persistence before creation, refusal to call upstream on journal-write failure,
+retention on failed deletion or ambiguous creation, and readable exact identity
+after a separate process is killed with SIGKILL. The latter uses a fake upstream;
+it proves persistence, not automatic recovery of a real model task.
+
+[The official-runtime fault probe](receipts/session-journal-probe.json) dropped a
+committed creation reply and verified exact target deletion, preservation of an
+unrelated session, and retention of the ambiguous intent through runtime stop.
+[Prepared startup](receipts/prepared-startup-journal.json) still passed two cycles,
+second-instance isolation and removal after clean stop. Both use OpenCode 2.0.18
+and send zero model generation requests. They record source hashes separately
+from the older model-generation receipts. Automatic recovery replay and ownership
+verification remain unimplemented; see [operations](operations.md).

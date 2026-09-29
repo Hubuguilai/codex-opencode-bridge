@@ -48,10 +48,24 @@ target if the runtime commits the session and the HTTP reply is lost. It rejects
 a different returned ID and does not delete that unrelated ID. Cleanup uses
 independent bounded requests and does not depend on the cancelled client signal.
 
-This does not cover a process killed before cleanup, an unavailable runtime, or a
-creation that commits after the cleanup attempt. Those require a persistent
-recovery journal and runtime ownership checks; the roadmap keeps that work open.
-Do not bulk-delete sessions from the user's OpenCode database.
+Before sending session creation, the managed bridge persists and syncs a private
+intent under `state/work-*/.bridge-sessions/`. It contains only a random session ID,
+working directory and timestamp, never credentials, prompts or output. A failed
+journal write prevents creation. Only a confirmed creation followed by successful
+deletion clears the intent. Lost creation replies retain an intent even after
+successful DELETE because a late creation commit cannot yet be ruled out.
+
+Stopping preserves a work directory with pending intents and emits
+`runtime_recovery_pending`. It also preserves the directory if child termination
+cannot be confirmed. `remove-prepared` refuses these leftovers. A process killed
+before cleanup leaves its intent available for subsequent inspection.
+
+Automatic replay/recovery is **not implemented**: the journal does not prove the
+runtime is dead, the session still exists, or the directory has not been modified.
+Ownership checks and late-commit reconciliation remain roadmap work. Do not
+bulk-delete sessions from the user's OpenCode database, or treat a retained intent
+as permission to kill a process or delete a session. Previously created work
+directories without a journal are not automatically adopted.
 
 ## Reproduce without model generation
 
