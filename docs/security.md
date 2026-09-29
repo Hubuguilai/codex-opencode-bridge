@@ -21,8 +21,12 @@
   is removed from the managed child's environment.
 - On cancellation, deadlines and errors the known session is interrupted and deleted.
   Cleanup calls have independent bounded deadlines and report failure codes.
-  A process crash, lost create response, or unavailable server can leave a session
-  behind. There is no crash-recovery journal yet. Never delete unrelated sessions.
+  The bridge selects a random session ID before creating it, so a committed
+  creation whose reply is lost still has an exact cleanup target. A mismatching
+  returned ID is rejected and never used as a deletion target. A process crash,
+  server unavailability or creation committing after cleanup has already run can
+  still leave a session behind. There is no persistent crash-recovery journal yet.
+  Never delete unrelated sessions.
 - Upstream session DELETE may return HTTP 204; that is successful cleanup.
 - No prompts or responses are logged by this bridge. OpenCode has its own database,
   logging, telemetry and provider data handling; deleting a session is not a promise
@@ -59,3 +63,9 @@ Codex `exec_command` is subject to client permissions. Encoded file content is
 ordinary command data, not an independent security boundary. File aliases use
 Python on the client, retain limited metadata, and show command activity rather
 than patch diffs. See [the exact alias contract](client-aliases.md).
+
+
+`serve-prepared` loads only a fixed set of preparation-owned settings, checks the
+manifest/file digests, refuses symlinked token/state entries, and ignores inherited
+bridge settings. These checks prevent accidental routing/authentication drift;
+they do not authenticate a preparation supplied by an untrusted party.

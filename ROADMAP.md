@@ -9,7 +9,7 @@
 - [x] Live denied approval, cancellation, timeout and recovery checks
 - [x] Negative Nemotron receipts retained; experimental status is explicit
 - [x] Independent Router/LiteLLM/forwarder protocol rehearsal with mock upstream
-- [x] Reversible isolated configuration preparation; no live settings overwritten
+- [x] Reversible multi-model preparation and direct prepared startup; no live settings overwritten
 - [x] English/Chinese documentation, MIT license, prior-art review and CI
 
 ## Follow-up: tool visibility
@@ -28,7 +28,8 @@
 - [x] Multiple exact models checked with independent real-client receipts
 - [ ] Repeated full suites for every supported model and diagnostics for Lightning
 - [ ] Long-context/multimodal validation and per-model maximum capability evidence
-- [ ] Crash-recovery journal for sessions whose creation response was lost
+- [x] Preallocated session identity and cleanup after a committed creation reply is lost
+- [ ] Persistent crash-recovery journal, including creation completing after cleanup
 - [ ] Stronger isolation of third-party plugins/MCP beyond trusted local configuration
 - [x] Incremental native visible-text events, explicit failure semantics and real-client regression
 - [ ] Public-release decision after support boundaries and upstream access are reviewed

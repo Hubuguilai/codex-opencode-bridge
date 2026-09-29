@@ -57,13 +57,16 @@ export class OpenCodeBackend {
         fs.rmSync(path.join(this.directory, 'bridge-plugin-ready'), { force: true });
         fs.writeFileSync(path.join(this.directory, 'bridge-request.json'), JSON.stringify({ requestId, tools: request.tools || [], messages: request.messages, toolTransport: this.toolTransport, internalTools: this.internalTools, options: request.options }), { mode: 0o600 });
       }
+      // The official v2 create endpoint accepts a client-generated session ID.
+      // Know the cleanup target even when creation commits but its reply is lost.
+      const sessionID = `ses_${randomUUID().replaceAll('-', '')}`;
+      route = `/api/session/${sessionID}`;
       const created = await this.call('/api/session', { method: 'POST', body: {
-        title: 'Temporary bridge request', model: { id, providerID },
+        id: sessionID, title: 'Temporary bridge request', model: { id, providerID },
         location: { directory: this.directory }, agent: native ? 'build' : 'plan',
         ...(native ? { permissions: [{ action: '*', resource: '*', effect: 'ask' }] } : {}),
       } });
-      if (typeof created?.data?.id !== 'string' || !created.data.id.startsWith('ses_')) throw new BridgeError(502, 'opencode_protocol_error', 'OpenCode returned no session ID.');
-      route = `/api/session/${encodeURIComponent(created.data.id)}`;
+      if (created?.data?.id !== sessionID) throw new BridgeError(502, 'opencode_protocol_error', 'OpenCode did not preserve the requested session ID.');
       signal.throwIfAborted();
       if (native && request.stream) {
         live = new NativeEvents({url:this.url,authorization:this.authorization,sessionID:created.data.id,signal,onDelta,maxBytes:this.maxOutputBytes});

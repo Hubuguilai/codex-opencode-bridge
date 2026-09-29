@@ -1,6 +1,6 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
-import {prepareDirectory,removePreparedDirectory} from '../src/setup.mjs';
+import {prepareDirectory,removePreparedDirectory,preparedEnvironment} from '../src/setup.mjs';
 function workspace(t){const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-setup-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;}
 test('Preparation preserves existing catalog entries and removal restores the untouched source',t=>{
  const root=workspace(t),catalog=path.join(root,'original.json'),directory=path.join(root,'prepared');const bytes='{"models":[{"slug":"native-test","custom":{"keep":true}}]}\n';fs.writeFileSync(catalog,bytes);
@@ -36,4 +36,23 @@ test('Multi-model preparation rejects duplicates, unsupported IDs and defaults o
  for(const options of [{models:[]},{models:[known,known]},{models:['opencode/untested']},{models:[known],model:'opencode/nemotron-3-ultra-free'}]){
   assert.throws(()=>prepareDirectory(directory,options));assert.equal(fs.existsSync(directory),false);
  }
+});
+
+
+test('Prepared startup ignores inherited bridge routes and tokens but preserves runtime access environment',t=>{
+ const root=workspace(t),directory=path.join(root,'prepared');
+ const models=['opencode/space-bunny-free','opencode/mimo-v2.6-flash-free'];prepareDirectory(directory,{models,port:54321,upstreamPort:54322});
+ const env=preparedEnvironment(directory,{PATH:'/example/bin',OPENCODE_BIN:'/example/opencode',PROVIDER_TEST_CREDENTIAL:'preserved',HTTP_PROXY:'http://example.invalid',BRIDGE_MODE:'text',BRIDGE_TOKEN:'wrong-inherited-token',BRIDGE_STATE_DIR:'/wrong',BRIDGE_MODELS:'wrong/model',BRIDGE_PORT:'1',OPENCODE_PORT:'2',BRIDGE_TIMEOUT_MS:'1'});
+ assert.equal(env.PATH,'/example/bin');assert.equal(env.PROVIDER_TEST_CREDENTIAL,'preserved');assert.equal(env.OPENCODE_BIN,'/example/opencode');assert.equal(env.HTTP_PROXY,'http://example.invalid');
+ assert.equal(env.BRIDGE_MODE,'native-tools');assert.equal(env.BRIDGE_MODELS,models.join(','));assert.equal(env.BRIDGE_PORT,'54321');assert.equal(env.OPENCODE_PORT,'54322');
+ assert.equal(env.BRIDGE_STATE_DIR,path.join(directory,'state'));assert.equal(env.BRIDGE_TOKEN,undefined);assert.equal(env.BRIDGE_TIMEOUT_MS,undefined);
+});
+
+test('Prepared startup refuses modified files, relocated state, and symlinked tokens before launching',t=>{
+ const root=workspace(t),directory=path.join(root,'prepared');prepareDirectory(directory);
+ const file=path.join(directory,'models.json'),original=fs.readFileSync(file);fs.appendFileSync(file,' ');
+ assert.throws(()=>preparedEnvironment(directory),/modified/);fs.writeFileSync(file,original);
+ const token=path.join(directory,'state','local-token'),outside=path.join(root,'outside-token');fs.renameSync(token,outside);fs.symlinkSync(outside,token);
+ assert.throws(()=>preparedEnvironment(directory),/regular/);fs.unlinkSync(token);fs.renameSync(outside,token);
+ const moved=path.join(root,'moved');fs.renameSync(directory,moved);assert.throws(()=>preparedEnvironment(moved),/moved/);
 });

@@ -132,3 +132,30 @@ Remaining release work includes broader tasks and repetitions, human-readable
 file-edit UI parity, live Desktop picker acceptance and crash-recovery hardening.
 No public release, account sharing, live-router restart or active Desktop-model
 migration has occurred.
+
+
+## Prepared startup and lost creation reply
+
+The next implementation adds `serve-prepared` and preallocated session IDs.
+[Real prepared startup](receipts/prepared-startup.json) passed two start/stop
+cycles, exact five-model listing, rejection of missing/inherited wrong tokens,
+second-instance isolation and removal after stop. No model generation was sent.
+Its receipt hashes source and CLI files; it predates the session-ID change, which
+does not change prepared startup.
+
+[HTTP fault injection](receipts/session-cleanup-probe.json) used official OpenCode
+2.0.18, accepted the client-selected ID, deliberately dropped the committed
+creation response, and verified deletion of that exact session while preserving
+an unrelated control. No model prompt was sent. Unit tests cover mismatched IDs
+and disconnection paths. Persistent process-crash recovery remains incomplete.
+
+A [new Nemotron full-suite attempt](receipts/nemotron-preallocated-session-suite.json)
+was stopped by upstream access/quota rejection at generation time. Cancel/deadline
+checks passed, but this is **not** a passing full model regression for the new
+source. The earlier five-model success remains tied to its recorded revision.
+The updated harness now stops a suite on access/quota denial, records its exact
+HTTP status when available, and stops the remaining model matrix after HTTP 429.
+It does not rotate identities or retry quota failures.
+
+Local syntax checks and 59 offline tests pass at this milestone. See
+[operations](operations.md) for reproducible commands and exact limits.

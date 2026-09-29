@@ -12,7 +12,7 @@ function fixture(t, behavior) {
  const routes=[];
  backend.call=async(route,options={})=>{
   routes.push([route,options.method||'GET']);
-  if(route==='/api/session')return {data:{id:'ses_test'}};
+  if(route==='/api/session')return {data:{id:options.body.id}};
   if(route.endsWith('/prompt')){
    const manifest=JSON.parse(fs.readFileSync(path.join(directory,'bridge-request.json')));
    fs.writeFileSync(path.join(directory,'bridge-plugin-ready'),manifest.requestId);
@@ -29,7 +29,8 @@ test('Native backend transfers original identity and arguments then interrupts a
  const {backend,directory,routes}=fixture(t,({directory,manifest})=>fs.writeFileSync(path.join(directory,'bridge-call.json'),JSON.stringify({requestId:manifest.requestId,kind:'call',relayName:'bridge_client_0',input:{cmd:'echo π'}})));
  const result=await backend.generate(request,{signal:AbortSignal.timeout(1000),onDelta:()=>{throw new Error('No fake text');}});
  assert.equal(result.calls[0].namespace,'functions');assert.equal(result.calls[0].name,'exec_command');assert.deepEqual(JSON.parse(result.calls[0].arguments),{cmd:'echo π'});assert.equal(result.tokens,null);
- assert.deepEqual(routes.slice(-2),[['/api/session/ses_test/interrupt','POST'],['/api/session/ses_test','DELETE']]);
+ const sessionRoute=routes.find(([route])=>route.endsWith('/prompt'))[0].slice(0,-7);
+ assert.deepEqual(routes.slice(-2),[[sessionRoute+'/interrupt','POST'],[sessionRoute,'DELETE']]);
  assert.equal(fs.existsSync(path.join(directory,'bridge-request.json')),false);assert.equal(backend.busy,false);
 });
 

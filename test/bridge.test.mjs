@@ -22,7 +22,7 @@ async function fixture(t, handler, overrides = {}) {
     if (handler && await handler(req, res, body)) return;
     let result = {};
     if (req.url === '/api/info') result = { version: '2.0.18' };
-    else if (req.url === '/api/session') result = { data: { id: 'ses_fixture' } };
+    else if (req.url === '/api/session') result = { data: { id: body.id } };
     else if (req.url.endsWith('/message?limit=100&order=asc')) {
       polls++;
       result = { data: [{ type: 'assistant', content: [{ type: 'text', text: polls === 1 ? '你' : '你好' }],
@@ -231,4 +231,24 @@ test('Known create session is cleaned even if client cancelled while creation co
   await assert.rejects(pending);
   assert.equal(calls.at(-1).method, 'DELETE');
   assert.ok(!calls.some(x => x.path.endsWith('/prompt')));
+});
+
+
+test('Lost creation reply still cleans the committed client-selected session without sending a prompt',async t=>{
+ const {backend,calls}=await fixture(t,async(req,res)=>{
+  if(req.url==='/api/session'){res.destroy();return true;}return false;
+ });
+ await assert.rejects(backend.generate({model,prompt:'not sent'},{signal:AbortSignal.timeout(1000),onDelta:()=>{}}));
+ const created=calls.find(x=>x.path==='/api/session');assert.match(created.body.id,/^ses_[a-f0-9]{32}$/);
+ assert.deepEqual(calls.slice(-2).map(x=>[x.path,x.method]),[[`/api/session/${created.body.id}/interrupt`,'POST'],[`/api/session/${created.body.id}`,'DELETE']]);
+ assert.equal(calls.some(x=>x.path.endsWith('/prompt')),false);
+});
+
+test('Mismatched creation identity fails without prompting or deleting the returned unrelated ID',async t=>{
+ const {backend,calls}=await fixture(t,async(req,res)=>{
+  if(req.url==='/api/session'){res.end(JSON.stringify({data:{id:'ses_unrelated'}}));return true;}return false;
+ });
+ await assert.rejects(backend.generate({model,prompt:'not sent'},{signal:AbortSignal.timeout(1000),onDelta:()=>{}}),{code:'opencode_protocol_error'});
+ assert.equal(calls.some(x=>x.path.includes('ses_unrelated')||x.path.endsWith('/prompt')),false);
+ assert.equal(calls.at(-1).path,'/api/session/'+calls[0].body.id);
 });

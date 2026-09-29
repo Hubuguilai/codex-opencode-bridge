@@ -63,10 +63,17 @@ async function turn(threadId,text){
  }
  await rpc('turn/interrupt',{threadId,turnId:turn.id});return {status:'timeout',durationMs:Date.now()-started};
 }
-function record(name,result,checks){const item={name,...result,checks,passed:result.status==='completed'&&Object.values(checks).every(Boolean)};receipt.scenarios.push(item);console.log(JSON.stringify(item));}
+function record(name,result,checks){const item={name,...result,checks,passed:result.status==='completed'&&Object.values(checks).every(Boolean)};receipt.scenarios.push(item);console.log(JSON.stringify(item));if(receipt.accessDenial)throw new Error('Upstream access or quota denied; remaining generation scenarios were not run.');}
 function output(){try{return fs.readFileSync(path.join(work,'output.md'),'utf8');}catch{return '';}}
 try{
  runtime=await startOpenCode(config);
+ const originalGenerate=runtime.backend.generate.bind(runtime.backend);
+ runtime.backend.generate=async(...args)=>{
+  try{return await originalGenerate(...args);}catch(error){
+   if(error.code==='upstream_access_or_quota')receipt.accessDenial={code:error.code,status:error.status};
+   throw error;
+  }
+ };
  const originalWarn=runtime.backend.warn;
  runtime.backend.warn=code=>{
   if(/^(client_alias_|internal_tool_blocked_)/.test(code)){receipt.toolEvents??={};receipt.toolEvents[code]=(receipt.toolEvents[code]||0)+1;}

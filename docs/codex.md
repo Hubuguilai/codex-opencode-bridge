@@ -79,12 +79,23 @@ automatic switch of your current model provider. The root provider in the fragme
 selects the standalone bridge; coexistence in one picker still needs the existing
 router route described above.
 
-To launch the prepared bridge, set `BRIDGE_STATE_DIR` to its `state` directory,
-`BRIDGE_MODE=native-tools`, `BRIDGE_INTERNAL_TOOLS=client-aliases`,
-`BRIDGE_TOOL_TRANSPORT=direct`, and `BRIDGE_MODELS` to the prepared comma-separated
-IDs (all values are recorded in `bridge-env.json`), then run
-`npm start`. Load `state/local-token` into the dedicated client's `BRIDGE_TOKEN`
-environment without putting it on a command line or committing it.
+Start the preparation directly:
+
+```sh
+node bin/bridge.mjs serve-prepared /absolute/new/bridge-config
+```
+
+This reads the reviewed model list, alias mode, ports and local token from that
+preparation. Inherited `BRIDGE_*` values and `OPENCODE_PORT` cannot silently
+replace them; `OPENCODE_BIN`, PATH, provider credentials and proxy settings remain
+available to the installed runtime. The command refuses edited files, moved
+preparations and symlinked state/token files. Regenerate a new preparation after
+changing its settings, or use explicit environment settings with ordinary `serve`.
+Checksums detect accidental edits; they are not signatures for untrusted bundles.
+
+Load `state/local-token` into the dedicated client's `BRIDGE_TOKEN` environment
+without committing it or placing it on a command line. Starting this bridge does
+not select a provider in an existing Codex instance or install a background service.
 
 After stopping the service:
 

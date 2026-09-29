@@ -113,6 +113,9 @@ ID. It writes only the new directory and refuses duplicate or unverified models.
 Follow [Codex integration](docs/codex.md) to run it. These artifacts do not install
 a live Desktop route or replace your existing native GPT configuration.
 
+Start it with `node bin/bridge.mjs serve-prepared /absolute/new/bridge-config`.
+See [startup, restart and recovery evidence](docs/operations.md).
+
 ## Configuration
 
 | Environment variable | Default | Meaning |

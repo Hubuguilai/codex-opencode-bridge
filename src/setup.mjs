@@ -53,3 +53,27 @@ export function removePreparedDirectory(directory){
  if(fs.lstatSync(state).isSymbolicLink()||fs.readdirSync(state).some(name=>name!=='local-token'))throw new Error('Runtime state is not empty; stop the managed service and inspect leftovers first.');
  fs.rmSync(root,{recursive:true});return {removed:true};
 }
+
+export function preparedEnvironment(directory,env=process.env){
+ const root=path.resolve(directory);
+ if(fs.lstatSync(root).isSymbolicLink())throw new Error('Refusing a symlinked preparation directory.');
+ const manifestFile=path.join(root,'install-manifest.json');
+ if(!fs.lstatSync(manifestFile).isFile()||fs.lstatSync(manifestFile).isSymbolicLink())throw new Error('Invalid preparation manifest.');
+ const manifest=JSON.parse(fs.readFileSync(manifestFile));
+ if(manifest.project!=='codex-opencode-bridge'||manifest.version!==1)throw new Error('Not a bridge preparation directory.');
+ for(const name of files){
+  const file=path.join(root,name),stat=fs.lstatSync(file);
+  if(!stat.isFile()||stat.isSymbolicLink()||digest(fs.readFileSync(file))!==manifest.files?.[name])throw new Error('Prepared files were modified; create a new preparation or use explicit serve settings.');
+ }
+ const saved=JSON.parse(fs.readFileSync(path.join(root,'bridge-env.json')));
+ const keys=['BRIDGE_STATE_DIR','BRIDGE_MODE','BRIDGE_INTERNAL_TOOLS','BRIDGE_TOOL_TRANSPORT','BRIDGE_MODELS','BRIDGE_PORT','OPENCODE_PORT'];
+ if(Object.keys(saved).length!==keys.length||keys.some(key=>typeof saved[key]!=='string'))throw new Error('Invalid prepared environment; regenerate the preparation.');
+ const models=manifest.models??[manifest.model];
+ if(!Array.isArray(models)||!models.length||models.some(id=>!supported.has(id))||new Set(models).size!==models.length||!models.includes(manifest.model)||saved.BRIDGE_MODELS!==models.join(','))throw new Error('Prepared model selection does not match its manifest.');
+ if(saved.BRIDGE_STATE_DIR!==path.join(root,'state')||saved.BRIDGE_MODE!=='native-tools'||saved.BRIDGE_INTERNAL_TOOLS!=='client-aliases'||saved.BRIDGE_TOOL_TRANSPORT!=='direct')throw new Error('Prepared settings are inconsistent or moved; regenerate the preparation.');
+ const state=path.join(root,'state'),token=path.join(state,'local-token');
+ if(fs.lstatSync(state).isSymbolicLink()||!fs.lstatSync(state).isDirectory()||fs.lstatSync(token).isSymbolicLink()||!fs.lstatSync(token).isFile())throw new Error('Prepared state and token must be local regular files/directories.');
+ // Inherited route/token/limits must not silently change a reviewed preparation.
+ // Keep the runtime executable, provider credentials and network environment.
+ return {...Object.fromEntries(Object.entries(env).filter(([key])=>!key.startsWith('BRIDGE_')&&key!=='OPENCODE_PORT')),...saved};
+}

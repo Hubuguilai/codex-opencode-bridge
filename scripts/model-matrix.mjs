@@ -15,7 +15,9 @@ const mode=process.argv.includes('--repair-only')?'repair-only':'full-suite';
 const receipt={date:new Date().toISOString(),mode,internalTools:process.env.BRIDGE_INTERNAL_TOOLS||'client-aliases',models:[]};
 const save=()=>fs.writeFileSync(path.join(output,'matrix.json'),JSON.stringify(receipt,null,2)+'\n');
 save();
+let quotaStopped=false;
 for(const model of models){
+ if(quotaStopped){receipt.models.push({model,notRun:true,reason:'Earlier model returned HTTP 429; no further quota requests were sent.',passed:false});save();continue;}
  const file=path.join(output,model.split('/')[1]+'.json');
  console.log(JSON.stringify({starting:model,mode}));
  const exitCode=await new Promise((resolve,reject)=>{
@@ -23,6 +25,7 @@ for(const model of models){
   child.once('error',reject);child.once('exit',code=>resolve(code));
  });
  let result;try{result=JSON.parse(fs.readFileSync(file));}catch{}
+ if(result?.accessDenial?.status===429)quotaStopped=true;
  receipt.models.push({model,exitCode,receipt:path.basename(file),sourceSha256:result?.sourceSha256,sourceChangedDuringRun:result?.sourceChangedDuringRun,scenarios:result?.scenarios.map(({name,passed})=>({name,passed})),passed:exitCode===0&&result?.passed===true&&result?.scenarios?.length>0&&result.scenarios.every(s=>s.passed)&&!result.sourceChangedDuringRun});save();
 }
 receipt.passed=receipt.models.every(x=>x.passed);save();
