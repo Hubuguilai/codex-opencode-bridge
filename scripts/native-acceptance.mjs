@@ -9,8 +9,9 @@ import {randomUUID,createHash} from 'node:crypto';
 import {readConfig} from '../src/config.mjs';
 import {startOpenCode} from '../src/opencode.mjs';
 import {createBridge} from '../src/server.mjs';
+import {acceptanceOptions,acceptancePassed} from '../src/acceptance-contract.mjs';
 
-if (!process.argv.includes('--live')) throw new Error('Live upstream use requires --live.');
+const {mode}=acceptanceOptions(process.argv.slice(2));
 const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-acceptance-'));
 const work=path.join(root,'client');fs.mkdirSync(work);
 const marker=randomUUID();
@@ -38,7 +39,7 @@ function sourceDigest(){
  for(const name of fs.readdirSync(new URL('../src/',import.meta.url)).filter(x=>x.endsWith('.mjs')).sort()){hash.update(name);hash.update(fs.readFileSync(new URL('../src/'+name,import.meta.url)));}
  return hash.digest('hex');
 }
-const receipt={sourceSha256:sourceDigest(),gitHead:spawnSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).stdout.trim(),date:new Date().toISOString(),model:overrides.model,toolTransport:config.toolTransport,internalTools:config.internalTools,node:process.version,codex:spawnSync('codex',['--version'],{encoding:'utf8'}).stdout.trim(),scenarios:[]};
+const receipt={mode,sourceSha256:sourceDigest(),gitHead:spawnSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).stdout.trim(),date:new Date().toISOString(),model:overrides.model,toolTransport:config.toolTransport,internalTools:config.internalTools,node:process.version,codex:spawnSync('codex',['--version'],{encoding:'utf8'}).stdout.trim(),scenarios:[]};
 let runtime,bridge,child,sequence=0,approvalCount=0,stderr='';
 const pending=new Map(),events=[];
 const send=value=>child.stdin.write(JSON.stringify(value)+'\n');
@@ -58,7 +59,7 @@ async function turn(threadId,text){
  const {turn}=await rpc('turn/start',{threadId,input:[{type:'text',text}]});
  while(Date.now()-started<180000){
   const end=events.slice(start).find(e=>e.method==='turn/completed'&&e.params.turn.id===turn.id);
-  if(end)return {status:end.params.turn.status,...(end.params.turn.error?{error:end.params.turn.error.message.replaceAll(root,'<temporary-workspace>')}:{}),commands:events.slice(start).filter(e=>e.method==='item/completed'&&e.params.item.type==='commandExecution').length,durationMs:Date.now()-started};
+  if(end)return {status:end.params.turn.status,...(end.params.turn.error?{error:end.params.turn.error.message.replaceAll(root,'<temporary-workspace>')}:{}),commands:events.slice(start).filter(e=>e.method==='item/completed'&&e.params.item.type==='commandExecution').length,fileChanges:events.slice(start).filter(e=>e.method==='item/completed'&&e.params.item.type==='fileChange').length,patchDiffs:events.slice(start).filter(e=>e.method==='item/completed'&&e.params.item.type==='fileChange'&&e.params.item.changes?.some(change=>typeof change.diff==='string'&&change.diff.length>0)).length,durationMs:Date.now()-started};
   await new Promise(resolve=>setTimeout(resolve,100));
  }
  await rpc('turn/interrupt',{threadId,turnId:turn.id});return {status:'timeout',durationMs:Date.now()-started};
@@ -110,22 +111,34 @@ try{
  });
  await rpc('initialize',{clientInfo:{name:'bridge_acceptance',version:'0.2.0'},capabilities:{experimentalApi:true}});send({method:'initialized'});
  const thread=await startThread();
- if (!process.argv.includes('--repair-only') && !process.argv.includes('--lifecycle-only')) {
+ if (mode==='full-suite') {
  record('create',await turn(thread,'Read input.json using exec_command. Write output.md with the exact marker and sum of values. Run a Python assertion checking both. Reply DONE after actual success.'),{marker:output().includes(marker),sum:output().includes('418'),upstreamDidNotWrite:!fs.existsSync(path.join(runtime.backend.directory,'output.md'))});
  record('followup',await turn(thread,'Revise the same output.md: preserve marker and sum, append PRODUCT=38497 computed from input.json. Verify all three using a Python assertion. Perform the change using exec_command.'),{marker:output().includes(marker),sum:output().includes('418'),product:output().includes('38497')});
  }
- if (!process.argv.includes('--lifecycle-only')) {
+ if (mode==='full-suite'||mode==='repair-only') {
  fs.writeFileSync(path.join(work,'calculator.py'),'def total(values):\n    return sum(values) - 1\n');
  fs.writeFileSync(path.join(work,'test_calculator.py'),'from calculator import total\nassert total([11, 17]) == 28\nassert total([]) == 0\n');
  const repair=await turn(thread,'Run python3 test_calculator.py, inspect the failure, fix calculator.py, and rerun the test. Do not edit test_calculator.py. Use Codex tools for all work.');
  const verified=spawnSync('python3',['test_calculator.py'],{cwd:work});
  record('repair',repair,{testPassed:verified.status===0,testUnchanged:fs.readFileSync(path.join(work,'test_calculator.py'),'utf8')==='from calculator import total\nassert total([11, 17]) == 28\nassert total([]) == 0\n'});
  }
- if (!process.argv.includes('--repair-only') && !process.argv.includes('--lifecycle-only')) {
+ if (mode==='full-suite') {
  const deniedThread=await startThread(true);const before=approvalCount;
  record('denial',await turn(deniedThread,'Use exec_command to run a Python command writing DENIED_SENTINEL into denied.txt here. If permission is denied, stop and report denial; do not try another command or tool.'),{approvalWasDenied:approvalCount>before,fileAbsent:!fs.existsSync(path.join(work,'denied.txt'))});
  }
- if (!process.argv.includes('--repair-only')) {
+ if (mode==='full-suite'||mode==='patch-only') {
+  const patchFile=path.join(work,'patch.txt');
+  const readPatch=()=>{try{return fs.readFileSync(patchFile,'utf8');}catch{return '';}};
+  const first=marker+'\nversion=1\n',second=marker+'\nversion=2\n';
+  const created=await turn(thread,'Use only the native apply_patch tool to create patch.txt with these exact UTF-8 contents: '+JSON.stringify(first)+'. Do not run shell commands or use write/edit aliases.');
+  record('patch-create',created,{exactContent:readPatch()===first,nativeFileChange:created.fileChanges>0,nativeDiff:created.patchDiffs>0,noCommandExecution:created.commands===0,upstreamDidNotWrite:!fs.existsSync(path.join(runtime.backend.directory,'patch.txt'))});
+  const updated=await turn(thread,'Use only the native apply_patch tool to change version=1 to version=2 in patch.txt, preserving the first line and final newline. Do not run shell commands or use write/edit aliases.');
+  record('patch-update',updated,{exactContent:readPatch()===second,nativeFileChange:updated.fileChanges>0,nativeDiff:updated.patchDiffs>0,noCommandExecution:updated.commands===0,upstreamDidNotWrite:!fs.existsSync(path.join(runtime.backend.directory,'patch.txt'))});
+  const deniedThread=await startThread(true),before=approvalCount;
+  const denied=await turn(deniedThread,'Use only apply_patch to create patch-denied.txt containing DENIED_PATCH. If approval is denied, stop and report it. Do not retry or use another tool.');
+  record('patch-denial',denied,{oneApprovalDenied:approvalCount-before===1,fileAbsent:!fs.existsSync(path.join(work,'patch-denied.txt')),nativeFileChange:denied.fileChanges>0,noCommandExecution:denied.commands===0,upstreamDidNotWrite:!fs.existsSync(path.join(runtime.backend.directory,'patch-denied.txt'))});
+ }
+ if (mode==='full-suite'||mode==='lifecycle-only') {
   const cancellationThread=await startThread();
   const start=events.length;
   const {turn:activeTurn}=await rpc('turn/start',{threadId:cancellationThread,input:[{type:'text',text:'Use exec_command to read input.json and explain the calculation.'}]});
@@ -150,7 +163,7 @@ try{
 finally{
  if(child)child.kill('SIGTERM');if(bridge)await bridge.close();if(runtime)await runtime.stop();
  receipt.sourceChangedDuringRun=receipt.sourceSha256!==sourceDigest();
- if(receipt.sourceChangedDuringRun)receipt.passed=false;
+ receipt.passed=acceptancePassed(receipt,mode);
  // No prompts, raw model output, credentials or machine paths in the receipt.
  const destination=path.resolve(process.env.BRIDGE_RECEIPT||'generated/native-acceptance.json');fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,JSON.stringify(receipt,null,2)+'\n');
  if(receipt.error)console.error(receipt.error);

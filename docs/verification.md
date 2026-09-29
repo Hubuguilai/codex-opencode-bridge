@@ -266,3 +266,20 @@ All 79 offline tests pass, including patch alias registration/replacement,
 ambiguous target rejection, byte preservation and backend custom-call identity.
 The updated model-facing tool surface and preference need per-model live
 regression; older five-model passes remain bound to their recorded source.
+
+
+## Expanded live acceptance contract (not yet run live)
+
+The live harness now includes patch-create, patch-update and patch-denial in the
+full suite and exposes a focused `--patch-only` mode in both single-model and
+matrix entrypoints. These require native file/diff events, exact bytes, no command
+execution, no upstream workspace writes and respect for a single denied approval.
+The default full suite therefore expands from seven to ten named scenarios.
+
+The matrix now rejects missing/duplicate scenarios, missing named checks, wrong
+modes/model identities, changed source, quota-denied receipts and mixed source
+hashes. Unknown or conflicting mode flags are rejected before runtime creation.
+All 83 offline tests pass, including deliberate partial-success fixtures that
+must fail the verifier. No live generation was run for this harness update:
+upstream access has not been confirmed restored. Existing historical generation
+receipts have not been upgraded to the new contract.

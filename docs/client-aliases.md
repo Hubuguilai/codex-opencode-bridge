@@ -93,3 +93,31 @@ falls back to a different model or retries a rejected provider identity. Receipt
 include source hashes and retain unsuccessful models alongside successful ones.
 Current results belong in [verification](verification.md), not inferred from the
 model list or from a successful greeting.
+
+### Native patch screen
+
+When upstream access is available, run the exact five-model patch screen:
+
+```sh
+BRIDGE_MATRIX_DIR=generated/patch-matrix \
+node scripts/model-matrix.mjs --live --patch-only \
+  --models opencode/space-bunny-free,opencode/nemotron-3-ultra-free,opencode/mimo-v2.6-flash-free,opencode/longcat-2.5-preview-free,opencode/big-pickle
+```
+
+This performs three real-model scenarios per model: native patch creation,
+follow-up modification and rejection of patch approval. Create/update require
+exact file contents, native file-change and diff events, zero command execution,
+and no corresponding file in the OpenCode workspace. Denial requires exactly one
+denied approval and no created file. It is a live test, not a free offline check.
+
+The default full suite now contains ten scenarios: the original seven plus these
+three patch cases. `--repair-only`, `--patch-only` and `--lifecycle-only` are mutually
+exclusive; misspelled/unknown options fail before any runtime starts. Both scripts
+require explicit `--live`.
+
+A pass requires every named scenario and its required checks, matching test mode,
+exact model identity and stable source revision. The matrix cannot combine passes
+from different source hashes. Partial or duplicate scenarios cannot stand in for
+the requested suite. Historical seven-scenario receipts retain their original
+scope; they do not certify the expanded ten-scenario suite. A patch-only pass also
+does not certify the full suite or graphical Desktop behavior.
