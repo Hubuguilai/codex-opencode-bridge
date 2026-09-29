@@ -328,3 +328,13 @@ This confirms current access rejection on this specific control path and shows t
 new patch alias is not necessary for that rejection. It does not retroactively
 classify the older failure, prove exhausted quota, test other models, or establish
 behavior of every official GUI/agent mode. A current five-model pass remains absent.
+
+
+## 2026-09-29 current four-model live regression
+
+User-authorized real Codex/OpenCode full-suite attempts ran serially on commit `04d9f52`, with identical source SHA `8d8f543c0f402110ea01c53e3b8fdda3b0c5520332a08b5ac9cfe84ee3da3da1` and no source changes during execution. Receipts: `receipts/live-four-20260929-recheck/`. These requests used the native-tools bridge with client aliases, not the existing Bunny direct API route.
+
+- Space Bunny Free: 9/10 scenarios passed. Initial create failed when an OpenCode internal tool was selected and blocked. Follow-up, repair, command denial, native patch create/update/denial, cancel, timeout, and recovery passed. Later success does not erase the initial failure; full acceptance remains failed.
+- MiMo V2.6 Flash Free, LongCat 2.5 Preview Free, and Big Pickle: each independently returned HTTP 403 on its initial create request. Remaining scenarios for that model were not run. This establishes present access rejection on the tested route, not quota exhaustion or successful current compatibility.
+- No HTTP 429 was observed; a 403 for one model did not prevent independent testing of the next model. Nemotron was not retried in this cohort.
+- No model achieved current full-suite acceptance in this cohort. Historical passes remain historical. No Desktop configuration or active services were changed.

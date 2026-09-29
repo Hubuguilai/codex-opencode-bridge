@@ -1,0 +1,228 @@
+{
+  "mode": "full-suite",
+  "sourceSha256": "8d8f543c0f402110ea01c53e3b8fdda3b0c5520332a08b5ac9cfe84ee3da3da1",
+  "gitHead": "04d9f52e80ebec0f9c628fdfe9441bf55b130157",
+  "date": "2026-09-29T06:03:43.288Z",
+  "model": "opencode/space-bunny-free",
+  "toolTransport": "direct",
+  "internalTools": "client-aliases",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "create",
+      "status": "failed",
+      "error": "stream disconnected before completion: The model selected an OpenCode internal tool; execution was blocked. Retry the task using client tools.",
+      "commands": 0,
+      "fileChanges": 0,
+      "patchDiffs": 0,
+      "durationMs": 6074,
+      "checks": {
+        "marker": false,
+        "sum": false,
+        "upstreamDidNotWrite": true
+      },
+      "passed": false
+    },
+    {
+      "name": "followup",
+      "status": "completed",
+      "commands": 4,
+      "fileChanges": 0,
+      "patchDiffs": 0,
+      "durationMs": 31929,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "product": true
+      },
+      "passed": true
+    },
+    {
+      "name": "repair",
+      "status": "completed",
+      "commands": 3,
+      "fileChanges": 1,
+      "patchDiffs": 1,
+      "durationMs": 21107,
+      "checks": {
+        "testPassed": true,
+        "testUnchanged": true
+      },
+      "passed": true
+    },
+    {
+      "name": "denial",
+      "status": "completed",
+      "commands": 1,
+      "fileChanges": 0,
+      "patchDiffs": 0,
+      "durationMs": 13942,
+      "checks": {
+        "approvalWasDenied": true,
+        "fileAbsent": true
+      },
+      "passed": true
+    },
+    {
+      "name": "patch-create",
+      "status": "completed",
+      "commands": 0,
+      "fileChanges": 1,
+      "patchDiffs": 1,
+      "durationMs": 11621,
+      "checks": {
+        "exactContent": true,
+        "nativeFileChange": true,
+        "nativeDiff": true,
+        "noCommandExecution": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "patch-update",
+      "status": "completed",
+      "commands": 0,
+      "fileChanges": 1,
+      "patchDiffs": 1,
+      "durationMs": 9498,
+      "checks": {
+        "exactContent": true,
+        "nativeFileChange": true,
+        "nativeDiff": true,
+        "noCommandExecution": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "patch-denial",
+      "status": "completed",
+      "commands": 0,
+      "fileChanges": 1,
+      "patchDiffs": 1,
+      "durationMs": 12021,
+      "checks": {
+        "oneApprovalDenied": true,
+        "fileAbsent": true,
+        "nativeFileChange": true,
+        "noCommandExecution": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "cancel",
+      "status": "completed",
+      "checks": {
+        "reachedBackend": true,
+        "interrupted": true,
+        "backendReleased": true,
+        "manifestRemoved": true
+      },
+      "passed": true
+    },
+    {
+      "name": "timeout",
+      "status": "completed",
+      "checks": {
+        "deadlineReported": true,
+        "backendReleased": true
+      },
+      "passed": true
+    },
+    {
+      "name": "recovery",
+      "status": "completed",
+      "commands": 0,
+      "fileChanges": 0,
+      "patchDiffs": 0,
+      "durationMs": 4447,
+      "checks": {
+        "backendReleased": true
+      },
+      "passed": true
+    }
+  ],
+  "opencode": "2.0.18",
+  "toolEvents": {
+    "internal_tool_blocked_unknown": 2
+  },
+  "commandOutcomes": [
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 294,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 140,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 67,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 22,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 543,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 228,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 7,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "declined",
+      "exitCode": null,
+      "usesRuntimePath": false,
+      "outputBytes": 0,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    }
+  ],
+  "passed": false,
+  "sourceChangedDuringRun": false
+}
