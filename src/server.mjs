@@ -52,7 +52,7 @@ export function createBridge(config, backend) {
       if (!authorized(req, config.token)) throw new BridgeError(401, 'unauthorized', 'A valid local bridge Bearer token is required.');
       if (req.method === 'GET' && req.url === '/v1/models') return json(res, 200, {
         object: 'list', data: config.models.map(id => ({ id, object: 'model', owned_by: id.split('/')[0],
-          supported_parameters: config.mode === 'native-tools' ? ['stream', 'tools', 'tool_choice'] : ['stream'], architecture: { input_modalities: ['text'], output_modalities: ['text'] },
+          supported_parameters: config.mode === 'native-tools' ? ['stream', 'tools', 'tool_choice'] : ['stream'], architecture: { input_modalities: config.imageModels?.includes(id) ? ['text', 'image'] : ['text'], output_modalities: ['text'] },
         })),
       });
       const api = req.url === '/v1/responses' ? 'responses' : req.url === '/v1/chat/completions' ? 'chat' : null;

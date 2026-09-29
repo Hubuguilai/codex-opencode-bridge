@@ -89,7 +89,13 @@ export class OpenCodeBackend {
         live = new NativeEvents({url:this.url,authorization:this.authorization,sessionID:created.data.id,signal,onDelta,maxBytes:this.maxOutputBytes});
         await live.open();
       }
-      await this.call(`${route}/prompt`, { method: 'POST', body: { text: request.prompt }, signal });
+      // Let the installed runtime construct its native media assets. Their
+      // class/schema differs between OpenCode releases and cannot be recreated
+      // safely by JSON-cloning a plugin message.
+      const files = (request.messages || []).flatMap(message => message.content || [])
+        .filter(part => part.type === 'media')
+        .map(part => ({uri: `data:${part.mediaType};base64,${part.data}`}));
+      await this.call(`${route}/prompt`, { method: 'POST', body: { text: request.prompt, ...(files.length ? {files} : {}) }, signal });
       // OpenCode initializes location plugins lazily when the first prompt runs.
       // All runtime actions require approval until the plugin is active; the
       // plugin then denies internal actions and permits only transfer stubs.

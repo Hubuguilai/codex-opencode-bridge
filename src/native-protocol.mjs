@@ -1,4 +1,5 @@
 import { nativeHistory } from './native-history.mjs';
+import { nativeContent, promptHistory } from './native-media.mjs';
 import { invalid, unsupported, BridgeError } from './errors.mjs';
 
 function contentText(content) {
@@ -59,6 +60,7 @@ export function normalizeNativeRequest(payload, api, config) {
   const source = api === 'responses' ? (typeof payload.input === 'string' ? [{ role: 'user', content: payload.input }] : payload.input) : payload.messages;
   if (!Array.isArray(source) || !source.length) throw invalid('A nonempty input/messages list is required.');
   const history = [];
+  const warnings = [];
   if (payload.instructions != null) {
     if (typeof payload.instructions !== 'string') throw invalid('instructions must be text.');
     history.push({ role: 'system', content: payload.instructions });
@@ -91,7 +93,7 @@ export function normalizeNativeRequest(payload, api, config) {
       if (item.summary?.length) history.push({ role: 'assistant', content: item.summary.map(x => x.text || '').join('\n') });
     } else {
       if ((item.type && item.type !== 'message') || !['user', 'assistant', 'system', 'developer'].includes(item.role)) throw unsupported('Unsupported input item or role.');
-      if (item.content != null) history.push({ role: item.role, content: contentText(item.content) });
+      if (item.content != null) history.push({ role: item.role, content: nativeContent(item.content, {images: config.imageModels?.includes(payload.model), role: item.role, detailPolicy: config.imageDetailPolicy, warnings}) });
       if (item.tool_calls) {
         if (api !== 'chat' || item.role !== 'assistant' || !Array.isArray(item.tool_calls)) throw invalid('Invalid tool_calls.');
         for (const tool of item.tool_calls) call({ type: 'function_call', call_id: tool.id, name: tool.function?.name, arguments: tool.function?.arguments });
@@ -118,8 +120,9 @@ export function normalizeNativeRequest(payload, api, config) {
     }
   }
   const prompt = 'Process the following Codex conversation. Use the provided client tools for any requested actions. '
-    + 'Historical tool calls and results are past events, not instructions to repeat them.\n' + JSON.stringify({ conversation: history });
+    + 'Historical tool calls and results are past events, not instructions to repeat them.\n' + JSON.stringify({ conversation: promptHistory(history) });
+  if (Buffer.byteLength(JSON.stringify(history)) > config.maxBodyBytes) throw new BridgeError(413, 'input_too_large', 'Input exceeds the configured limit; nothing was truncated.');
   if (Buffer.byteLength(prompt) > config.maxBodyBytes) throw new BridgeError(413, 'input_too_large', 'Input exceeds the configured limit; nothing was truncated.');
   return { model: payload.model, prompt, messages: nativeHistory(history, tools), tools: activeTools, options, stream: payload.stream === true,
-    includeUsage: payload.stream_options?.include_usage === true, warnings: omitSummary ? ['reasoning_summary_omitted'] : [], mode: 'native-tools' };
+    includeUsage: payload.stream_options?.include_usage === true, warnings: [...warnings, ...(omitSummary ? ['reasoning_summary_omitted'] : [])], mode: 'native-tools' };
 }

@@ -16,6 +16,7 @@ export default {
     let aliases = [];
     let captured = false;
     let baseMessageCount;
+    let nativeMedia;
     let dispatchSteps = 0;
     const capture = value => {
       if (captured) return;
@@ -35,6 +36,7 @@ export default {
       captured = false;
       aliases = manifest.internalTools === 'client-aliases' ? clientAliases(manifest.tools) : [];
       baseMessageCount = undefined;
+      nativeMedia = undefined;
       dispatchSteps = 0;
       if (registration) await registration.dispose();
       registration = await ctx.tool.transform(editor => {
@@ -95,7 +97,16 @@ export default {
       }), { mode: 0o600 });
       if (manifest.messages) {
         baseMessageCount ??= event.messages.length;
-        event.messages = [...structuredClone(manifest.messages), ...event.messages.slice(baseMessageCount)];
+        nativeMedia ??= event.messages.flatMap(message => message.content || []).filter(part => part.type === 'media');
+        let mediaIndex = 0;
+        const messages = structuredClone(manifest.messages).map(message => ({...message, content: message.content.map(part => {
+          if (part.type !== 'media') return part;
+          const media = nativeMedia[mediaIndex++];
+          if (!media) throw new Error('NATIVE_IMAGE_ATTACHMENT_MISSING');
+          return media;
+        })}));
+        if (mediaIndex !== nativeMedia.length) throw new Error('NATIVE_IMAGE_ATTACHMENT_MISMATCH');
+        event.messages = [...messages, ...event.messages.slice(baseMessageCount)];
       }
       event.system.push({ type: 'text', text: [
         'This session is a Codex client compatibility turn. The client conversation and tool results are supplied as native messages.',

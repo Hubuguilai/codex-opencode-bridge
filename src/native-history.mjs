@@ -29,7 +29,9 @@ export function nativeHistory(history, tools) {
   }else {
    // OpenCode has one operator-instruction role; developer and system both
    // use it. Tool/user content is never promoted to that role.
-   push(item.role==='developer'?'system':item.role,{type:'text',text:item.content});
+   const role=item.role==='developer'?'system':item.role;
+   if(Array.isArray(item.content)) messages.push({role,content:item.content});
+   else push(role,{type:'text',text:item.content});
   }
  }
  return messages;

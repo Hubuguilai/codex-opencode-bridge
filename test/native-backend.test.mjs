@@ -16,7 +16,7 @@ function fixture(t, behavior) {
   if(route.endsWith('/prompt')){
    const manifest=JSON.parse(fs.readFileSync(path.join(directory,'bridge-request.json')));
    fs.writeFileSync(path.join(directory,'bridge-plugin-ready'),manifest.requestId);
-   await behavior({directory,manifest});return {};
+   await behavior({directory,manifest,prompt:options.body});return {};
   }
   if(route.includes('/message'))return {data:[]};
   return null;
@@ -94,4 +94,16 @@ test('Dispatch continuations request chronological snapshots and complete on the
  };
  const deltas=[];await backend.generate(request,{signal:AbortSignal.timeout(1000),onDelta:async value=>deltas.push(value)});
  assert.equal(deltas.join(''),'Working\n\nDone');
+});
+
+
+test('Native images go through official attachments in order and are cleaned after transfer',async t=>{
+ const media=[{type:'media',mediaType:'image/png',data:'aGVsbG8='},{type:'media',mediaType:'image/jpeg',data:'d29ybGQ='}];
+ const {backend,directory}=fixture(t,({directory,manifest,prompt})=>{
+  assert.deepEqual(prompt.files,[{uri:'data:image/png;base64,aGVsbG8='},{uri:'data:image/jpeg;base64,d29ybGQ='}]);
+  assert.equal(prompt.text,'client task');
+  fs.writeFileSync(path.join(directory,'bridge-call.json'),JSON.stringify({requestId:manifest.requestId,kind:'call',relayName:'bridge_client_0',input:{cmd:'ok'}}));
+ });
+ await backend.generate({...request,messages:[{role:'user',content:[media[0],{type:'text',text:'middle'},media[1]]}]},{signal:AbortSignal.timeout(1000),onDelta:()=>{}});
+ assert.equal(fs.existsSync(path.join(directory,'bridge-request.json')),false);
 });

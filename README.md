@@ -135,6 +135,8 @@ entries and creates a separate route for each selected bridge model.
 | `BRIDGE_TOOL_TRANSPORT` | `direct` | Optional experimental `codemode` dispatcher; not the verified default |
 | `OPENCODE_BIN` | PATH, then `~/.opencode/bin/opencode` | Installed executable |
 | `BRIDGE_MODELS` | `opencode/nemotron-3-ultra-free` | Comma-separated exact `provider/model` IDs |
+| `BRIDGE_IMAGE_MODELS` | Empty | Verified image-capable subset of `BRIDGE_MODELS`, native mode only. See [image support](docs/images.md). |
+| `BRIDGE_IMAGE_DETAIL_POLICY` | `strict` | Optional `auto` maps client low/high/original detail hints to OpenCode automatic image processing with an `image_detail_auto` warning. |
 | `BRIDGE_PORT` | `4396` | Loopback bridge port |
 | `OPENCODE_PORT` | `4397` | Managed OpenCode port |
 | `BRIDGE_STATE_DIR` | `~/.local/share/codex-opencode-bridge-project` | Local token and temporary work dirs |
