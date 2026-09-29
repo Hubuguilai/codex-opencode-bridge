@@ -67,6 +67,17 @@ remain intact, upstream model mapping, namespace/call identity, reasoning fields
 and removal of temporary state. It does not execute a Desktop GUI turn or prove
 that a live menu has been migrated.
 
+## Native streaming follow-up
+
+Native streaming now uses the official live event API, with final snapshot
+reconciliation and chronological message queries. Space Bunny passed a complete
+real Codex suite on the streaming implementation. The first event implementation
+had a reader shutdown timeout; explicit reader cancellation was then tested with
+successive Responses and Chat requests. See [streaming evidence](native-streaming.md)
+for revision-specific receipts and the limits of each test. Nemotron Code Mode
+repair was also repeated on this source: two commands ran, then internal-tool
+selection caused failure; no broader compatibility upgrade is claimed.
+
 ## Hidden internal tools follow-up
 
 The bridge now offers opt-in `BRIDGE_INTERNAL_TOOLS=hidden`. The actual outgoing

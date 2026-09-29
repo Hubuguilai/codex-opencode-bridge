@@ -5,6 +5,8 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { findOpenCode } from './config.mjs';
 import { BridgeError } from './errors.mjs';
+import { NativeEvents } from './native-events.mjs';
+import { NativeTextStream } from './native-text-stream.mjs';
 
 export class OpenCodeBackend {
   constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', toolTransport = 'direct', internalTools = 'guarded', warn = () => {} }) {
@@ -44,9 +46,10 @@ export class OpenCodeBackend {
     const native = this.mode === 'native-tools';
     const requestId = randomUUID();
     const capturePath = path.join(this.directory, 'bridge-call.json');
-    let route;
+    let route, live;
     let completed = false;
     let previous = '';
+    const nativeText = new NativeTextStream(this.maxOutputBytes);
     try {
       signal.throwIfAborted();
       if (native) {
@@ -62,6 +65,10 @@ export class OpenCodeBackend {
       if (typeof created?.data?.id !== 'string' || !created.data.id.startsWith('ses_')) throw new BridgeError(502, 'opencode_protocol_error', 'OpenCode returned no session ID.');
       route = `/api/session/${encodeURIComponent(created.data.id)}`;
       signal.throwIfAborted();
+      if (native && request.stream) {
+        live = new NativeEvents({url:this.url,authorization:this.authorization,sessionID:created.data.id,signal,onDelta,maxBytes:this.maxOutputBytes});
+        await live.open();
+      }
       await this.call(`${route}/prompt`, { method: 'POST', body: { text: request.prompt }, signal });
       // OpenCode initializes location plugins lazily when the first prompt runs.
       // All runtime actions require approval until the plugin is active; the
@@ -75,6 +82,12 @@ export class OpenCodeBackend {
       }
       while (true) {
         signal.throwIfAborted();
+        live?.assertHealthy();
+        const result = await this.call(`${route}/message?limit=100&order=asc`, { signal });
+        if (!Array.isArray(result.data)) throw new BridgeError(502, 'opencode_protocol_error', 'Invalid OpenCode message response.');
+        const assistants = result.data.filter(x => x.type === 'assistant');
+        if (native && assistants.length > 4) throw new BridgeError(502, 'dispatch_step_limit', 'OpenCode dispatch exceeded four model steps without a client transfer.');
+        if (!native && assistants.length > 1) throw new BridgeError(502, 'unexpected_agent_loop', 'Unexpected multi-step agent execution in text-only mode.');
         if (native && fs.existsSync(capturePath)) {
           let capture;
           try { capture = JSON.parse(fs.readFileSync(capturePath, 'utf8')); } catch { await delay(this.pollMs, undefined, { signal }); continue; }
@@ -85,17 +98,14 @@ export class OpenCodeBackend {
           if (!tool || capture.kind !== 'call') throw new BridgeError(502, 'unknown_client_tool', 'Unrecognized client tool call.');
           if (!capture.input || typeof capture.input !== 'object' || Array.isArray(capture.input)) throw new BridgeError(502, 'invalid_tool_arguments', 'Invalid client tool arguments.');
           if (tool.kind === 'custom' && typeof capture.input.input !== 'string') throw new BridgeError(502, 'invalid_tool_arguments', 'Invalid custom tool input.');
+          if (live) await live.finish(assistants);
+          else await nativeText.update(assistants, onDelta);
           return { calls: [{ type: tool.kind === 'custom' ? 'custom_tool_call' : 'function_call',
             id: `fc_${randomUUID().replaceAll('-', '')}`, call_id: `call_${randomUUID().replaceAll('-', '')}`,
             name: tool.name, ...(tool.namespace ? { namespace: tool.namespace } : {}),
             ...(tool.kind === 'custom' ? { input: capture.input.input } : { arguments: JSON.stringify(capture.input) }),
           }], tokens: null };
         }
-        const result = await this.call(`${route}/message?limit=100`, { signal });
-        if (!Array.isArray(result.data)) throw new BridgeError(502, 'opencode_protocol_error', 'Invalid OpenCode message response.');
-        const assistants = result.data.filter(x => x.type === 'assistant');
-        if (native && assistants.length > 4) throw new BridgeError(502, 'dispatch_step_limit', 'OpenCode dispatch exceeded four model steps without a client transfer.');
-        if (!native && assistants.length > 1) throw new BridgeError(502, 'unexpected_agent_loop', 'Unexpected multi-step agent execution in text-only mode.');
         const assistant = assistants.at(-1);
         if (assistant) {
           if ([401, 403, 429].includes(assistant.error?.status)) {
@@ -109,13 +119,14 @@ export class OpenCodeBackend {
           if (!native && !text.startsWith(previous)) throw new BridgeError(502, 'non_append_output', 'Upstream changed already-delivered text.');
           if (Buffer.byteLength(text) > this.maxOutputBytes) throw new BridgeError(502, 'output_too_large', 'Output exceeded the configured byte limit.');
           if (!native && text.length > previous.length) await onDelta(text.slice(previous.length));
+          if (native && !live) await nativeText.update(assistants, onDelta);
           previous = text;
           if (assistant.time?.completed && !(native && assistant.finish === 'tool-calls')) {
             if (assistant.finish === 'tool-calls' || assistant.finish === 'length') {
               throw new BridgeError(502, 'incomplete_generation', 'OpenCode did not complete a plain text answer.');
             }
             if (!text) throw new BridgeError(502, 'empty_generation', 'OpenCode returned no text.');
-            if (native) await onDelta(text);
+            if (live) await live.finish(assistants);
             completed = true;
             return { tokens: assistant.tokens || {} };
           }
@@ -126,6 +137,7 @@ export class OpenCodeBackend {
         await delay(this.pollMs, undefined, { signal });
       }
     } finally {
+      if (live) await live.stop();
       if (route && !completed) {
         await this.call(`${route}/interrupt`, { method: 'POST', signal: AbortSignal.timeout(2000) }).catch(() => this.warn('session_interrupt_failed'));
       }

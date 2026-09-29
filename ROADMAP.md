@@ -28,7 +28,7 @@
 - [ ] Long-context/multimodal validation and per-model maximum capability evidence
 - [ ] Crash-recovery journal for sessions whose creation response was lost
 - [ ] Stronger isolation of third-party plugins/MCP beyond trusted local configuration
-- [ ] Incremental native final-text streaming without sacrificing safe recovery
+- [x] Incremental native visible-text events, explicit failure semantics and real-client regression
 - [ ] Public-release decision after support boundaries and upstream access are reviewed
 
 The private candidate is not a universal or unlimited free API gateway. Windows,

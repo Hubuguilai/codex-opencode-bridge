@@ -28,7 +28,10 @@
   logging, telemetry and provider data handling; deleting a session is not a promise
   of secure data erasure or zero upstream retention.
 - Each upstream session has a four-model-step dispatch limit; intermediate
-  dispatch text is buffered and never presented as completed client work.
+  dispatch text can stream as provisional assistant commentary. Only a terminal
+  completed response denotes completion; an error after partial text stays failed.
+  Live events are session-scoped, never reconnect automatically, and are reconciled
+  with final snapshots to detect missing, rewritten or duplicated text.
 - One corrective generation is allowed only after a bridge-disabled internal-tool
   choice, before any text is streamed, within the original deadline. User tool
   denials, provider access/quota errors, timeouts and partial streams are never

@@ -49,6 +49,20 @@ test('Function/custom call streaming uses matching IDs, namespaces and completed
  assert.ok(!events.some(x=>x.type==='response.output_text.delta'));
 });
 
+test('Streamed commentary and client call occupy distinct output items with stable indices',()=>{
+ let wire='';const res={writeHead(){},flushHeaders(){},write(x){wire+=x;},end(x=''){wire+=x;}};
+ const writer=makeWriter(res,'responses',{model:'opencode/test',stream:true});
+ const call={type:'function_call',id:'fc_mixed',call_id:'call_mixed',namespace:'functions',name:'exec_command',arguments:'{}'};
+ writer.delta('I will ');writer.delta('check.');writer.calls([call]);writer.finish(null);
+ const events=wire.split('\n').filter(x=>x.startsWith('data: ')).map(x=>JSON.parse(x.slice(6)));
+ const added=events.filter(x=>x.type==='response.output_item.added');
+ assert.deepEqual(added.map(x=>x.output_index),[0,1]);
+ assert.equal(events.find(x=>x.type==='response.function_call_arguments.delta').output_index,1);
+ assert.equal(events.at(-1).response.output[0].content[0].text,'I will check.');
+ assert.deepEqual(events.at(-1).response.output[1],call);
+ assert.deepEqual(events.map(x=>x.sequence_number),events.map((_,i)=>i));
+});
+
 test('Runtime guard blocks every internal action and only records client transfer without executing it', async t => {
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-plugin-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const manifest={requestId:'r1',tools:normalizeTools([fn])};fs.writeFileSync(path.join(root,'bridge-request.json'),JSON.stringify(manifest));

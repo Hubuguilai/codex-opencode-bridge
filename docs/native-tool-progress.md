@@ -111,3 +111,12 @@ This replaces any earlier inference that the plugin cannot remove internal tools
 Two consecutive complete Space Bunny Codex suites passed with the same runtime
 source digest. A prior development run had a failed follow-up and is retained;
 no causal claim about that transient failure is made. See [tool surface evidence](tool-surface.md).
+
+## Native streaming follow-up
+
+Streaming native requests now subscribe to official v2 session text events before
+prompting, scope them to the current session, and reconcile terminal snapshots.
+Snapshots alone did not yield incremental text in the live control. Explicit
+reader cancellation resolved the reproduced shutdown stall in the subsequent
+probe; chronological snapshot order also avoids selecting an older dispatch step.
+A full Space Bunny Codex suite passed on this implementation. See [streaming evidence](native-streaming.md).

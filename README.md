@@ -23,8 +23,9 @@ Codex / compatible client
 
 - `GET /health`, authenticated `GET /v1/models`.
 - `POST /v1/chat/completions` and `POST /v1/responses`: text, JSON and SSE.
-- Text mode polls incremental OpenCode snapshots. Native mode buffers final text
-  until the dispatch outcome is known; it does not fake token-by-token streaming.
+- Native streaming subscribes to OpenCode v2 live text events before prompting,
+  forwards text as it arrives, and reconciles with final snapshots without replay.
+  Text mode still polls snapshots; observed chunking depends on runtime behavior.
 - Native message roles and matched tool-call/result history are translated into
   each fresh session; text mode serializes history. Neither silently truncates it.
 - Client disconnect/deadline → interrupt and delete the known upstream session.
@@ -43,6 +44,8 @@ See [real-client evidence and remaining gates](docs/native-tool-progress.md).
 Images, audio, file uploads, adjustable reasoning controls, structured output,
 `previous_response_id`, stored responses and background responses are unsupported.
 Responses streaming errors arrive as `response.failed` after HTTP headers have been sent.
+Partial text is not a completed answer; event disconnects fail explicitly and are
+never automatically reconnected across a possible text gap. See [streaming evidence](docs/native-streaming.md).
 
 The upstream is the **official OpenCode runtime**, including its system context
 and user-level configuration. Native mode blocks internal actions before execution

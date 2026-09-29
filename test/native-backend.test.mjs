@@ -46,3 +46,43 @@ test('Cancelled native request cleans up and a subsequent request can transfer a
  const recovered=await backend.generate(request,{signal:AbortSignal.timeout(1000),onDelta:()=>{}});
  assert.equal(JSON.parse(recovered.calls[0].arguments).cmd,'recovered');
 });
+
+test('Native backend sends text before completion and does not replay it at finish',async t=>{
+ const {backend}=fixture(t,()=>{});const original=backend.call.bind(backend);
+ let polls=0,release;
+ const firstDelivered=new Promise(resolve=>{release=resolve;});
+ backend.call=async(route,options)=>{
+  if(!route.includes('/message'))return original(route,options);
+  if(++polls===2)await Promise.race([firstDelivered,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Text was buffered until completion')),200))]);
+  return {data:[{id:'a',type:'assistant',content:[{type:'text',text:polls===1?'Hello':'Hello world'}],time:polls===1?{}:{completed:1},finish:'stop'}]};
+ };
+ const deltas=[];
+ await backend.generate(request,{signal:AbortSignal.timeout(1000),onDelta:async value=>{deltas.push(value);release();}});
+ assert.deepEqual(deltas,['Hello',' world']);
+});
+
+test('Native tool transfer preserves preceding streamed commentary and call identity',async t=>{
+ const {backend,directory}=fixture(t,()=>{});const original=backend.call.bind(backend);let polls=0;
+ backend.call=async(route,options)=>{
+  if(!route.includes('/message'))return original(route,options);
+  if(++polls===2){const manifest=JSON.parse(fs.readFileSync(path.join(directory,'bridge-request.json')));
+   fs.writeFileSync(path.join(directory,'bridge-call.json'),JSON.stringify({requestId:manifest.requestId,kind:'call',relayName:'bridge_client_0',input:{cmd:'echo hello'}}));}
+  return {data:[{id:'a',type:'assistant',content:[{type:'text',text:polls===1?'I will':'I will check.'}],time:{},finish:'tool-calls'}]};
+ };
+ const deltas=[];const result=await backend.generate(request,{signal:AbortSignal.timeout(1000),onDelta:async value=>deltas.push(value)});
+ assert.deepEqual(deltas,['I will',' check.']);assert.equal(result.calls[0].name,'exec_command');assert.equal(result.calls[0].namespace,'functions');
+});
+
+test('Dispatch continuations request chronological snapshots and complete on the newest assistant',async t=>{
+ const {backend}=fixture(t,()=>{});const original=backend.call.bind(backend);
+ backend.call=async(route,options)=>{
+  if(!route.includes('/message'))return original(route,options);
+  assert.match(route,/order=asc/);
+  return {data:[
+   {id:'a',type:'assistant',content:[{type:'text',text:'Working'}],finish:'tool-calls',time:{completed:1}},
+   {id:'b',type:'assistant',content:[{type:'text',text:'Done'}],finish:'stop',time:{completed:2}},
+  ]};
+ };
+ const deltas=[];await backend.generate(request,{signal:AbortSignal.timeout(1000),onDelta:async value=>deltas.push(value)});
+ assert.equal(deltas.join(''),'Working\n\nDone');
+});

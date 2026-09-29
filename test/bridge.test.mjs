@@ -23,7 +23,7 @@ async function fixture(t, handler, overrides = {}) {
     let result = {};
     if (req.url === '/api/info') result = { version: '2.0.18' };
     else if (req.url === '/api/session') result = { data: { id: 'ses_fixture' } };
-    else if (req.url.endsWith('/message?limit=100')) {
+    else if (req.url.endsWith('/message?limit=100&order=asc')) {
       polls++;
       result = { data: [{ type: 'assistant', content: [{ type: 'text', text: polls === 1 ? '你' : '你好' }],
         time: polls === 1 ? {} : { completed: Date.now() }, finish: 'stop', tokens: { input: 5, output: 2, reasoning: 3 } }] };
@@ -144,7 +144,7 @@ test('Stream failures do not emit a successful completed/DONE event', async t =>
 
 test('Client cancellation interrupts and deletes an active session', async t => {
   const { request, calls } = await fixture(t, (req, res) => {
-    if (!req.url.endsWith('/message?limit=100')) return false;
+    if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end(JSON.stringify({ data: [] })); return true;
   });
   const controller = new AbortController();
@@ -177,7 +177,7 @@ test('Upstream HTTP 204 deletion is successful cleanup', async t => {
 
 test('Generation timeout interrupts, cleans up and returns 504', async t => {
   const { request, calls } = await fixture(t, (req, res) => {
-    if (!req.url.endsWith('/message?limit=100')) return false;
+    if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end('{"data":[]}'); return true;
   }, { timeoutMs: 80 });
   assert.equal((await request('/v1/chat/completions', payload)).status, 504);
@@ -187,7 +187,7 @@ test('Generation timeout interrupts, cleans up and returns 504', async t => {
 
 test('Concurrent overflow is rejected without creating another session', async t => {
   const { request, calls } = await fixture(t, (req, res) => {
-    if (!req.url.endsWith('/message?limit=100')) return false;
+    if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end('{"data":[]}'); return true;
   }, { maxConcurrent: 1, timeoutMs: 200 });
   const first = await request('/v1/responses', { model, input: 'hello', stream: true });
@@ -198,7 +198,7 @@ test('Concurrent overflow is rejected without creating another session', async t
 
 test('Upstream access denial is preserved without reflecting provider error text', async t => {
   const { request } = await fixture(t, (req, res) => {
-    if (!req.url.endsWith('/message?limit=100')) return false;
+    if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end(JSON.stringify({ data: [
       { type: 'idle', outcome: 'failed' },
       { type: 'assistant', finish: 'error', error: { status: 403, message: 'private upstream detail' } },
@@ -212,7 +212,7 @@ test('Upstream access denial is preserved without reflecting provider error text
 test('Changed upstream text fails instead of silently corrupting a streamed answer', async t => {
   let n = 0;
   const { request } = await fixture(t, (req, res) => {
-    if (!req.url.endsWith('/message?limit=100')) return false;
+    if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end(JSON.stringify({ data: [{ type: 'assistant', content: [{ type: 'text', text: n++ === 0 ? 'abc' : 'xyz' }], time: {} }] })); return true;
   });
   const response = await request('/v1/responses', { model, input: 'hello', stream: true });
