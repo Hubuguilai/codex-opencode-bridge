@@ -338,3 +338,10 @@ User-authorized real Codex/OpenCode full-suite attempts ran serially on commit `
 - MiMo V2.6 Flash Free, LongCat 2.5 Preview Free, and Big Pickle: each independently returned HTTP 403 on its initial create request. Remaining scenarios for that model were not run. This establishes present access rejection on the tested route, not quota exhaustion or successful current compatibility.
 - No HTTP 429 was observed; a 403 for one model did not prevent independent testing of the next model. Nemotron was not retried in this cohort.
 - No model achieved current full-suite acceptance in this cohort. Historical passes remain historical. No Desktop configuration or active services were changed.
+
+
+## 2026-09-29 session identity regression fixed
+
+The preceding 403 diagnosis was incomplete. Big Pickle failed with UUID-derived preallocated IDs even without the plugin, while official CLI and server-generated IDs succeeded. Native-format preallocation fixes access without changing credentials or tool guards. [Controlled diagnosis](session-id-regression.md) and [current matrix](receipts/native-id-four-models/matrix.json).
+
+Latest results: Big Pickle 10/10, MiMo V2.6 Flash Free 10/10, LongCat 9/10 (patch-update exact content), Nemotron 9/10 (repair generation failed). All four have identical source digests and no 403. Matrix remains failed. 87 offline tests, syntax, package installation, and real-runtime crash recovery passed. Existing historical failures are retained; Desktop activation is still pending.

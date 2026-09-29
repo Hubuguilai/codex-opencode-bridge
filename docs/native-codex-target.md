@@ -70,7 +70,7 @@ Passing a greeting, a mocked tool event, a model-written JSON snippet or an HTTP
 | Gate | Evidence required | Current state |
 |---|---|---|
 | Text transport | Real short responses, JSON and SSE | Passed for Nemotron prototype / v0.1 smoke |
-| Native tools | Real file read/write/command/result loop executed by Codex | Five exact models passed historical seven-case client-alias suites; current ten-case generation regression is pending |
+| Native tools | Real file read/write/command/result loop executed by Codex | Five exact models passed historical seven-case suites; current native-ID regression evidence is in docs/session-id-regression.md |
 | Continuations | Multiple tool steps, follow-up edits, stable IDs/history | Historical same-thread create/follow-up/repair passed; latest source/model cohort remains unverified |
 | Lifecycle | Cancel, timeout, permission refusal, bounded retries | Real Codex app-server cancel/timeout/denial/recovery passed |
 | Desktop UX | Picker coexistence, restart, reversible install/uninstall | Five-route Router/catalog rehearsal and reversible preparation passed; live activation and UI acceptance remain required |
@@ -114,5 +114,4 @@ A single official-runtime Plan control on Nemotron, without the bridge client-to
 plugin, returned HTTP 403. See [the exact control receipt](receipts/nemotron-official-control.json).
 This is evidence of current access rejection on that runtime path, not proof that
 all official GUI modes fail, that all other models fail, or that quota is depleted.
-No alternate model/account was used after the denial. Upstream access resolution
-and coordinated Desktop activation remain the immediate completion dependencies.
+That control used a UUID-derived preallocated session ID. Subsequent controlled tests isolated an ID-format compatibility regression, now fixed; see [the diagnosis](session-id-regression.md). It is not a remaining blanket provider-access blocker. Coordinated Desktop activation and model-specific acceptance remain required.

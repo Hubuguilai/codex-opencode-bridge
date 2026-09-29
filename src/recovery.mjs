@@ -1,3 +1,4 @@
+import {isJournalSessionID} from './session-id.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {processAbsent, syncDirectory} from './runtime-ownership.mjs';
@@ -70,7 +71,7 @@ export async function recoverSessions(stateDir, backend, {absent = processAbsent
       const journalStat = fs.lstatSync(journal);
       if (!journalStat.isDirectory() || journalStat.isSymbolicLink()) throw new Error('invalid_journal');
       const intents = fs.readdirSync(journal).map(file => {
-        if (!/^ses_[a-f0-9]{32}\.json$/.test(file)) throw new Error('invalid_intent');
+        if ((!file.endsWith('.json') || !isJournalSessionID(file.slice(0, -5)))) throw new Error('invalid_intent');
         const intent = readJSON(path.join(journal, file));
         if (intent.version !== 2 || intent.sessionID + '.json' !== file || intent.directory !== directory || intent.runID !== owner.runID) throw new Error('unverified_intent');
         return {file, intent};

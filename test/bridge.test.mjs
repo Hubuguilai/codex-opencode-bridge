@@ -245,7 +245,7 @@ test('Lost creation reply still cleans the committed client-selected session wit
   if(req.url==='/api/session'){res.destroy();return true;}return false;
  });
  await assert.rejects(backend.generate({model,prompt:'not sent'},{signal:AbortSignal.timeout(1000),onDelta:()=>{}}));
- const created=calls.find(x=>x.path==='/api/session');assert.match(created.body.id,/^ses_[a-f0-9]{32}$/);
+ const created=calls.find(x=>x.path==='/api/session');assert.match(created.body.id,/^ses_[a-f0-9]{12}[A-Za-z0-9]{14}$/);
  assert.deepEqual(calls.slice(-2).map(x=>[x.path,x.method]),[[`/api/session/${created.body.id}/interrupt`,'POST'],[`/api/session/${created.body.id}`,'DELETE']]);
  assert.equal(calls.some(x=>x.path.endsWith('/prompt')),false);
 });

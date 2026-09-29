@@ -1,0 +1,209 @@
+{
+  "date": "2026-09-29T06:23:28.381Z",
+  "mode": "full-suite",
+  "internalTools": "client-aliases",
+  "models": [
+    {
+      "model": "opencode/big-pickle",
+      "exitCode": 0,
+      "receipt": "big-pickle.json",
+      "sourceSha256": "66d931930e9f8b98b2ae1618df5ec7f2e89e4bfa01b3a1df15f9e5137d96cc93",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": true
+        },
+        {
+          "name": "followup",
+          "passed": true
+        },
+        {
+          "name": "repair",
+          "passed": true
+        },
+        {
+          "name": "denial",
+          "passed": true
+        },
+        {
+          "name": "patch-create",
+          "passed": true
+        },
+        {
+          "name": "patch-update",
+          "passed": true
+        },
+        {
+          "name": "patch-denial",
+          "passed": true
+        },
+        {
+          "name": "cancel",
+          "passed": true
+        },
+        {
+          "name": "timeout",
+          "passed": true
+        },
+        {
+          "name": "recovery",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model": "opencode/mimo-v2.6-flash-free",
+      "exitCode": 0,
+      "receipt": "mimo-v2.6-flash-free.json",
+      "sourceSha256": "66d931930e9f8b98b2ae1618df5ec7f2e89e4bfa01b3a1df15f9e5137d96cc93",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": true
+        },
+        {
+          "name": "followup",
+          "passed": true
+        },
+        {
+          "name": "repair",
+          "passed": true
+        },
+        {
+          "name": "denial",
+          "passed": true
+        },
+        {
+          "name": "patch-create",
+          "passed": true
+        },
+        {
+          "name": "patch-update",
+          "passed": true
+        },
+        {
+          "name": "patch-denial",
+          "passed": true
+        },
+        {
+          "name": "cancel",
+          "passed": true
+        },
+        {
+          "name": "timeout",
+          "passed": true
+        },
+        {
+          "name": "recovery",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model": "opencode/longcat-2.5-preview-free",
+      "exitCode": 1,
+      "receipt": "longcat-2.5-preview-free.json",
+      "sourceSha256": "66d931930e9f8b98b2ae1618df5ec7f2e89e4bfa01b3a1df15f9e5137d96cc93",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": true
+        },
+        {
+          "name": "followup",
+          "passed": true
+        },
+        {
+          "name": "repair",
+          "passed": true
+        },
+        {
+          "name": "denial",
+          "passed": true
+        },
+        {
+          "name": "patch-create",
+          "passed": true
+        },
+        {
+          "name": "patch-update",
+          "passed": false
+        },
+        {
+          "name": "patch-denial",
+          "passed": true
+        },
+        {
+          "name": "cancel",
+          "passed": true
+        },
+        {
+          "name": "timeout",
+          "passed": true
+        },
+        {
+          "name": "recovery",
+          "passed": true
+        }
+      ],
+      "passed": false
+    },
+    {
+      "model": "opencode/nemotron-3-ultra-free",
+      "exitCode": 1,
+      "receipt": "nemotron-3-ultra-free.json",
+      "sourceSha256": "66d931930e9f8b98b2ae1618df5ec7f2e89e4bfa01b3a1df15f9e5137d96cc93",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": true
+        },
+        {
+          "name": "followup",
+          "passed": true
+        },
+        {
+          "name": "repair",
+          "passed": false
+        },
+        {
+          "name": "denial",
+          "passed": true
+        },
+        {
+          "name": "patch-create",
+          "passed": true
+        },
+        {
+          "name": "patch-update",
+          "passed": true
+        },
+        {
+          "name": "patch-denial",
+          "passed": true
+        },
+        {
+          "name": "cancel",
+          "passed": true
+        },
+        {
+          "name": "timeout",
+          "passed": true
+        },
+        {
+          "name": "recovery",
+          "passed": true
+        }
+      ],
+      "passed": false
+    }
+  ],
+  "sourceConsistent": true,
+  "passed": false
+}

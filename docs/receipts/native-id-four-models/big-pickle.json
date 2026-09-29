@@ -1,0 +1,263 @@
+{
+  "mode": "full-suite",
+  "sourceSha256": "66d931930e9f8b98b2ae1618df5ec7f2e89e4bfa01b3a1df15f9e5137d96cc93",
+  "gitHead": "f0d1fec2c754510a476c1e6f091a251c253afe57",
+  "date": "2026-09-29T06:23:28.433Z",
+  "model": "opencode/big-pickle",
+  "toolTransport": "direct",
+  "internalTools": "client-aliases",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "create",
+      "status": "completed",
+      "commands": 4,
+      "fileChanges": 0,
+      "patchDiffs": 0,
+      "durationMs": 27594,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "followup",
+      "status": "completed",
+      "commands": 4,
+      "fileChanges": 0,
+      "patchDiffs": 0,
+      "durationMs": 22446,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "product": true
+      },
+      "passed": true
+    },
+    {
+      "name": "repair",
+      "status": "completed",
+      "commands": 3,
+      "fileChanges": 1,
+      "patchDiffs": 1,
+      "durationMs": 20515,
+      "checks": {
+        "testPassed": true,
+        "testUnchanged": true
+      },
+      "passed": true
+    },
+    {
+      "name": "denial",
+      "status": "completed",
+      "commands": 1,
+      "fileChanges": 0,
+      "patchDiffs": 0,
+      "durationMs": 8086,
+      "checks": {
+        "approvalWasDenied": true,
+        "fileAbsent": true
+      },
+      "passed": true
+    },
+    {
+      "name": "patch-create",
+      "status": "completed",
+      "commands": 0,
+      "fileChanges": 1,
+      "patchDiffs": 1,
+      "durationMs": 13129,
+      "checks": {
+        "exactContent": true,
+        "nativeFileChange": true,
+        "nativeDiff": true,
+        "noCommandExecution": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "patch-update",
+      "status": "completed",
+      "commands": 0,
+      "fileChanges": 1,
+      "patchDiffs": 1,
+      "durationMs": 7480,
+      "checks": {
+        "exactContent": true,
+        "nativeFileChange": true,
+        "nativeDiff": true,
+        "noCommandExecution": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "patch-denial",
+      "status": "completed",
+      "commands": 0,
+      "fileChanges": 1,
+      "patchDiffs": 1,
+      "durationMs": 7076,
+      "checks": {
+        "oneApprovalDenied": true,
+        "fileAbsent": true,
+        "nativeFileChange": true,
+        "noCommandExecution": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "cancel",
+      "status": "completed",
+      "checks": {
+        "reachedBackend": true,
+        "interrupted": true,
+        "backendReleased": true,
+        "manifestRemoved": true
+      },
+      "passed": true
+    },
+    {
+      "name": "timeout",
+      "status": "completed",
+      "checks": {
+        "deadlineReported": true,
+        "backendReleased": true
+      },
+      "passed": true
+    },
+    {
+      "name": "recovery",
+      "status": "completed",
+      "commands": 0,
+      "fileChanges": 0,
+      "patchDiffs": 0,
+      "durationMs": 4949,
+      "checks": {
+        "backendReleased": true
+      },
+      "passed": true
+    }
+  ],
+  "opencode": "2.0.18",
+  "commandOutcomes": [
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 68,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 18,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 105,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 55,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 16,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 18,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 104,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 69,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 543,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 234,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 74,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    },
+    {
+      "status": "declined",
+      "exitCode": null,
+      "usesRuntimePath": false,
+      "outputBytes": 0,
+      "missingFile": false,
+      "syntaxError": false,
+      "permissionDenied": false
+    }
+  ],
+  "toolEvents": {
+    "client_alias_write": 1
+  },
+  "passed": true,
+  "sourceChangedDuringRun": false
+}

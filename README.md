@@ -5,13 +5,13 @@ Experimental native-tool mode relays structured tool calls to Codex for executio
 Version **0.2.0-rc.1**. The repository remains private; no public release has been made.
 
 **Product target:** native Codex workspace and tool workflows for supported models.
-Space Bunny Free, Nemotron 3 Ultra Free, MiMo V2.6 Flash Free, LongCat 2.5
-Preview Free and Big Pickle passed historical seven-scenario real-Codex suites
-with client-executed aliases. Nemotron passed twice on that recorded runtime
-source. The current full suite adds three native patch scenarios; those ten-case
-results are not yet available. The latest Nemotron generation regression was
-blocked by upstream access/quota rejection. This remains experimental text/tool
-compatibility; see the [revision-specific evidence](docs/verification.md).
+Current real-Codex ten-scenario tests pass 10/10 for Big Pickle and MiMo V2.6 Flash Free.
+LongCat 2.5 Preview Free and Nemotron 3 Ultra Free pass 9/10; exact patch contents
+and repair generation respectively still failed. A UUID-derived session-ID regression
+caused the earlier provider 403s; native-format preallocation fixes those rejections
+in all four retested models. Bunny's earlier 9/10 result is on the previous source.
+This remains experimental text/tool compatibility; see the
+[controlled diagnosis](docs/session-id-regression.md) and [evidence](docs/verification.md).
 See the [native integration acceptance contract](docs/native-codex-target.md).
 
 [中文说明](docs/README.zh-CN.md) · [Prior art](docs/prior-art.md) · [Verification](docs/verification.md)

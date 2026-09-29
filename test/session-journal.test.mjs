@@ -83,7 +83,7 @@ test('A process killed during creation leaves a readable session intent without 
   child.kill('SIGKILL');
   const [, signal] = await exit;
   assert.equal(signal, 'SIGKILL');
-  assert.match(id, /^ses_[a-f0-9]{32}$/);
+  assert.match(id, /^ses_[a-f0-9]{12}[A-Za-z0-9]{14}$/);
   const persisted = fs.readFileSync(path.join(root, '.bridge-sessions', `${id}.json`), 'utf8');
   assert.equal(JSON.parse(persisted).sessionID, id);
   assert.doesNotMatch(persisted, /secret-password|secret-prompt/);

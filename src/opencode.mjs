@@ -7,6 +7,7 @@ import { findOpenCode } from './config.mjs';
 import { BridgeError } from './errors.mjs';
 import { NativeEvents } from './native-events.mjs';
 import { NativeTextStream } from './native-text-stream.mjs';
+import { createSessionID } from './session-id.mjs';
 import { SessionJournal } from './session-journal.mjs';
 import { RuntimeOwnership } from './runtime-ownership.mjs';
 
@@ -73,7 +74,7 @@ export class OpenCodeBackend {
       }
       // The official v2 create endpoint accepts a client-generated session ID.
       // Know the cleanup target even when creation commits but its reply is lost.
-      sessionID = `ses_${randomUUID().replaceAll('-', '')}`;
+      sessionID = createSessionID();
       this.journal?.begin(sessionID);
       route = `/api/session/${sessionID}`;
       const created = await this.call('/api/session', { method: 'POST', body: {

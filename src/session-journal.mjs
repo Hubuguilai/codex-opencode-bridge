@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
+import {isJournalSessionID} from './session-id.mjs';
 import {syncDirectory} from './runtime-ownership.mjs';
 
 // Intents contain identifiers only, never prompts, model output or credentials.
@@ -14,7 +15,7 @@ export class SessionJournal {
     syncDirectory(this.directory);
   }
   file(id) {
-    if (!/^ses_[a-f0-9]{32}$/.test(id)) throw new Error('Invalid journal session identity.');
+    if (!isJournalSessionID(id)) throw new Error('Invalid journal session identity.');
     return path.join(this.root, `${id}.json`);
   }
   begin(id) {
