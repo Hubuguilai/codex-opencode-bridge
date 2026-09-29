@@ -227,3 +227,21 @@ unit evidence; full crash/recovery timing coverage remains open.
 [The same-source prepared startup regression](receipts/prepared-startup-recovery.json)
 also passes two normal cycles, second-instance isolation and clean removal with
 all five configured model routes. This startup check sends no generation calls.
+
+
+## Creation after cleanup and abrupt driver exit
+
+[The deterministic crash probe](receipts/crash-recovery-probe.json) expands the
+real-runtime evidence at the same source/CLI hash as the explicit recovery probe.
+A local proxy drops creation before forwarding it, lets the bridge finish its
+original interrupt/delete cleanup (DELETE returns 404), and only then commits the
+staged creation into official OpenCode 2.0.18. No prompt reaches inference.
+
+The probe stops its owned runtime child without writing a stopped ownership
+record, kills the driver with SIGKILL, and verifies both recorded PIDs are absent.
+The actual `recover-prepared` CLI then clears the late-created session and its
+work directory. A fresh verifier runtime confirms the target is absent and an
+unrelated control survives; preparation removal succeeds. Thus the evidence covers
+one concrete late-commit and abrupt-driver-exit sequence, not arbitrary crash
+scheduling or a live orphan runtime. Crashes during recovery and the child-spawn
+ownership-recording window remain unproven. All 76 offline tests still pass.

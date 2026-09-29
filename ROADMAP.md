@@ -32,7 +32,8 @@
 - [x] Preallocated session identity and cleanup after a committed creation reply is lost
 - [x] Durable session intents before creation; retain ambiguous/failed cleanup through stop and crash
 - [x] Explicit ownership-aware recovery for stopped/absent runtimes, exact sessions and absent intents
-- [ ] End-to-end crash-timing coverage during creation and recovery, including late commits
+- [x] Real-runtime late creation after cleanup, followed by driver SIGKILL and absent-owner recovery
+- [ ] Broader crash timing: live orphan runtime, spawn-recording window and interruption during recovery
 - [ ] Stronger isolation of third-party plugins/MCP beyond trusted local configuration
 - [x] Incremental native visible-text events, explicit failure semantics and real-client regression
 - [ ] Public-release decision after support boundaries and upstream access are reviewed

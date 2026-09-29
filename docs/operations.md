@@ -105,10 +105,12 @@ These commands launch the installed official runtime but send no model prompts:
 node scripts/prepared-startup.mjs --live-runtime
 node scripts/session-cleanup-probe.mjs --live-runtime
 node scripts/recovery-probe.mjs --live-runtime
+node scripts/crash-recovery-probe.mjs --live-runtime
 ```
 
 The first uses temporary directories and ports 5096/5097; the second uses
-5196/5197 plus an ephemeral local fault-injection proxy; recovery uses 5296/5297.
+5196/5197 plus an ephemeral local fault-injection proxy; recovery uses 5296/5297
+and the late-commit/driver-crash probe uses 5396/5397.
 They retain sanitized
 receipts under `generated/` and clean their own sessions/directories. Startup
 checks include authentication, exact model listing, two cycles and refusal to
@@ -116,6 +118,13 @@ remove a running preparation. The fault probe destroys the successful creation
 reply and checks both target deletion and preservation of an unrelated session.
 Recovery checks exact owned cleanup, already-absent intents, preservation of an
 unrelated session, and removability of the preparation after the CLI completes.
+The crash probe deliberately commits creation after the original cleanup has
+finished, stops its own runtime child without updating the ownership phase, and
+kills the bridge driver with SIGKILL. The actual recovery CLI then checks absent
+PIDs, removes the late-created session and preserves an unrelated control.
+On probe failure it retains temporary state for investigation rather than deleting
+state underneath a potentially surviving runtime. This test does not establish
+automatic handling of live orphan processes or crashes during recovery itself.
 These results prove lifecycle behavior, not current model access or Desktop UI
 installation. See [revision-specific receipts](verification.md).
 
