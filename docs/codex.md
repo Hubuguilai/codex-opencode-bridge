@@ -116,3 +116,13 @@ node scripts/router-rehearsal.mjs --router-root /absolute/codex-router
 
 It uses isolated state and ports 4696–4699 with a mock upstream, then removes them.
 The check validates protocol coexistence, not live UI deployment.
+
+
+## Export a Desktop picker plan
+
+`prepare-router` now exports a separate provider, model additions and an unchanged
+existing catalog plus new entries. It does not write live Router state or copy a
+credential. The real installed Router stack and Codex catalog parser accepted the
+five-model plan in an isolated mock-upstream rehearsal. See
+[Desktop integration](desktop-integration.md) for commands, exact fields and the
+remaining live activation/restart checks.

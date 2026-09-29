@@ -159,3 +159,19 @@ It does not rotate identities or retry quota failures.
 
 Local syntax checks and 59 offline tests pass at this milestone. See
 [operations](operations.md) for reproducible commands and exact limits.
+
+
+## Five-model Desktop integration preview
+
+`prepare-router` exports a reviewable additions-only provider/model plan and a
+combined menu preview. In the current local snapshot it preserved 53 entries and
+added five. Unit tests check identity conflicts, original-file preservation and
+absence of the bridge token in every output artifact. There are now 61 offline
+tests. [The five-route rehearsal](receipts/router-five-model-rehearsal.json)
+validated the exported entries in the real installed Router stack against a mock
+upstream, including completed call identity/namespace/arguments and real Codex
+catalog parsing. It also verifies the source documents remain unchanged.
+
+Actual live registration, service refresh, application restart and graphical
+picker acceptance are still pending. The export must be revalidated against its
+source hashes before applying. See [Desktop integration](desktop-integration.md).

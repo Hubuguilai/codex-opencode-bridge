@@ -115,6 +115,9 @@ a live Desktop route or replace your existing native GPT configuration.
 
 Start it with `node bin/bridge.mjs serve-prepared /absolute/new/bridge-config`.
 See [startup, restart and recovery evidence](docs/operations.md).
+For coexistence in an existing Desktop picker, use the export-only
+[Router integration preview](docs/desktop-integration.md); it preserves existing
+entries and creates a separate route for each selected bridge model.
 
 ## Configuration
 

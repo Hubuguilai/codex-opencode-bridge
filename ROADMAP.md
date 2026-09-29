@@ -24,7 +24,8 @@
 
 - [x] Complete client-alias workflows on Nemotron, MiMo, LongCat, Big Pickle and Bunny
 - [ ] Broader repeated-task reliability beyond the small acceptance fixture
-- [ ] Live Desktop picker migration and UI acceptance, separately authorized
+- [x] Export-only Desktop plan and five-route isolated Router/catalog validation
+- [ ] Live Desktop picker migration and UI acceptance, coordinated with the user
 - [x] Multiple exact models checked with independent real-client receipts
 - [ ] Repeated full suites for every supported model and diagnostics for Lightning
 - [ ] Long-context/multimodal validation and per-model maximum capability evidence
