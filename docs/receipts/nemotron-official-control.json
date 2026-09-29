@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-29T05:33:45.719Z",
+  "model": "opencode/nemotron-3-ultra-free",
+  "mode": "official-runtime-plan-control",
+  "requests": 1,
+  "bridgeClientTools": false,
+  "opencode": "2.0.18",
+  "passed": false,
+  "error": {
+    "code": "upstream_access_or_quota",
+    "status": 403
+  },
+  "gitHead": "ec43c1cd0e282fe2ce402f02dda17ef8de99922d",
+  "sourceSha256": "8d8f543c0f402110ea01c53e3b8fdda3b0c5520332a08b5ac9cfe84ee3da3da1",
+  "scope": "Official OpenCode v2 session API, agent=plan, no bridge plugin, single text request; not a GUI-client equivalence test."
+}

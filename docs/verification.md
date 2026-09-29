@@ -316,3 +316,15 @@ installation check pass. No new model request was made.
 The old Nemotron denial receipt lacks the exact status. A read-only inspection of
 available local runtime logs did not recover a matching HTTP status for that run;
 it remains unclassified and must not be called proven quota exhaustion.
+
+
+## Current official-runtime access control
+
+[One Nemotron control](receipts/nemotron-official-control.json) used the same existing
+identity and exact model through official OpenCode 2.0.18 session creation in Plan
+mode, with no bridge client-tool plugin. The request asked for a fixed short text
+reply and returned HTTP 403. No further provider requests followed this denial.
+This confirms current access rejection on this specific control path and shows the
+new patch alias is not necessary for that rejection. It does not retroactively
+classify the older failure, prove exhausted quota, test other models, or establish
+behavior of every official GUI/agent mode. A current five-model pass remains absent.

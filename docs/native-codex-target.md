@@ -70,10 +70,10 @@ Passing a greeting, a mocked tool event, a model-written JSON snippet or an HTTP
 | Gate | Evidence required | Current state |
 |---|---|---|
 | Text transport | Real short responses, JSON and SSE | Passed for Nemotron prototype / v0.1 smoke |
-| Native tools | Real file read/write/command/result loop executed by Codex | Five exact models passed complete client-alias suites; Nemotron repeated twice |
-| Continuations | Multiple tool steps, follow-up edits, stable IDs/history | Passed same-thread create/follow-up/repair on five exact models |
+| Native tools | Real file read/write/command/result loop executed by Codex | Five exact models passed historical seven-case client-alias suites; current ten-case generation regression is pending |
+| Continuations | Multiple tool steps, follow-up edits, stable IDs/history | Historical same-thread create/follow-up/repair passed; latest source/model cohort remains unverified |
 | Lifecycle | Cancel, timeout, permission refusal, bounded retries | Real Codex app-server cancel/timeout/denial/recovery passed |
-| Desktop UX | Picker coexistence, restart, reversible install/uninstall | Isolated Router protocol/catalog rehearsal and reversible preparation passed; live UI activation excluded |
+| Desktop UX | Picker coexistence, restart, reversible install/uninstall | Five-route Router/catalog rehearsal and reversible preparation passed; live activation and UI acceptance remain required |
 | Optional features | Per-model vision, reasoning and context tests | No blanket claim |
 | Public release | Reproducible supported-model matrix, docs and owner release decision | Private candidate prepared; public release not authorized |
 
@@ -100,3 +100,19 @@ suite twice on the same runtime source. This advances the original runtime-only
 model objective beyond the Space Bunny control. File aliases still appear as
 commands, not patch diffs, and failed/unknown models remain explicit. See the
 [model matrix](verification.md) and [alias contract](client-aliases.md).
+
+
+## Current completion audit (2026-09-29)
+
+The current candidate is not release-complete. Offline tests and isolated package,
+client-patch and runtime-lifecycle evidence do not replace current real-model and
+Desktop acceptance. The prepared Desktop plan still matches all three source
+Router document hashes and remains unapplied. The repository is private and PR #1
+is an open draft.
+
+A single official-runtime Plan control on Nemotron, without the bridge client-tool
+plugin, returned HTTP 403. See [the exact control receipt](receipts/nemotron-official-control.json).
+This is evidence of current access rejection on that runtime path, not proof that
+all official GUI modes fail, that all other models fail, or that quota is depleted.
+No alternate model/account was used after the denial. Upstream access resolution
+and coordinated Desktop activation remain the immediate completion dependencies.
