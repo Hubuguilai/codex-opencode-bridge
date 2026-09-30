@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-29T06:20:09.986Z",
+  "model": "opencode/big-pickle",
+  "mode": "official-build-no-plugin",
+  "permissions": "ask",
+  "bridgeTools": false,
+  "opencode": "2.0.18",
+  "providerError": {
+    "type": "provider.auth",
+    "status": 403,
+    "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode"
+  },
+  "passed": false,
+  "error": {
+    "code": "upstream_access_or_quota",
+    "status": 403
+  }
+}

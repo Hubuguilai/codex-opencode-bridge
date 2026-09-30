@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-30T04:38:27.893Z",
+  "isolatedClientState": true,
+  "realLaunchd": true,
+  "realPublication": true,
+  "routerServiceRestart": false,
+  "modelRequests": "live_router_client_verification",
+  "checks": {
+    "installHealthyAndPublished": true,
+    "olderOwnedProfileRefresh": true,
+    "profileRefreshRepeatAndPreservation": true
+  },
+  "legacyFixture": "Owned model profiles lacking strict-image flags; current bridge code and pinned compatible Router. Not an unowned manual installation.",
+  "passed": false,
+  "error": "Expected values to be strictly equal:\n\nfalse !== true\n",
+  "cleanup": true
+}

@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-29T04:46:33.731Z",
+  "sourceAndCliSha256": "7714107942c5f19fffa7fa670335f61f273f70ebcb6e81612cf97280ee896c3f",
+  "models": [
+    "opencode/space-bunny-free",
+    "opencode/nemotron-3-ultra-free",
+    "opencode/mimo-v2.6-flash-free",
+    "opencode/longcat-2.5-preview-free",
+    "opencode/big-pickle"
+  ],
+  "modelGenerations": 0,
+  "checks": {
+    "secondInstancePreservesFirst": true,
+    "cycle1": true,
+    "cycle2": true,
+    "removedAfterStop": true
+  },
+  "opencode": "2.0.18",
+  "passed": true
+}

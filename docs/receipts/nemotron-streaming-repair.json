@@ -1,0 +1,27 @@
+{
+  "sourceSha256": "1c6ecc91f52e007f83a57701e95c7e647725e190d87da5eb7a74ec81e3e9bda4",
+  "gitHead": "972fd26af3b895fcaeb4a67c2c85463916f5b0a0",
+  "date": "2026-09-29T03:34:22.997Z",
+  "model": "opencode/nemotron-3-ultra-free",
+  "toolTransport": "codemode",
+  "internalTools": "guarded",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "repair",
+      "status": "failed",
+      "error": "stream disconnected before completion: The model selected an OpenCode internal tool; execution was blocked. Retry the task using client tools.",
+      "commands": 2,
+      "durationMs": 90114,
+      "checks": {
+        "testPassed": false,
+        "testUnchanged": true
+      },
+      "passed": false
+    }
+  ],
+  "opencode": "2.0.18",
+  "passed": false,
+  "sourceChangedDuringRun": false
+}

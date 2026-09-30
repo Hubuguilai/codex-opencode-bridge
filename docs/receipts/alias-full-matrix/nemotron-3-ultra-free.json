@@ -1,0 +1,91 @@
+{
+  "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+  "gitHead": "6e781a07d7065d8b221bed8621e312959951efe4",
+  "date": "2026-09-29T03:56:57.848Z",
+  "model": "opencode/nemotron-3-ultra-free",
+  "toolTransport": "direct",
+  "internalTools": "client-aliases",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "create",
+      "status": "completed",
+      "commands": 3,
+      "durationMs": 36810,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "followup",
+      "status": "completed",
+      "commands": 3,
+      "durationMs": 21487,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "product": true
+      },
+      "passed": true
+    },
+    {
+      "name": "repair",
+      "status": "completed",
+      "commands": 4,
+      "durationMs": 27276,
+      "checks": {
+        "testPassed": true,
+        "testUnchanged": true
+      },
+      "passed": true
+    },
+    {
+      "name": "denial",
+      "status": "completed",
+      "commands": 1,
+      "durationMs": 17578,
+      "checks": {
+        "approvalWasDenied": true,
+        "fileAbsent": true
+      },
+      "passed": true
+    },
+    {
+      "name": "cancel",
+      "status": "completed",
+      "checks": {
+        "reachedBackend": true,
+        "interrupted": true,
+        "backendReleased": true,
+        "manifestRemoved": true
+      },
+      "passed": true
+    },
+    {
+      "name": "timeout",
+      "status": "completed",
+      "checks": {
+        "deadlineReported": true,
+        "backendReleased": true
+      },
+      "passed": true
+    },
+    {
+      "name": "recovery",
+      "status": "completed",
+      "commands": 0,
+      "durationMs": 3763,
+      "checks": {
+        "backendReleased": true
+      },
+      "passed": true
+    }
+  ],
+  "opencode": "2.0.18",
+  "passed": true,
+  "sourceChangedDuringRun": false
+}

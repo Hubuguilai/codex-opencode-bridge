@@ -1,0 +1,96 @@
+{
+  "sourceSha256": "50a538e8487d24eb988469c9e0da5f8c3ba9c86238b1ed92e58453e4544e3738",
+  "gitHead": "f32c72277bd340809019fcf48ec85469a80d65b9",
+  "date": "2026-09-29T04:18:59.728Z",
+  "model": "opencode/nemotron-3-ultra-free",
+  "toolTransport": "direct",
+  "internalTools": "client-aliases",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "create",
+      "status": "failed",
+      "error": "stream disconnected before completion: OpenCode provider denied access or quota. Check your model entitlement in OpenCode.",
+      "commands": 0,
+      "durationMs": 4187,
+      "checks": {
+        "marker": false,
+        "sum": false,
+        "upstreamDidNotWrite": true
+      },
+      "passed": false
+    },
+    {
+      "name": "followup",
+      "status": "failed",
+      "error": "stream disconnected before completion: OpenCode provider denied access or quota. Check your model entitlement in OpenCode.",
+      "commands": 0,
+      "durationMs": 1252,
+      "checks": {
+        "marker": false,
+        "sum": false,
+        "product": false
+      },
+      "passed": false
+    },
+    {
+      "name": "repair",
+      "status": "failed",
+      "error": "stream disconnected before completion: OpenCode provider denied access or quota. Check your model entitlement in OpenCode.",
+      "commands": 0,
+      "durationMs": 1236,
+      "checks": {
+        "testPassed": false,
+        "testUnchanged": true
+      },
+      "passed": false
+    },
+    {
+      "name": "denial",
+      "status": "failed",
+      "error": "stream disconnected before completion: OpenCode provider denied access or quota. Check your model entitlement in OpenCode.",
+      "commands": 0,
+      "durationMs": 1633,
+      "checks": {
+        "approvalWasDenied": false,
+        "fileAbsent": true
+      },
+      "passed": false
+    },
+    {
+      "name": "cancel",
+      "status": "completed",
+      "checks": {
+        "reachedBackend": true,
+        "interrupted": true,
+        "backendReleased": true,
+        "manifestRemoved": true
+      },
+      "passed": true
+    },
+    {
+      "name": "timeout",
+      "status": "completed",
+      "checks": {
+        "deadlineReported": true,
+        "backendReleased": true
+      },
+      "passed": true
+    },
+    {
+      "name": "recovery",
+      "status": "failed",
+      "error": "stream disconnected before completion: OpenCode provider denied access or quota. Check your model entitlement in OpenCode.",
+      "commands": 0,
+      "durationMs": 2344,
+      "checks": {
+        "backendReleased": true
+      },
+      "passed": false
+    }
+  ],
+  "opencode": "2.0.18",
+  "passed": false,
+  "sourceChangedDuringRun": false
+}

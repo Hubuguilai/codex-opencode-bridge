@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "strict-image-input-v1",
+  "upstreamRevision": "b90aa60e257bbcc33855aad7d43954c1a09b1311",
+  "files": [
+    {
+      "path": "src/router.mjs",
+      "beforeSha256": "155ab693b3e147ecc450c0057a3af81941f4c0b504f088dc5f47978ec2df3f54",
+      "afterSha256": "c34644c1ef8503ea40de7ecbb5049566e90b3b21ee0f3d8e745041a65e7da408",
+      "edits": [
+        {
+          "before": "  if (supportsImageInput(route)) return input;\n  if (route.visionBridge === false) {",
+          "after": "  if (supportsImageInput(route)) return input;\n  if (route.bridgeStrictImages === true) {\n    throw Object.assign(new Error(\"The selected model does not support images. No image content was removed or sent to another model.\"), {status: 422, code: \"bridge_image_input_unsupported\"});\n  }\n  if (route.visionBridge === false) {"
+        },
+        {
+          "before": "    if (error?.code === \"model_search_not_supported\" && !response.headersSent) {",
+          "after": "    if ([\"model_search_not_supported\", \"bridge_image_input_unsupported\"].includes(error?.code) && !response.headersSent) {"
+        }
+      ]
+    },
+    {
+      "path": "src/api-forwarder.mjs",
+      "beforeSha256": "14305ad4b5a24d9e232ea11accf0b5a7a49c28c7d2819a50c3db7fe3b205fcba",
+      "afterSha256": "43f26d36ce4c52f7f2e94d47552370ed7a96fb215b1b917d92f2402a6efbe967",
+      "edits": [
+        {
+          "before": "      if (!stripped.images) continue;\n      payload[field] = stripped.input;",
+          "after": "      if (!stripped.images) continue;\n      if (model.bridgeStrictImages === true) {\n        throw Object.assign(new Error(\"The selected model does not support images. No image content was removed or sent to another model.\"), {status: 422, code: \"bridge_image_input_unsupported\"});\n      }\n      payload[field] = stripped.input;"
+        },
+        {
+          "before": "        error: transport || {",
+          "after": "        error: (error?.code === \"bridge_image_input_unsupported\"\n          ? {type: error.code, code: error.code, message: error.message}\n          : transport) || {"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+  "gitHead": "6e781a07d7065d8b221bed8621e312959951efe4",
+  "date": "2026-09-29T03:58:46.848Z",
+  "model": "opencode/space-bunny-free",
+  "toolTransport": "direct",
+  "internalTools": "client-aliases",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "create",
+      "status": "completed",
+      "commands": 2,
+      "durationMs": 28344,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "followup",
+      "status": "completed",
+      "commands": 2,
+      "durationMs": 14693,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "product": true
+      },
+      "passed": true
+    },
+    {
+      "name": "repair",
+      "status": "completed",
+      "commands": 4,
+      "durationMs": 27254,
+      "checks": {
+        "testPassed": true,
+        "testUnchanged": true
+      },
+      "passed": true
+    },
+    {
+      "name": "denial",
+      "status": "completed",
+      "commands": 1,
+      "durationMs": 9047,
+      "checks": {
+        "approvalWasDenied": true,
+        "fileAbsent": true
+      },
+      "passed": true
+    },
+    {
+      "name": "cancel",
+      "status": "completed",
+      "checks": {
+        "reachedBackend": true,
+        "interrupted": true,
+        "backendReleased": true,
+        "manifestRemoved": true
+      },
+      "passed": true
+    },
+    {
+      "name": "timeout",
+      "status": "completed",
+      "checks": {
+        "deadlineReported": true,
+        "backendReleased": true
+      },
+      "passed": true
+    },
+    {
+      "name": "recovery",
+      "status": "completed",
+      "commands": 0,
+      "durationMs": 4982,
+      "checks": {
+        "backendReleased": true
+      },
+      "passed": true
+    }
+  ],
+  "opencode": "2.0.18",
+  "commandOutcomes": [
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 242
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 61
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 24
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 137
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 368
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 228
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 165
+    },
+    {
+      "status": "completed",
+      "exitCode": 0,
+      "usesRuntimePath": false,
+      "outputBytes": 67
+    },
+    {
+      "status": "declined",
+      "exitCode": null,
+      "usesRuntimePath": false,
+      "outputBytes": 0
+    }
+  ],
+  "passed": true,
+  "sourceChangedDuringRun": false
+}

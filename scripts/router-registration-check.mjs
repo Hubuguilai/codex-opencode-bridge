@@ -1,0 +1,27 @@
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import assert from 'node:assert/strict';
+if(!process.argv[2])throw Error('Provide an explicit Router source directory.');
+const temp=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-router-register-'));
+process.env.MODEL_ROUTER_STATE_DIR=path.join(temp,'router');
+process.env.MODEL_ROUTER_USER_MODELS=path.join(temp,'router/user-models.json');
+const {prepareDirectory}=await import('../src/setup.mjs');const {prepareRouterPlan}=await import('../src/router-plan.mjs');
+const {loadRouter,registerRouter,unregisterRouter}=await import('../src/router-registration.mjs');
+const api=await loadRouter(path.resolve(process.argv[2]));
+const original=api.overlay;let failPublish=false;
+api.overlay={...original,transactModelOverlayMutation:opts=>original.transactModelOverlayMutation({...opts,restart:false,applyPublication:async()=>{if(failPublish){failPublish=false;throw Error('Injected publication failure');}return {};}})};
+fs.mkdirSync(process.env.MODEL_ROUTER_STATE_DIR,{recursive:true});
+fs.writeFileSync(path.join(process.env.MODEL_ROUTER_STATE_DIR,'generic-providers.json'),JSON.stringify({version:1,providers:[]}));
+const sentinel={slug:'sentinel',gatewayModel:'sentinel',provider:'other'};api.users.writeUserModels([sentinel]);
+fs.writeFileSync(path.join(process.env.MODEL_ROUTER_STATE_DIR,'merged-models.json'),JSON.stringify({models:[]}));
+const prepared=path.join(temp,'prepared'),plan=path.join(temp,'plan');prepareDirectory(prepared,{models:['opencode/big-pickle','opencode/muse-spark-1.3-contributor-free']});prepareRouterPlan(plan,{prepared,routerState:process.env.MODEL_ROUTER_STATE_DIR});
+failPublish=true;await assert.rejects(registerRouter(plan,{api,restart:false}),/Injected/);assert.deepEqual(api.users.readUserModels(),[sentinel]);assert.equal(api.providers.readGenericProviders().length,0);
+const first=await registerRouter(plan,{api,restart:false});assert.equal(first.registered,true);
+assert.equal((await registerRouter(plan,{api,restart:false})).reused,true);
+const ownedModels=api.users.readUserModels();
+api.users.writeUserModels([...ownedModels,{slug:'dependent',gatewayModel:'dependent',provider:'opencode-native-bridge'}]);
+await assert.rejects(unregisterRouter(plan,{api,restart:false}),/Additional models/);
+api.users.writeUserModels(ownedModels);
+api.users.writeUserModels([...api.users.readUserModels(),{slug:'later',gatewayModel:'later',provider:'other'}]);
+await unregisterRouter(plan,{api,restart:false});assert.deepEqual(api.users.readUserModels().map(x=>x.slug),['sentinel','later']);assert.equal(api.providers.readGenericProviders().length,0);
+console.log(JSON.stringify({passed:true,actualRouterModules:true,publicationStubbed:true,rollback:true,repeat:true,laterUserModelsPreserved:true}));
+
+fs.rmSync(temp,{recursive:true,force:true});

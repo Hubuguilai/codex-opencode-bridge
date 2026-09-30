@@ -1,0 +1,36 @@
+{
+  "mode": "full-suite",
+  "sourceSha256": "8d8f543c0f402110ea01c53e3b8fdda3b0c5520332a08b5ac9cfe84ee3da3da1",
+  "gitHead": "04d9f52e80ebec0f9c628fdfe9441bf55b130157",
+  "date": "2026-09-29T06:05:45.602Z",
+  "model": "opencode/big-pickle",
+  "toolTransport": "direct",
+  "internalTools": "client-aliases",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "create",
+      "status": "failed",
+      "error": "stream disconnected before completion: OpenCode provider returned HTTP 403: access was rejected. Check model entitlement or provider access restrictions in OpenCode; this does not establish quota exhaustion.",
+      "commands": 0,
+      "fileChanges": 0,
+      "patchDiffs": 0,
+      "durationMs": 4144,
+      "checks": {
+        "marker": false,
+        "sum": false,
+        "upstreamDidNotWrite": true
+      },
+      "passed": false
+    }
+  ],
+  "opencode": "2.0.18",
+  "accessDenial": {
+    "code": "upstream_access_or_quota",
+    "status": 403
+  },
+  "error": "Upstream access or quota denied; remaining generation scenarios were not run.",
+  "passed": false,
+  "sourceChangedDuringRun": false
+}

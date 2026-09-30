@@ -1,0 +1,12 @@
+{
+  "date": "2026-09-30",
+  "platform": "macOS arm64",
+  "runtime": "@opencode/cli@2.0.18",
+  "freshDirectoryInstall": true,
+  "repeatInstallReused": true,
+  "packageAssetsVerified": true,
+  "unitTestsPassed": 104,
+  "failureCleanupTestsPassed": true,
+  "desktopInstallationVerified": false,
+  "cleanOperatingSystemVerified": false
+}

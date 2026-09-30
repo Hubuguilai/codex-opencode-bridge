@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-30T04:04:08.715Z",
+  "kind": "real-router-dependency-recovery",
+  "platform": "darwin",
+  "node": "v24.4.1",
+  "modelRequests": 0,
+  "clientSetupExecuted": false,
+  "checks": {
+    "realNpmFailure": true,
+    "durablePreparationRecord": true,
+    "reusedPinnedDownload": true,
+    "realNpmRetryAndCompatibility": true,
+    "stopsAtUnverifiedClientSetup": true
+  },
+  "sourceSha256": "2e643cd85be8ebf872a9d7de9a309ae318d790e449a401211651e726241de5b3",
+  "passed": true,
+  "cleaned": true
+}

@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-29T03:29:42.487Z",
+  "model": "opencode/space-bunny-free",
+  "sourceSha256": "4fd1f8ed18f5dd8eefe2a9d5e1b1a19fdd2e92c69cfeff6ba6f1f6d40f069b08",
+  "internalTools": "hidden",
+  "scenarios": [
+    {
+      "api": "responses",
+      "deltas": 16,
+      "characters": 2199,
+      "terminal": true,
+      "httpStatus": 200,
+      "firstDeltaMs": 13928,
+      "finalMatches": true,
+      "durationMs": 21282,
+      "deltaSpanMs": 7211,
+      "passed": true
+    },
+    {
+      "api": "chat",
+      "deltas": 7,
+      "characters": 1994,
+      "terminal": true,
+      "httpStatus": 200,
+      "firstDeltaMs": 14983,
+      "durationMs": 17711,
+      "deltaSpanMs": 2721,
+      "passed": true
+    }
+  ],
+  "opencode": "2.0.18",
+  "sourceChangedDuringRun": false,
+  "passed": true
+}

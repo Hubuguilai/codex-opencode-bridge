@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-29",
+  "model": "opencode/ling-3.0-flash-fin-free",
+  "opencode": "2.0.18",
+  "probe": "short text generation through official runtime",
+  "upstreamError": {
+    "type": "provider.invalid-request",
+    "status": 400,
+    "message": "Endpoint is unavailable"
+  },
+  "passed": false,
+  "boundary": "Diagnostic establishes the observed upstream error only; does not prove permanent unavailability."
+}

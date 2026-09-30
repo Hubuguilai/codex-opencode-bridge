@@ -1,0 +1,101 @@
+{
+  "date": "2026-09-29T06:03:43.221Z",
+  "mode": "full-suite",
+  "internalTools": "client-aliases",
+  "models": [
+    {
+      "model": "opencode/space-bunny-free",
+      "exitCode": 1,
+      "receipt": "space-bunny-free.json",
+      "sourceSha256": "8d8f543c0f402110ea01c53e3b8fdda3b0c5520332a08b5ac9cfe84ee3da3da1",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": false
+        },
+        {
+          "name": "followup",
+          "passed": true
+        },
+        {
+          "name": "repair",
+          "passed": true
+        },
+        {
+          "name": "denial",
+          "passed": true
+        },
+        {
+          "name": "patch-create",
+          "passed": true
+        },
+        {
+          "name": "patch-update",
+          "passed": true
+        },
+        {
+          "name": "patch-denial",
+          "passed": true
+        },
+        {
+          "name": "cancel",
+          "passed": true
+        },
+        {
+          "name": "timeout",
+          "passed": true
+        },
+        {
+          "name": "recovery",
+          "passed": true
+        }
+      ],
+      "passed": false
+    },
+    {
+      "model": "opencode/mimo-v2.6-flash-free",
+      "exitCode": 1,
+      "receipt": "mimo-v2.6-flash-free.json",
+      "sourceSha256": "8d8f543c0f402110ea01c53e3b8fdda3b0c5520332a08b5ac9cfe84ee3da3da1",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": false
+        }
+      ],
+      "passed": false
+    },
+    {
+      "model": "opencode/longcat-2.5-preview-free",
+      "exitCode": 1,
+      "receipt": "longcat-2.5-preview-free.json",
+      "sourceSha256": "8d8f543c0f402110ea01c53e3b8fdda3b0c5520332a08b5ac9cfe84ee3da3da1",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": false
+        }
+      ],
+      "passed": false
+    },
+    {
+      "model": "opencode/big-pickle",
+      "exitCode": 1,
+      "receipt": "big-pickle.json",
+      "sourceSha256": "8d8f543c0f402110ea01c53e3b8fdda3b0c5520332a08b5ac9cfe84ee3da3da1",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": false
+        }
+      ],
+      "passed": false
+    }
+  ],
+  "sourceConsistent": true,
+  "passed": false
+}

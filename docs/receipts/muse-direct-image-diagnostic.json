@@ -1,0 +1,111 @@
+{
+  "date": "2026-09-30T04:43:43.010Z",
+  "route": "direct_prepared_bridge_real_codex",
+  "model": "opencode/muse-spark-1.3-contributor-free",
+  "warnings": [
+    {
+      "elapsedMs": 16318,
+      "code": "client_alias_read"
+    },
+    {
+      "elapsedMs": 25117,
+      "code": "client_alias_write"
+    },
+    {
+      "elapsedMs": 34778,
+      "code": "image_detail_auto"
+    }
+  ],
+  "media": [
+    {
+      "event": {
+        "model": "opencode/muse-spark-1.3-contributor-free",
+        "check": "text",
+        "passed": true
+      },
+      "counts": {
+        "imageParts": 0,
+        "inlineImages": 0,
+        "remoteImages": 0
+      }
+    },
+    {
+      "event": {
+        "model": "opencode/muse-spark-1.3-contributor-free",
+        "check": "client_file_tools",
+        "passed": true
+      },
+      "counts": {
+        "imageParts": 0,
+        "inlineImages": 0,
+        "remoteImages": 0
+      }
+    },
+    {
+      "event": {
+        "model": "opencode/muse-spark-1.3-contributor-free",
+        "check": "uploaded_image",
+        "passed": false
+      },
+      "counts": {
+        "imageParts": 1,
+        "inlineImages": 1,
+        "remoteImages": 0
+      }
+    },
+    {
+      "event": {
+        "model": "opencode/muse-spark-1.3-contributor-free",
+        "errorCategory": "verification_assertion"
+      },
+      "counts": {
+        "imageParts": 1,
+        "inlineImages": 1,
+        "remoteImages": 0
+      }
+    }
+  ],
+  "sourceSha256": "c4efc81fc31bd16415ecf6dbd80079c2eb2f0348e7a0a47cc06150afadf5adbb",
+  "runtime": "2.0.18",
+  "client": {
+    "model": "opencode/muse-spark-1.3-contributor-free",
+    "route": "direct_prepared_bridge_real_codex",
+    "checks": [
+      {
+        "name": "text",
+        "passed": true,
+        "durationMs": 8049,
+        "clientToolEvents": 0,
+        "imageToolEvents": 0
+      },
+      {
+        "name": "client_file_tools",
+        "passed": true,
+        "durationMs": 26153,
+        "clientToolEvents": 3,
+        "imageToolEvents": 0
+      },
+      {
+        "name": "uploaded_image",
+        "passed": false,
+        "durationMs": 87594,
+        "clientToolEvents": 0,
+        "imageToolEvents": 0
+      }
+    ],
+    "desktopPickerVerified": false,
+    "activeCheck": "uploaded_image",
+    "imageDiagnostics": {
+      "finalTextLength": 81,
+      "agentMessages": 1,
+      "exactDigitMatch": false,
+      "containsExpectedDigitGroup": false,
+      "sixDigitGroups": 0,
+      "claimsMissingImage": true
+    },
+    "passed": false,
+    "errorCategory": "verification_assertion"
+  },
+  "passed": false,
+  "cleaned": true
+}

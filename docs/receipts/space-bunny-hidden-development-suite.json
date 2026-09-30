@@ -1,0 +1,93 @@
+{
+  "sourceSha256": "aea154165128b2bb25a8478389cc4c8d7f44d9e0590c0ab5ee2ae0f9939a4dcd",
+  "gitHead": "031de00c28cdf250ef60dab8c97c7f7968d53879",
+  "date": "2026-09-29T03:10:48.995Z",
+  "model": "opencode/space-bunny-free",
+  "toolTransport": "direct",
+  "internalTools": "hidden",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "create",
+      "status": "completed",
+      "commands": 2,
+      "durationMs": 18287,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "followup",
+      "status": "failed",
+      "error": "stream disconnected before completion: OpenCode generation failed.",
+      "commands": 0,
+      "durationMs": 7408,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "product": false
+      },
+      "passed": false
+    },
+    {
+      "name": "repair",
+      "status": "completed",
+      "commands": 6,
+      "durationMs": 35652,
+      "checks": {
+        "testPassed": true,
+        "testUnchanged": true
+      },
+      "passed": true
+    },
+    {
+      "name": "denial",
+      "status": "completed",
+      "commands": 1,
+      "durationMs": 10405,
+      "checks": {
+        "approvalWasDenied": true,
+        "fileAbsent": true
+      },
+      "passed": true
+    },
+    {
+      "name": "cancel",
+      "status": "completed",
+      "checks": {
+        "reachedBackend": true,
+        "interrupted": true,
+        "backendReleased": true,
+        "manifestRemoved": true
+      },
+      "passed": true
+    },
+    {
+      "name": "timeout",
+      "status": "completed",
+      "checks": {
+        "deadlineReported": true,
+        "backendReleased": true
+      },
+      "passed": true
+    },
+    {
+      "name": "recovery",
+      "status": "completed",
+      "commands": 0,
+      "durationMs": 3839,
+      "checks": {
+        "backendReleased": true
+      },
+      "passed": true
+    }
+  ],
+  "opencode": "2.0.18",
+  "passed": false,
+  "sourceChangedDuringRun": true,
+  "evidenceNote": "Development run overlapped an HTTP-guard edit; retain the failed follow-up but do not treat this as an exact-source acceptance receipt."
+}

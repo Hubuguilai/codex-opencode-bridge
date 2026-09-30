@@ -1,0 +1,91 @@
+{
+  "sourceSha256": "220351ec36d8145bbb8e10296c0766a08ea4aface066556d70cc5151f2c2a886",
+  "gitHead": "031de00c28cdf250ef60dab8c97c7f7968d53879",
+  "date": "2026-09-29T03:15:04.392Z",
+  "model": "opencode/space-bunny-free",
+  "toolTransport": "direct",
+  "internalTools": "hidden",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "create",
+      "status": "completed",
+      "commands": 3,
+      "durationMs": 19249,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "upstreamDidNotWrite": true
+      },
+      "passed": true
+    },
+    {
+      "name": "followup",
+      "status": "completed",
+      "commands": 3,
+      "durationMs": 22489,
+      "checks": {
+        "marker": true,
+        "sum": true,
+        "product": true
+      },
+      "passed": true
+    },
+    {
+      "name": "repair",
+      "status": "completed",
+      "commands": 3,
+      "durationMs": 17630,
+      "checks": {
+        "testPassed": true,
+        "testUnchanged": true
+      },
+      "passed": true
+    },
+    {
+      "name": "denial",
+      "status": "completed",
+      "commands": 1,
+      "durationMs": 8032,
+      "checks": {
+        "approvalWasDenied": true,
+        "fileAbsent": true
+      },
+      "passed": true
+    },
+    {
+      "name": "cancel",
+      "status": "completed",
+      "checks": {
+        "reachedBackend": true,
+        "interrupted": true,
+        "backendReleased": true,
+        "manifestRemoved": true
+      },
+      "passed": true
+    },
+    {
+      "name": "timeout",
+      "status": "completed",
+      "checks": {
+        "deadlineReported": true,
+        "backendReleased": true
+      },
+      "passed": true
+    },
+    {
+      "name": "recovery",
+      "status": "completed",
+      "commands": 0,
+      "durationMs": 3772,
+      "checks": {
+        "backendReleased": true
+      },
+      "passed": true
+    }
+  ],
+  "opencode": "2.0.18",
+  "passed": true,
+  "sourceChangedDuringRun": false
+}

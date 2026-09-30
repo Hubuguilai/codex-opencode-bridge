@@ -1,0 +1,48 @@
+{
+  "date": "2026-09-30T03:49:55.968Z",
+  "type": "mock-upstream-router-integration",
+  "checks": {
+    "registryAccepted": true,
+    "nativeCatalogPreserved": true,
+    "codexCatalogLoaded": true,
+    "modelMapped": true,
+    "toolNamespacePreserved": true,
+    "reasoningPreserved": true,
+    "callIdReturned": true,
+    "stateRemoved": true,
+    "sourceFilesUnchanged": true
+  },
+  "routerRevision": "b90aa60e257bbcc33855aad7d43954c1a09b1311",
+  "routerSourceSha256": "c47a2543a48a501e24465dc98fa0007263547800eeecb230ff163f875e563d50",
+  "routerWorktreeDirty": true,
+  "planSha256": "2eff297bbd4b87aae16193338da0bba50c61807d4e0c0ebe3458e6a15f2f06e3",
+  "models": [
+    "opencode-native-bridge/opencode/big-pickle",
+    "opencode-native-bridge/opencode/muse-spark-1.3-contributor-free"
+  ],
+  "existingCatalogEntries": 0,
+  "proposedCatalogEntries": 2,
+  "routes": [
+    {
+      "model": "opencode-native-bridge/opencode/big-pickle",
+      "modelMapped": true,
+      "toolNamespacePreserved": true,
+      "reasoningPreserved": true,
+      "callIdReturned": true,
+      "router_uploaded_imageRejectedBeforeUpstream": true,
+      "forwarder_uploaded_imageRejectedBeforeUpstream": true,
+      "router_tool_imageRejectedBeforeUpstream": true,
+      "forwarder_tool_imageRejectedBeforeUpstream": true
+    },
+    {
+      "model": "opencode-native-bridge/opencode/muse-spark-1.3-contributor-free",
+      "modelMapped": true,
+      "toolNamespacePreserved": true,
+      "reasoningPreserved": true,
+      "callIdReturned": true,
+      "uploaded_imageBytesPreserved": true,
+      "tool_imageBytesPreserved": true
+    }
+  ],
+  "passed": true
+}

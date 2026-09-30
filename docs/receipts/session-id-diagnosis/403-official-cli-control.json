@@ -1,0 +1,9 @@
+{
+  "date": "2026-09-29T06:20:50.567377+00:00",
+  "model": "opencode/big-pickle",
+  "mode": "official-cli-standalone-build",
+  "bridge": false,
+  "exitCode": 0,
+  "freeTierClientRejection": false,
+  "controlMarkerReceived": true
+}

@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-29T06:24:17.514Z",
+  "sourceAndCliSha256": "2343f5969f7c1a035f0706e7a04f56200c029e42fc6c559e185bc7fd562c9f3f",
+  "modelGenerations": 0,
+  "checks": {
+    "creationCommittedAfterOriginalCleanup": true,
+    "ownedRuntimeExitedBeforeDriverCrash": true,
+    "driverKilledWithoutCleanup": true,
+    "absentPIDsWithUnclosedOwnership": true,
+    "recoveryCompleted": true,
+    "lateCommittedSessionRemoved": true,
+    "unrelatedSessionPreserved": true,
+    "preparationRemovable": true
+  },
+  "opencode": "2.0.18",
+  "passed": true
+}

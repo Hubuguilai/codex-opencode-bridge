@@ -1,0 +1,121 @@
+{
+  "date": "2026-09-29T03:10:22.932Z",
+  "model": "opencode/space-bunny-free",
+  "sourceSha256": "aea154165128b2bb25a8478389cc4c8d7f44d9e0590c0ab5ee2ae0f9939a4dcd",
+  "scenarios": [
+    {
+      "mode": "guarded",
+      "opencode": "2.0.18",
+      "returnedClientCall": true,
+      "durationMs": 3293,
+      "context": {
+        "mode": "guarded",
+        "step": 1,
+        "tools": [
+          "bridge_client_echo_0",
+          "edit",
+          "execute",
+          "glob",
+          "grep",
+          "question",
+          "read",
+          "shell",
+          "skill",
+          "subagent",
+          "webfetch",
+          "websearch",
+          "write"
+        ]
+      },
+      "wire": {
+        "mode": "guarded",
+        "tools": [
+          "bridge_client_echo_0",
+          "edit",
+          "execute",
+          "glob",
+          "grep",
+          "question",
+          "read",
+          "shell",
+          "skill",
+          "subagent",
+          "webfetch",
+          "websearch",
+          "write"
+        ]
+      },
+      "upstream": {
+        "status": 200
+      }
+    },
+    {
+      "mode": "hidden",
+      "opencode": "2.0.18",
+      "returnedClientCall": true,
+      "durationMs": 3021,
+      "context": {
+        "mode": "hidden",
+        "step": 1,
+        "tools": [
+          "bridge_client_echo_0"
+        ]
+      },
+      "wire": {
+        "mode": "hidden",
+        "tools": [
+          "bridge_client_echo_0"
+        ]
+      },
+      "upstream": {
+        "status": 200
+      }
+    },
+    {
+      "mode": "guarded",
+      "opencode": "2.0.18",
+      "returnedClientCall": true,
+      "durationMs": 5129,
+      "context": {
+        "mode": "guarded",
+        "step": 1,
+        "tools": [
+          "bridge_client_echo_0",
+          "edit",
+          "execute",
+          "glob",
+          "grep",
+          "question",
+          "read",
+          "shell",
+          "skill",
+          "subagent",
+          "webfetch",
+          "websearch",
+          "write"
+        ]
+      },
+      "wire": {
+        "mode": "guarded",
+        "tools": [
+          "bridge_client_echo_0",
+          "edit",
+          "execute",
+          "glob",
+          "grep",
+          "question",
+          "read",
+          "shell",
+          "skill",
+          "subagent",
+          "webfetch",
+          "websearch",
+          "write"
+        ]
+      },
+      "upstream": {
+        "status": 200
+      }
+    }
+  ]
+}

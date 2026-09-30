@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-30T02:59:35.893Z",
+  "sourceFiles": {
+    "src/router-registration.mjs": "2e7415f7ef866e8aa74569c6cb6b86622e75153d90e892f993f708a13cc76a10",
+    "src/router-plan.mjs": "4f98bad9d7684495bfde6749f8c464caa9e02f60705e59e9209f1337d1da9726",
+    "src/model-profiles.mjs": "8253716adc3d582c269aef952f43953bd89eea247d79fc719f428744d65b1e3c",
+    "scripts/router-publication-check.mjs": "42e10956f3c1d804fd75ce3c277a4588c7761e460b7a348c157c363174547842"
+  },
+  "passed": true,
+  "upstreamPinnedUnmodified": true,
+  "realCatalogPublication": true,
+  "missingModelRollback": true,
+  "nativeSourcePreserved": true,
+  "nativeSignedInPickerUntested": true,
+  "registrationRemoval": true,
+  "modelRemoveAndAdd": true,
+  "modelUpdatePublicationRollback": true,
+  "providerAndCredentialsPreserved": true,
+  "modelEditsPreserved": true,
+  "unrelatedUserModelPreserved": true,
+  "serviceRestartTested": false,
+  "desktopPickerTested": false
+}

@@ -1,0 +1,12 @@
+{
+  "scope": "Last primary provider request at uploaded-image stream failure; counts only, byte identity and provider perception not verified",
+  "event": {
+    "model": "opencode-native-bridge/opencode/muse-spark-1.3-contributor-free",
+    "errorCategory": "stream_interrupted"
+  },
+  "media": {
+    "imageParts": 1,
+    "inlineImages": 1,
+    "remoteImages": 0
+  }
+}

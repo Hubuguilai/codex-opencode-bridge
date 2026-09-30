@@ -1,0 +1,66 @@
+{
+  "date": "2026-09-29T04:31:51.728Z",
+  "type": "mock-upstream-router-integration",
+  "checks": {
+    "registryAccepted": true,
+    "nativeCatalogPreserved": true,
+    "codexCatalogLoaded": true,
+    "modelMapped": true,
+    "toolNamespacePreserved": true,
+    "reasoningPreserved": true,
+    "callIdReturned": true,
+    "stateRemoved": true,
+    "sourceFilesUnchanged": true
+  },
+  "routerRevision": "b90aa60e257bbcc33855aad7d43954c1a09b1311",
+  "routerSourceSha256": "47a2e3e86c93a0513d6302d18834c053e35953d69f07994a09372164a93426b2",
+  "routerWorktreeDirty": true,
+  "planSha256": "f9c10e2e286a1a6b690a25364c172d1a7825a87cefa1ba98a8c45fa0ad7b5611",
+  "models": [
+    "opencode-native-bridge/opencode/space-bunny-free",
+    "opencode-native-bridge/opencode/nemotron-3-ultra-free",
+    "opencode-native-bridge/opencode/mimo-v2.6-flash-free",
+    "opencode-native-bridge/opencode/longcat-2.5-preview-free",
+    "opencode-native-bridge/opencode/big-pickle"
+  ],
+  "existingCatalogEntries": 53,
+  "proposedCatalogEntries": 58,
+  "routes": [
+    {
+      "model": "opencode-native-bridge/opencode/space-bunny-free",
+      "modelMapped": true,
+      "toolNamespacePreserved": true,
+      "reasoningPreserved": true,
+      "callIdReturned": true
+    },
+    {
+      "model": "opencode-native-bridge/opencode/nemotron-3-ultra-free",
+      "modelMapped": true,
+      "toolNamespacePreserved": true,
+      "reasoningPreserved": true,
+      "callIdReturned": true
+    },
+    {
+      "model": "opencode-native-bridge/opencode/mimo-v2.6-flash-free",
+      "modelMapped": true,
+      "toolNamespacePreserved": true,
+      "reasoningPreserved": true,
+      "callIdReturned": true
+    },
+    {
+      "model": "opencode-native-bridge/opencode/longcat-2.5-preview-free",
+      "modelMapped": true,
+      "toolNamespacePreserved": true,
+      "reasoningPreserved": true,
+      "callIdReturned": true
+    },
+    {
+      "model": "opencode-native-bridge/opencode/big-pickle",
+      "modelMapped": true,
+      "toolNamespacePreserved": true,
+      "reasoningPreserved": true,
+      "callIdReturned": true
+    }
+  ],
+  "passed": true
+}

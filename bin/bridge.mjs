@@ -1,25 +1,91 @@
 #!/usr/bin/env node
+import {routerMigrationPreflight} from '../src/router-migration-preflight.mjs';
+import {verifyInstalled} from '../src/installed-verification.mjs';
+import {setDesktopModels,recoverDesktopModels} from '../src/desktop-models.mjs';
+import {upgradeDesktop,recoverDesktopUpgrade} from '../src/desktop-upgrade.mjs';
+import {installationStatus} from '../src/installation-status.mjs';
+import {installDesktop,uninstallDesktop} from '../src/desktop-install.mjs';
+import {loadRouter,registerRouter,unregisterRouter} from '../src/router-registration.mjs';
+import {installService,serviceStatus,removeService} from '../src/service.mjs';
+import {installRuntime} from '../src/runtime-install.mjs';
+import {doctor} from '../src/doctor.mjs';
+import { prepareRouterPlan } from '../src/router-plan.mjs';
+import { prepareDirectory, removePreparedDirectory, preparedEnvironment } from '../src/setup.mjs';
 import { readConfig } from '../src/config.mjs';
 import { startOpenCode } from '../src/opencode.mjs';
 import { createBridge } from '../src/server.mjs';
+import { parseCommand } from '../src/cli.mjs';
+import { recoverSessions } from '../src/recovery.mjs';
 
-const command = process.argv[2] || 'serve';
-if (['--help', '-h', 'help'].includes(command)) {
-  console.log(`codex-opencode-bridge v0.1.0\n\nCommands:\n  serve   Start an authenticated local bridge and OpenCode v2\n  init    Create a private local token and print its file path\n\nConfiguration: BRIDGE_PORT, OPENCODE_PORT, OPENCODE_BIN, BRIDGE_MODELS,\nBRIDGE_STATE_DIR, BRIDGE_TOKEN, BRIDGE_TIMEOUT_MS, BRIDGE_MAX_BODY_BYTES.\nSee README.md. No client configuration is edited automatically.`);
-} else if (!['serve', 'init'].includes(command)) {
+let invocation;
+try { invocation = parseCommand(process.argv.slice(2)); }
+catch (error) { console.error(error.message); process.exit(1); }
+const {command, directory, options} = invocation;
+if (command === 'help') {
+  console.log(`codex-opencode-bridge v0.2.0-rc.1\n\nCommands:\n  migration-preflight [--router-root DIR]  Read-only legacy Router source reconciliation\n  verify --live [--directory DIR] [--route router|bridge]  Real Codex text/tool/image checks using your model access\n  models --models ID,ID [--directory DIR]  Set the complete desired model selection\n  recover-models [--directory DIR]  Restore an interrupted model change\n  upgrade [--directory DIR]  Switch to this checkout version with health-checked recovery\n  rollback [--directory DIR]  Restore the previous managed version\n  recover-upgrade [--directory DIR]  Restore after an interrupted upgrade\n  status [--directory DIR]  Read-only service, health and model publication checks\n  install [--directory DIR] [--router-root DIR] [--models ID,ID]  Install bridge and bootstrap Router when absent\n  uninstall [--directory DIR]  Remove this managed bridge registration and service\n  register-router PLAN_DIR --router-root DIR  Register models through the installed Router\n  unregister-router PLAN_DIR --router-root DIR  Remove this registration while preserving other models\n  install-service DIR --binary PATH  Start a managed macOS bridge service\n  service-status DIR  Inspect the managed service\n  remove-service DIR  Stop and remove only its service registration\n  install-runtime [--directory DIR]  Install an isolated pinned official OpenCode runtime\n  doctor  Read-only prerequisite and supported-model checks\n  serve   Start an authenticated local bridge and OpenCode v2\n  serve-prepared DIR  Start a reviewed preparation without manual environment settings\n  init    Create a private local token and print its file path\n  prepare DIR [--models ID,ID] [--model DEFAULT_ID] [--catalog PATH]  Prepare isolated config files\n  prepare-router DIR --prepared DIR --router-state DIR  Export a read-only desktop integration plan\n  recover-prepared DIR  Clean verified abandoned bridge sessions without generating text\n  remove-prepared DIR  Remove unmodified prepared files after stopping service\n\nConfiguration: BRIDGE_MODE, BRIDGE_PORT, OPENCODE_PORT, OPENCODE_BIN, BRIDGE_MODELS,\nBRIDGE_STATE_DIR, BRIDGE_TOKEN, BRIDGE_TIMEOUT_MS, BRIDGE_MAX_BODY_BYTES.\nSee README.md. Installation commands manage owned client configuration; read-only commands do not.`);
+} else if(command==='migration-preflight') {
+ try{const result=routerMigrationPreflight({routerRoot:options['router-root']});console.log(JSON.stringify(result,null,2));if(!result.sourceMergeable)process.exitCode=1;}catch(error){console.error(error.message);process.exitCode=1;}
+} else if(command==='verify') {
+ try {const result=await verifyInstalled({directory:options.directory,live:options.live,route:options.route,onProgress:value=>console.log(JSON.stringify(value))});console.log(JSON.stringify(result,null,2));if(!result.passed)process.exitCode=1;}
+ catch(error){console.error(error.message);process.exitCode=1;}
+} else if (['models','recover-models'].includes(command)) {
+ try {console.log(JSON.stringify(await (command==='models'?setDesktopModels:recoverDesktopModels)({directory:options.directory,models:options.models?.split(',')}),null,2));}
+ catch(error){console.error(error.message);process.exitCode=1;}
+} else if (['upgrade','rollback','recover-upgrade'].includes(command)) {
+ try {const args={directory:options.directory,rollback:command==='rollback'};console.log(JSON.stringify(await (command==='recover-upgrade'?recoverDesktopUpgrade:upgradeDesktop)(args),null,2));}
+ catch(error){console.error(error.message);process.exitCode=1;}
+} else if (command==='status') {
+ try {const result=await installationStatus({directory:options.directory});console.log(JSON.stringify(result,null,2));if(!result.configurationReady)process.exitCode=1;}
+ catch(error){console.error(error.message);process.exitCode=1;}
+} else if (['install','uninstall'].includes(command)) {
+ try {const args={directory:options.directory,routerRoot:options['router-root'],models:options.models?.split(',')};console.log(JSON.stringify(await (command==='install'?installDesktop:uninstallDesktop)(args),null,2));}
+ catch(error){console.error(error.message);process.exitCode=1;}
+} else if (['register-router','unregister-router'].includes(command)) {
+ try {const api=await loadRouter(options['router-root']);console.log(JSON.stringify(await (command==='register-router'?registerRouter:unregisterRouter)(directory,{api}),null,2));}
+ catch(error){console.error(error.message);process.exitCode=1;}
+} else if (['install-service','service-status','remove-service'].includes(command)) {
+ try {const result=command==='install-service'?await installService(directory,{binary:options.binary}):command==='service-status'?serviceStatus(directory):removeService(directory);console.log(JSON.stringify(result,null,2));}
+ catch(error){console.error(error.message);process.exitCode=1;}
+} else if (command === 'install-runtime') {
+ try {console.log(JSON.stringify(installRuntime({directory:options.directory}),null,2));}
+ catch(error){console.error(error.message);process.exitCode=1;}
+} else if (command === 'doctor') {
+ const result=doctor();console.log(JSON.stringify(result,null,2));if(!result.prerequisitesReady)process.exitCode=1;
+} else if (command === 'recover-prepared') {
+  let runtime;
+  try {
+    const env = preparedEnvironment(directory);
+    const config = {...readConfig(env), mode: 'text'};
+    runtime = await startOpenCode(config, env);
+    const result = await recoverSessions(config.stateDir, runtime.backend);
+    console.log(JSON.stringify(result, null, 2));
+    if (!result.complete) process.exitCode = 1;
+  } catch (error) { console.error(error.message); process.exitCode = 1; }
+  finally { if (runtime) await runtime.stop(); }
+} else if(command==='prepare-router') {
+  try {
+    console.log(JSON.stringify(prepareRouterPlan(directory,{prepared:options.prepared,routerState:options['router-state']}),null,2));
+  }catch(error){console.error(error.message);process.exitCode=1;}
+} else if (['prepare', 'remove-prepared'].includes(command)) {
+  try {
+    const result = command === 'prepare' ? prepareDirectory(directory, { model: options.model, models: options.models?.split(','), catalog: options.catalog }) : removePreparedDirectory(directory);
+    console.log(JSON.stringify(result, null, 2));
+  } catch (error) { console.error(error.message); process.exitCode = 1; }
+} else if (!['serve', 'serve-prepared', 'init'].includes(command)) {
   console.error('Unknown command. Use --help.'); process.exitCode = 1;
 } else {
   let runtime, bridge;
   try {
-    const config = readConfig();
+    const env=command==='serve-prepared'?preparedEnvironment(directory):process.env;
+    const config = readConfig(env);
     if (command === 'init') {
       console.log(process.env.BRIDGE_TOKEN ? 'Using BRIDGE_TOKEN from the environment.' : `Local token file: ${config.tokenPath}`);
     } else {
-      runtime = await startOpenCode(config);
+      runtime = await startOpenCode(config,env);
       bridge = createBridge(config, runtime.backend);
       await bridge.listen();
-      console.log(`Bridge ready at http://${config.host}:${config.port}/v1 (text-only).`);
-      console.log(process.env.BRIDGE_TOKEN ? 'Authentication: BRIDGE_TOKEN.' : `Authentication token file: ${config.tokenPath}`);
+      console.log(`Bridge ready at http://${config.host}:${config.port}/v1 (${config.mode}).`);
+      console.log(env.BRIDGE_TOKEN ? 'Authentication: BRIDGE_TOKEN.' : `Authentication token file: ${config.tokenPath}`);
       let stopping = false;
       const stop = async () => {
         if (stopping) return;

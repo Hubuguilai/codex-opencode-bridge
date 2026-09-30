@@ -1,0 +1,90 @@
+{
+  "date": "2026-09-30T04:56:45.690Z",
+  "type": "mock-upstream-router-integration",
+  "checks": {
+    "registryAccepted": true,
+    "nativeCatalogPreserved": true,
+    "codexCatalogLoaded": true,
+    "terminalFailuresPreserved": true,
+    "modelMapped": true,
+    "toolNamespacePreserved": true,
+    "reasoningPreserved": true,
+    "callIdReturned": true,
+    "stateRemoved": true
+  },
+  "routerRevision": "",
+  "routerSourceSha256": "dacdc4928dd6e27e090103acf08cd42fe5ac8966c910781c0a24906fdd9db1a7",
+  "routerWorktreeDirty": false,
+  "models": [
+    "opencode-native-bridge/opencode/nemotron-3-ultra-free"
+  ],
+  "existingCatalogEntries": 11,
+  "proposedCatalogEntries": 12,
+  "routes": [
+    {
+      "model": "opencode-native-bridge/opencode/nemotron-3-ultra-free",
+      "modelMapped": true,
+      "toolNamespacePreserved": true,
+      "reasoningPreserved": true,
+      "callIdReturned": true
+    }
+  ],
+  "failureRoutes": [
+    {
+      "route": "forwarder",
+      "status": 429,
+      "terminalFailure": true,
+      "errorCodePreserved": true,
+      "safeMeaningPreserved": true,
+      "falseCompletion": false
+    },
+    {
+      "route": "router_gateway_forwarder",
+      "status": 429,
+      "terminalFailure": true,
+      "errorCodePreserved": true,
+      "safeMeaningPreserved": true,
+      "falseCompletion": false
+    },
+    {
+      "route": "forwarder",
+      "status": 504,
+      "terminalFailure": true,
+      "errorCodePreserved": true,
+      "safeMeaningPreserved": true,
+      "falseCompletion": false
+    },
+    {
+      "route": "router_gateway_forwarder",
+      "status": 504,
+      "terminalFailure": true,
+      "errorCodePreserved": true,
+      "safeMeaningPreserved": true,
+      "falseCompletion": false
+    }
+  ],
+  "clientFailures": [
+    {
+      "status": 429,
+      "category": "rate_limit",
+      "expected": "rate_limit",
+      "passed": true
+    },
+    {
+      "status": 504,
+      "category": "timeout",
+      "expected": "timeout",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "fixture": {
+    "baseCompatibility": "strict-image-input-v1",
+    "disposableRouterCopy": true,
+    "installerIntegration": true,
+    "appliedCompatibility": "strict-images-terminal-errors-v2",
+    "realProviderInference": false,
+    "sourcePreserved": true,
+    "repairSha256": "083daa2f1fa80b6ea54fbe1a4bedd77a3c3145f6fa3b0d0e6917bbdeacfcdf08"
+  }
+}

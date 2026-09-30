@@ -1,0 +1,94 @@
+{
+  "date": "2026-09-30T05:04:09.375Z",
+  "route": "direct_prepared_bridge_real_codex",
+  "model": "opencode/muse-spark-1.3-contributor-free",
+  "warnings": [
+    {
+      "elapsedMs": 3344,
+      "code": "image_detail_auto"
+    },
+    {
+      "elapsedMs": 12402,
+      "code": "image_detail_auto"
+    },
+    {
+      "elapsedMs": 17980,
+      "code": "image_detail_auto"
+    }
+  ],
+  "media": [
+    {
+      "event": {
+        "model": "opencode/muse-spark-1.3-contributor-free",
+        "check": "uploaded_image",
+        "passed": true
+      },
+      "counts": {
+        "imageParts": 1,
+        "inlineImages": 1,
+        "remoteImages": 0
+      },
+      "imageIntegrity": {
+        "expectedImages": 1,
+        "wireImages": 1,
+        "exactBytesInOrder": true
+      }
+    },
+    {
+      "event": {
+        "model": "opencode/muse-spark-1.3-contributor-free",
+        "check": "tool_returned_image",
+        "passed": true
+      },
+      "counts": {
+        "imageParts": 2,
+        "inlineImages": 2,
+        "remoteImages": 0
+      },
+      "imageIntegrity": {
+        "expectedImages": 2,
+        "wireImages": 2,
+        "exactBytesInOrder": true
+      }
+    }
+  ],
+  "sourceSha256": "21fcbc0e1c1c4e9339e365153cc68de50040bfe16d77ba4d70ae6ed1d27873fe",
+  "runtime": "2.0.18",
+  "client": {
+    "model": "opencode/muse-spark-1.3-contributor-free",
+    "route": "direct_prepared_bridge_real_codex",
+    "checks": [
+      {
+        "name": "uploaded_image",
+        "passed": true,
+        "durationMs": 11802,
+        "clientToolEvents": 0,
+        "imageToolEvents": 0
+      },
+      {
+        "name": "tool_returned_image",
+        "passed": true,
+        "durationMs": 10193,
+        "clientToolEvents": 0,
+        "imageToolEvents": 1
+      }
+    ],
+    "desktopPickerVerified": false,
+    "diagnosticOnly": true,
+    "omittedChecks": [
+      "text",
+      "client_file_tools"
+    ],
+    "imageDiagnostics": {
+      "finalTextLength": 6,
+      "agentMessages": 1,
+      "exactDigitMatch": true,
+      "containsExpectedDigitGroup": true,
+      "sixDigitGroups": 1,
+      "claimsMissingImage": false
+    },
+    "passed": true
+  },
+  "passed": true,
+  "cleaned": true
+}

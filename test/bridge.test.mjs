@@ -22,8 +22,8 @@ async function fixture(t, handler, overrides = {}) {
     if (handler && await handler(req, res, body)) return;
     let result = {};
     if (req.url === '/api/info') result = { version: '2.0.18' };
-    else if (req.url === '/api/session') result = { data: { id: 'ses_fixture' } };
-    else if (req.url.endsWith('/message?limit=100')) {
+    else if (req.url === '/api/session') result = { data: { id: body.id } };
+    else if (req.url.endsWith('/message?limit=100&order=asc')) {
       polls++;
       result = { data: [{ type: 'assistant', content: [{ type: 'text', text: polls === 1 ? '你' : '你好' }],
         time: polls === 1 ? {} : { completed: Date.now() }, finish: 'stop', tokens: { input: 5, output: 2, reasoning: 3 } }] };
@@ -144,7 +144,7 @@ test('Stream failures do not emit a successful completed/DONE event', async t =>
 
 test('Client cancellation interrupts and deletes an active session', async t => {
   const { request, calls } = await fixture(t, (req, res) => {
-    if (!req.url.endsWith('/message?limit=100')) return false;
+    if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end(JSON.stringify({ data: [] })); return true;
   });
   const controller = new AbortController();
@@ -177,7 +177,7 @@ test('Upstream HTTP 204 deletion is successful cleanup', async t => {
 
 test('Generation timeout interrupts, cleans up and returns 504', async t => {
   const { request, calls } = await fixture(t, (req, res) => {
-    if (!req.url.endsWith('/message?limit=100')) return false;
+    if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end('{"data":[]}'); return true;
   }, { timeoutMs: 80 });
   assert.equal((await request('/v1/chat/completions', payload)).status, 504);
@@ -187,7 +187,7 @@ test('Generation timeout interrupts, cleans up and returns 504', async t => {
 
 test('Concurrent overflow is rejected without creating another session', async t => {
   const { request, calls } = await fixture(t, (req, res) => {
-    if (!req.url.endsWith('/message?limit=100')) return false;
+    if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end('{"data":[]}'); return true;
   }, { maxConcurrent: 1, timeoutMs: 200 });
   const first = await request('/v1/responses', { model, input: 'hello', stream: true });
@@ -196,23 +196,46 @@ test('Concurrent overflow is rejected without creating another session', async t
   assert.equal(calls.filter(x => x.path === '/api/session').length, 1);
 });
 
-test('Upstream access denial is preserved without reflecting provider error text', async t => {
-  const { request } = await fixture(t, (req, res) => {
-    if (!req.url.endsWith('/message?limit=100')) return false;
+for (const status of [401,403,429]) test(`Upstream HTTP ${status} is explicit in JSON and SSE without exposing provider text or retrying`, async t => {
+  const { request,calls } = await fixture(t, (req, res) => {
+    if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end(JSON.stringify({ data: [
       { type: 'idle', outcome: 'failed' },
-      { type: 'assistant', finish: 'error', error: { status: 403, message: 'private upstream detail' } },
+      { type: 'assistant', finish: 'error', error: { status, message: 'private upstream detail' } },
     ] })); return true;
   });
   const response = await request('/v1/chat/completions', payload);
-  assert.equal(response.status, 403);
-  assert.doesNotMatch(await response.text(), /private upstream detail/);
+  assert.equal(response.status, status);
+  const error=(await response.json()).error;
+  assert.equal(error.code,'upstream_access_or_quota');assert.match(error.message,new RegExp('HTTP '+status));
+  assert.doesNotMatch(error.message,/private upstream detail/);
+  assert.match(error.message,status===401?/authentication was rejected/:status===403?/access was rejected/:/rate or quota limit/);
+  const stream=await request('/v1/responses',{model,input:'test',stream:true});
+  const wire=await stream.text();assert.match(wire,/response.failed/);assert.match(wire,new RegExp('HTTP '+status));assert.doesNotMatch(wire,/private upstream detail/);
+  assert.equal(calls.filter(call=>call.path==='/api/session').length,2);
+});
+
+for(const scenario of [
+ {type:'provider.invalid-request',status:400,message:'Maximum context length exceeded. PRIVATE_SENTINEL',code:'context_length_exceeded',http:400},
+ {type:'provider.invalid-request',status:422,message:'Invalid schema for function example. PRIVATE_SENTINEL',code:'upstream_tool_schema',http:422},
+ {type:'provider.invalid-request',status:400,message:'Unrecognized setting PRIVATE_SENTINEL',code:'generation_failed',http:502},
+ {type:'unknown',status:500,message:'context_length_exceeded PRIVATE_SENTINEL',code:'generation_failed',http:502},
+])test(`Provider error ${scenario.code}/${scenario.status} has a safe JSON/SSE outcome`,async t=>{
+ const {request,calls}=await fixture(t,(req,res)=>{
+  if(!req.url.endsWith('/message?limit=100&order=asc'))return false;
+  res.end(JSON.stringify({data:[{type:'assistant',finish:'error',error:{type:scenario.type,status:scenario.status,message:scenario.message}}]}));return true;
+ });
+ const response=await request('/v1/responses',{model,input:'test'});assert.equal(response.status,scenario.http);
+ const error=(await response.json()).error;assert.equal(error.code,scenario.code);assert.ok(!JSON.stringify(error).includes('PRIVATE_SENTINEL'));
+ const stream=await request('/v1/responses',{model,input:'test',stream:true}),wire=await stream.text();
+ assert.ok(wire.includes('response.failed'));assert.ok(wire.includes(scenario.code));assert.ok(!wire.includes('response.completed'));assert.ok(!wire.includes('PRIVATE_SENTINEL'));
+ assert.equal(calls.filter(x=>x.path==='/api/session').length,2);
 });
 
 test('Changed upstream text fails instead of silently corrupting a streamed answer', async t => {
   let n = 0;
   const { request } = await fixture(t, (req, res) => {
-    if (!req.url.endsWith('/message?limit=100')) return false;
+    if (!req.url.endsWith('/message?limit=100&order=asc')) return false;
     res.end(JSON.stringify({ data: [{ type: 'assistant', content: [{ type: 'text', text: n++ === 0 ? 'abc' : 'xyz' }], time: {} }] })); return true;
   });
   const response = await request('/v1/responses', { model, input: 'hello', stream: true });
@@ -231,4 +254,39 @@ test('Known create session is cleaned even if client cancelled while creation co
   await assert.rejects(pending);
   assert.equal(calls.at(-1).method, 'DELETE');
   assert.ok(!calls.some(x => x.path.endsWith('/prompt')));
+});
+
+
+test('Lost creation reply still cleans the committed client-selected session without sending a prompt',async t=>{
+ const {backend,calls}=await fixture(t,async(req,res)=>{
+  if(req.url==='/api/session'){res.destroy();return true;}return false;
+ });
+ await assert.rejects(backend.generate({model,prompt:'not sent'},{signal:AbortSignal.timeout(1000),onDelta:()=>{}}));
+ const created=calls.find(x=>x.path==='/api/session');assert.match(created.body.id,/^ses_[a-f0-9]{12}[A-Za-z0-9]{14}$/);
+ assert.deepEqual(calls.slice(-2).map(x=>[x.path,x.method]),[[`/api/session/${created.body.id}/interrupt`,'POST'],[`/api/session/${created.body.id}`,'DELETE']]);
+ assert.equal(calls.some(x=>x.path.endsWith('/prompt')),false);
+});
+
+test('Mismatched creation identity fails without prompting or deleting the returned unrelated ID',async t=>{
+ const {backend,calls}=await fixture(t,async(req,res)=>{
+  if(req.url==='/api/session'){res.end(JSON.stringify({data:{id:'ses_unrelated'}}));return true;}return false;
+ });
+ await assert.rejects(backend.generate({model,prompt:'not sent'},{signal:AbortSignal.timeout(1000),onDelta:()=>{}}),{code:'opencode_protocol_error'});
+ assert.equal(calls.some(x=>x.path.includes('ses_unrelated')||x.path.endsWith('/prompt')),false);
+ assert.equal(calls.at(-1).path,'/api/session/'+calls[0].body.id);
+});
+
+
+test('Streaming timeout logs safe stage codes and never sends a completed response',async t=>{
+ const {request,backend,calls}=await fixture(t,(req,res)=>{
+  if(!req.url.endsWith('/message?limit=100&order=asc'))return false;
+  res.end('{"data":[]}');return true;
+ },{timeoutMs:80});
+ const warnings=[];backend.warn=code=>warnings.push(code);
+ const response=await request('/v1/responses',{model,input:'PRIVATE_INPUT',stream:true});
+ const wire=await response.text();
+ assert.ok(wire.includes('response.failed'));assert.ok(!wire.includes('response.completed'));
+ assert.deepEqual(warnings,['request_deadline','request_failed_request_cancelled']);
+ assert.ok(calls.some(x=>x.method==='DELETE'));
+ assert.ok(!JSON.stringify(warnings).includes('PRIVATE_INPUT'));
 });

@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-30T03:17:50.217Z",
+  "kind": "installed-client-verification",
+  "codeReleaseSha256": "26ec036efdbb55881d77aa5ebae298af3635e44cca1fd05b18dc13c2404f7a0e",
+  "route": "installed_bridge_direct_real_codex_client",
+  "desktopPickerVerified": false,
+  "routerForwardingVerified": false,
+  "models": [
+    {
+      "model": "opencode/big-pickle",
+      "route": "installed_bridge_direct_real_codex_client",
+      "checks": [
+        {
+          "name": "text",
+          "passed": true,
+          "durationMs": 2461,
+          "clientToolEvents": 0
+        },
+        {
+          "name": "client_file_tools",
+          "passed": true,
+          "durationMs": 28903,
+          "clientToolEvents": 4
+        }
+      ],
+      "desktopPickerVerified": false,
+      "passed": true
+    },
+    {
+      "model": "opencode/muse-spark-1.3-contributor-free",
+      "route": "installed_bridge_direct_real_codex_client",
+      "checks": [
+        {
+          "name": "text",
+          "passed": true,
+          "durationMs": 2446,
+          "clientToolEvents": 0
+        },
+        {
+          "name": "client_file_tools",
+          "passed": true,
+          "durationMs": 60612,
+          "clientToolEvents": 5
+        },
+        {
+          "name": "uploaded_image",
+          "passed": true,
+          "durationMs": 5090,
+          "clientToolEvents": 0
+        }
+      ],
+      "desktopPickerVerified": false,
+      "imageDiagnostics": {
+        "finalTextLength": 6,
+        "agentMessages": 1,
+        "exactDigitMatch": true,
+        "containsExpectedDigitGroup": true
+      },
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "skippedModels": [],
+  "next": "Verify the actual Desktop picker and Router route. This check used the installed bridge directly."
+}

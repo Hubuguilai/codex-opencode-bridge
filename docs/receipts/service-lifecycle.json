@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-30T01:50:17.479Z",
+  "platform": "macOS arm64",
+  "install": {
+    "installed": true,
+    "loaded": true,
+    "running": false,
+    "reused": false
+  },
+  "models": [
+    "opencode/big-pickle",
+    "opencode/muse-spark-1.3-contributor-free"
+  ],
+  "ready": true,
+  "repeat": {
+    "installed": true,
+    "loaded": true,
+    "running": true,
+    "reused": true
+  },
+  "beforeRemove": {
+    "installed": true,
+    "loaded": true,
+    "running": true
+  },
+  "remove": {
+    "removed": true,
+    "logsPreserved": true,
+    "preparationPreserved": true
+  },
+  "afterRemove": {
+    "installed": false,
+    "running": false
+  },
+  "preparationPreserved": true,
+  "tokenPreserved": true,
+  "inferencePerformed": false,
+  "cleanOperatingSystemVerified": false,
+  "rebootVerified": false,
+  "unitTestsPassed": 107
+}

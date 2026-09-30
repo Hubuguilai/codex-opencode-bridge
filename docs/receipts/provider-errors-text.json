@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-30T04:25:45.609Z",
+  "kind": "official-runtime-local-provider-errors",
+  "mode": "text",
+  "realProviderInference": false,
+  "modelsTested": [],
+  "checks": [
+    {
+      "name": "context",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    },
+    {
+      "name": "tool-schema",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    },
+    {
+      "name": "unknown",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    },
+    {
+      "name": "authentication",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    },
+    {
+      "name": "access",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    },
+    {
+      "name": "quota",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    }
+  ],
+  "sourceSha256": "8fe26ec16f446b8c0d3da34da18b857c6d46a4f32f39c31f298fb272d851c2fa",
+  "runtime": "2.0.18",
+  "runtimeCompactionDisabled": true,
+  "passed": true,
+  "cleaned": true
+}

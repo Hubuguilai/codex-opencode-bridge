@@ -1,132 +1,213 @@
 # codex-opencode-bridge
 
-A local, authenticated **text-response bridge for the OpenCode v2 session API**.
-Exposes OpenAI-compatible Chat Completions and a text subset of Responses.
-Experimental v0.1.0; this repository is currently private.
+Use supported OpenCode models from Codex's model menu, with file and command
+execution handled by Codex. The bridge runs locally through the official OpenCode
+runtime and your own model access.
 
-**Product target:** native Codex workspace and tool workflows for supported models.
-The text-only implementation below is a baseline, not completion of that goal.
-See the [native integration acceptance contract](docs/native-codex-target.md).
+[中文说明](docs/README.zh-CN.md) · [Model access](docs/opencode-access.md) ·
+[Verification](docs/verification.md) · [Release checklist](docs/release-readiness.json)
 
-[中文说明](docs/README.zh-CN.md) · [Prior art](docs/prior-art.md) · [Verification](docs/verification.md)
+**Private trial candidate: 0.2.0-rc.1.** See the [delivery summary and deferred gates](docs/private-trial.md). The installer is implemented, but a
+complete clean-machine desktop installation has not passed acceptance. There is
+no public release yet. Upgrade and model-selection lifecycle checks have passed;
+clean-client acceptance, current-release full model workflows and some first-install recovery remain open. Do not interpret an install
+success message as certification of the model picker or every Codex feature.
 
-```text
-Codex / compatible client
-  → local bridge (Bearer authentication, 127.0.0.1)
-  → official OpenCode v2 server (temporary Plan session)
-  → model available to the user's OpenCode installation
-```
+## Start here
 
-## What works, and what does not
+The first target is **macOS arm64**. macOS x64 has not been exercised; Windows and
+Linux desktop installation are not certified. Install Codex and Node.js **22.19+
+with npm** first. Python 3 is required for the file-tool compatibility aliases.
+Git is needed when the installer downloads Router. Automatic Node installation is
+not implemented.
 
-- `GET /health`, authenticated `GET /v1/models`.
-- `POST /v1/chat/completions` and `POST /v1/responses`: text, JSON and SSE.
-- Incremental text delivery by polling live OpenCode message snapshots. If a runtime
-  exposes text only at completion, it arrives as a single delta; no fake word streaming.
-- Full text history serialized into each fresh session; no silent truncation.
-- Client disconnect/deadline → interrupt and delete the known upstream session.
-- Model allowlist, request/output byte limits, bounded concurrency, authenticated loopback.
-- No runtime npm dependencies; Node.js 22+ and a separately installed OpenCode v2 required.
-
-**Not a full Codex coding backend.** Native Codex tool definitions/calls are rejected
-with HTTP 422. Images, audio, files, sampling/reasoning controls, structured output,
-`previous_response_id`, stored responses and background responses are unsupported.
-Responses streaming errors arrive as `response.failed` after HTTP headers have been sent.
-
-The upstream is an **OpenCode Plan agent**, not a raw model endpoint. OpenCode's own
-system prompt, tools, permissions and user-level configuration can affect behavior.
-An empty working directory is **not an OS sandbox**. Internal tools are not forwarded
-to Codex; if observed in the response, this adapter aborts the request, but they may
-already have run inside OpenCode. Run only with trusted local OpenCode configuration.
-See [security and lifecycle boundaries](docs/security.md).
-
-## Quick start
-
-Install Node.js 22+ and [OpenCode](https://opencode.ai). Configure your own access
-in OpenCode. The currently exercised runtime is `@opencode/cli` **2.0.18**; older
-`opencode-ai` v1 servers have a different API and are not supported.
+1. Follow [OpenCode account and model access](docs/opencode-access.md). Use your own
+   account; keys belong in a local login flow, not a chat or Git repository. Check
+   that the exact model answers in OpenCode.
+2. Obtain this repository. While private, access requires collaborator permission.
+3. Run the installer from the repository directory, or copy the Prompt below into
+   Codex with this repository open.
 
 ```sh
 git clone https://github.com/Hubuguilai/codex-opencode-bridge.git
 cd codex-opencode-bridge
-npm ci --ignore-scripts
-node bin/bridge.mjs init
-npm start
+node bin/bridge.mjs install
+node bin/bridge.mjs verify --live
 ```
 
-The repository is private, so cloning currently requires collaborator access.
-If `opencode` is not on PATH, set `OPENCODE_BIN` to its absolute executable path.
-The bridge never downloads a binary or searches arbitrary npm caches automatically.
+The installer reuses a compatible Router or downloads its pinned upstream source,
+installs a private OpenCode 2.0.18 runtime, prepares the two default models, starts
+a local service, checks its health, and registers the models through Router.
+It applies a shipped, version-checked Router compatibility change for strict image
+rejection on these routes, retaining protected original source backups. Unknown
+or edited Router versions are preserved and refused rather than patched blindly.
+Existing provider identities are not silently replaced. It does not restart Codex.
+See [the precise installer behavior and remaining gaps](docs/desktop-install.md).
 
-Default URL: `http://127.0.0.1:4396/v1`. The child runtime listens on port 4397.
-These differ from the original local prototype's ports. Use Ctrl-C to stop both.
-The local token is generated outside the repository with mode 0600. It is never
-printed; `init` reports its path.
+`verify --live` uses your OpenCode access and can consume paid quota if applicable.
+It starts an ephemeral Codex client, connects through the installed Router, checks a
+random text reply and a temporary file task for each model, then uploaded and tool-returned images
+for Muse. It leaves private receipts in the installation's `verification` directory.
+Use `verify --live --route bridge` to isolate the bridge from Router when diagnosing
+failures. Image checks use the installed model's declared capability, not a Router
+vision fallback. The latest full Router check passed both models’ text/file tasks
+and Muse uploaded and actual tool-returned images, with byte integrity checked.
+[Earlier failures and the latest evidence](docs/verification.md#image-byte-integrity-and-task-history-isolation)
+remain recorded; this does not prove every long-history vision task is reliable.
+The verifier requires an actual `view_image` event for the expected file and the
+correct image-only answer; command/OCR fallback does not pass that check.
+This does not certify the Desktop picker,
+permissions, full workflows or long context. Access/quota failure stops remaining
+model checks. `doctor` and `status` remain read-only without model inference.
 
-From a second terminal (with the same state-dir override, if used):
+After successful installation, fully quit and reopen Codex. Look for:
+
+- **Big Pickle (OpenCode Native Bridge)**
+- **Muse Spark 1.3 Contributor Free (OpenCode Native Bridge)**
+
+Select a model in the same menu used for GPT models. A new chat is recommended for
+first verification. Menu visibility, a text answer, a successful file task, and
+image understanding are separate checks. Existing manually configured entries may
+have older names; the installer refuses identity collisions rather than adopting
+them without ownership records.
+
+## Copy this installation Prompt into Codex
+
+```text
+Install this codex-opencode-bridge checkout using its maintained installer.
+Read README.md, docs/desktop-install.md and docs/opencode-access.md first.
+Check macOS, Node 22.19+/npm, Git, Python 3, Codex, existing Router/configuration,
+and my OpenCode model access. Preserve existing GPT models, other providers and
+login. Do not ask me to paste credentials into chat; use local login flows.
+Run the repository's install command. Use its existing backup and ownership
+checks; do not bypass conflicts or erase incomplete installation records.
+If human login or a Codex restart is necessary, explain that exact action.
+After installation, run verify --live using my model access, report each result,
+and then verify the actual model menu and independently test text,
+file reading, file creation/modification, a follow-up turn and an applicable
+permission denial. For Muse, test both an uploaded image and a view_image result
+with image-only details unknown from the prompt. Record actual outcomes and
+unverified checks separately. Do not claim native-GPT equivalence or complete
+installation just because a service is healthy or a model answers a greeting.
+```
+
+## Models and current evidence
+
+Last documentation reconciliation: **2026-09-30**. Catalog capacity and a configured
+compression threshold are not proof of reliable full-capacity reasoning.
+
+| Model | New-install context / auto-compression setting | Images | Evidence |
+| --- | --- | --- | --- |
+| Big Pickle | 200,000 / 160,000 tokens | Text only | Ten workflow scenarios passed on frozen commit 3a096e9; see the [receipt](docs/receipts/big-pickle-frozen-workflows-20260930.json) |
+| Muse Spark 1.3 Contributor Free | 1,048,576 / 891,289 tokens | Uploaded images and client tool image results | Real Codex image/tool-result checks passed; ten workflow scenarios passed on frozen commit 3a096e9 |
+
+Muse also completed a single near-capacity marker-retrieval probe using 1,041,600
+total tokens. That does not certify sustained load, concurrent use, complex
+reasoning at that length or the precise overflow boundary. See [capacity evidence](docs/muse-capacity.md)
+and [image evidence](docs/images.md). Other models have historical experiments in
+[verification](docs/verification.md); they are not all first-release supported models.
+
+Unsupported: native audio/video/PDF input, provider-hosted tools, adjustable
+reasoning levels, structured final-output formats, stored/background Responses and
+`previous_response_id`. Model intelligence and upstream availability are unchanged.
+Codex handles client tools; OpenCode still contributes runtime/system context.
+See [security boundaries](docs/security.md) and [tool semantics](docs/client-aliases.md).
+
+## Diagnose a problem
 
 ```sh
-export BRIDGE_TOKEN="$(cat "${BRIDGE_STATE_DIR:-$HOME/.local/share/codex-opencode-bridge-project}/local-token")"
-curl http://127.0.0.1:4396/v1/models -H "Authorization: Bearer $BRIDGE_TOKEN"
-curl http://127.0.0.1:4396/v1/chat/completions \
-  -H "Authorization: Bearer $BRIDGE_TOKEN" -H 'Content-Type: application/json' \
-  --data '{"model":"opencode/nemotron-3-ultra-free","messages":[{"role":"user","content":"Hello"}],"stream":true}'
+node bin/bridge.mjs doctor
+node bin/bridge.mjs status
 ```
 
-Shell-expanded curl headers may be visible in local process listings. For automated
-clients, load the token file directly in the client process instead of passing it
-on the command line. This token authenticates the local bridge, not the model provider.
+These commands are read-only. `doctor` checks prerequisites; `status` checks a
+managed installation record, service health and published model entries. Neither
+performs model inference. A missing managed record does not prove an older manual
+installation is broken. Its
+OpenCode lookup uses PATH/OPENCODE_BIN; it may not find a separately managed runtime
+unless given its recorded path. The diagnostic Prompt below covers that distinction.
+See [error meanings and recovery](docs/troubleshooting.md).
 
-## Configuration
+```text
+Diagnose this codex-opencode-bridge installation without replacing configuration.
+Read README.md and docs/troubleshooting.md. Start with the exact error and the
+managed installation record, then check prerequisites, the recorded runtime,
+service-status, local bridge health, model registration and provider access.
+Do not print tokens, authentication files, raw conversation payloads or private
+backups. Distinguish local authentication, upstream 401/403, local bridge_busy,
+provider 429, input context overflow, output limits, tool schema errors,
+unsupported content/tools, timeout and stream interruption.
+Use the installed model and actual failing input mode; do not substitute a text
+hello for an image or tool-result failure. Preserve evidence and existing models.
+Use maintained recovery commands for reversible repairs. Stop on ownership
+conflicts and explain the specific conflict. Never retry quota failures in a loop.
+Report what was reproduced, changed, verified and still unknown.
+```
 
-| Environment variable | Default | Meaning |
-|---|---|---|
-| `OPENCODE_BIN` | PATH, then `~/.opencode/bin/opencode` | Installed executable |
-| `BRIDGE_MODELS` | `opencode/nemotron-3-ultra-free` | Comma-separated exact `provider/model` IDs |
-| `BRIDGE_PORT` | `4396` | Loopback bridge port |
-| `OPENCODE_PORT` | `4397` | Managed OpenCode port |
-| `BRIDGE_STATE_DIR` | `~/.local/share/codex-opencode-bridge-project` | Local token and temporary work dirs |
-| `BRIDGE_TOKEN` | Generated token file | Optional local auth token; at least 24 characters |
-| `BRIDGE_TIMEOUT_MS` | `180000` | Generation deadline; cleanup may take 4 additional seconds |
-| `BRIDGE_POLL_MS` | `250` | Snapshot polling interval |
-| `BRIDGE_MAX_BODY_BYTES` | `16000000` | Raw JSON and serialized prompt byte limit |
-| `BRIDGE_MAX_OUTPUT_BYTES` | `8000000` | Output byte limit |
-| `BRIDGE_MAX_CONCURRENT` | `2` | Simultaneous admitted requests; overflow returns 429 |
+New managed installations run a content-verified code copy under their installation directory. Updating the checkout does not silently update that service; repeat installation retains the selected copy. Older installations retain their existing service paths. Use the explicit upgrade commands below to switch versions.
 
-A configured model ID is an allowlist entry, not proof of availability. No token
-context limit, price or multimodal capability is invented in `/v1/models`.
-Body byte limits are not model token limits; a 1M context claim requires separate
-model evidence and real long-input validation.
+## Repeat, change, update or remove
 
-## Codex integration
+- **Repeat / recover a bridge-stage failure:** run the same `install` command with
+  the same options. Owned files are checked; old plans/backups are retained.
+- **Remove:** `node bin/bridge.mjs uninstall`. It removes this installation's model
+  registration and service, preserving the existing Router, login, backups and
+  preparation. Reinstall with the same `install` command.
+- **Choose models on the first install:** use `--models` with documented exact IDs.
+- **Change installed models:** finish active tasks, then pass the complete desired
+  list to `node bin/bridge.mjs models --models opencode/big-pickle` to keep only
+  Big Pickle, or `node bin/bridge.mjs models --models opencode/big-pickle,opencode/muse-spark-1.3-contributor-free`
+  to enable both. This updates the service allowlist and Router catalog together.
+  It preserves the local token and checks service health before publication.
+  A failure restores the original selection; reopen Codex and verify actual tasks.
+- **Interrupted model change:** run `node bin/bridge.mjs recover-models` before
+  other installation operations. It restores the saved configuration and catalog.
+  It refuses unrelated user edits rather than overwriting them. Use `uninstall`
+  to remove the whole integration; an empty model list is not accepted.
+  A later `install` without `--models` retains the recorded selection.
+- **Upgrade:** finish active model tasks, then run `node bin/bridge.mjs upgrade`
+  from the desired checked-out project version. It saves that code, installs its
+  pinned OpenCode runtime if needed, switches only this bridge service and checks
+  health. Model registration, credentials and prepared configuration stay intact.
+  Startup failure triggers restoration and a health check of the old version.
+- **Rollback:** `node bin/bridge.mjs rollback` switches to the previously selected
+  managed code/runtime pair. Both copies are retained.
+- **Interrupted upgrade:** `node bin/bridge.mjs recover-upgrade` restores the
+  recorded pre-upgrade version. Use this before install/uninstall when an upgrade
+  journal remains. Recovery refuses edited ownership records or code files.
+  Legacy installations without independent code releases require migration;
+  these commands currently explain that limitation instead of guessing paths.
+- **Router bootstrap failure:** re-run `install` after a download or dependency
+  failure. The installer checks recorded source and worker processes before
+  resuming preparation. A pinned-upstream “configuration incomplete” exit can also
+  retry. A crash or ordinary failure during client setup still requires state
+  recovery; it is not assumed to have rolled back.
 
-See [integration notes](docs/codex.md). The Responses endpoint permits experiments
-with a custom provider; the Chat Completions endpoint can sit behind an existing
-router. **Installing this service alone does not add a Desktop model picker entry.**
-Provider/catalog integration is separate, and a normal Codex request with tools
-will be rejected in v0.1. Do not replace a working provider with this build blindly.
+These commands verify startup health, not model workflows. Recheck actual model tasks after upgrading. The pinned compatibility repair is managed; arbitrary future Router-version and configuration-format migrations are not automated. Legacy-service migration has passed an isolated real-service rehearsal, but its end-user command remains pending; see [migration scope](docs/legacy-migration.md).
 
-## Development and tests
+The default state directory is `~/.local/share/codex-opencode-bridge/desktop`.
+Use the same `--directory` on later operations if you chose a custom location.
+Backups can contain sensitive local state; keep them private. Uninstall does not
+mean deleting all logs, credentials or third-party dependencies.
+
+## Development and release status
 
 ```sh
 npm run check
 npm test
-# Explicitly sends two real requests using your own OpenCode access:
-npm run smoke -- --live
+npm run test:package
 ```
 
-CI runs offline protocol tests on macOS/Linux and Node 22/24. The live smoke test
-starts a separate managed server, exercises Chat JSON and Responses SSE, and tears
-it down. Change both ports if occupied. It does not edit Codex/Router settings.
+Live model acceptance consumes the account's allowance and requires explicit
+operator authorization. See [verification](docs/verification.md),
+[manual API/developer notes](docs/manual-api.md), [prior art](docs/prior-art.md),
+[license](LICENSE) and [release gates](docs/release-readiness.json).
 
-## Scope and upstream access
+Release blockers include a clean supported-machine install from this README,
+actual Desktop picker and signed-in GPT preservation, full current-source model
+workflows, reboot/upgrade/lifecycle checks, and default-branch consistency. The
+repository remains private until its owner authorizes publication.
 
-This project does not supply credentials or quotas, rotate accounts, spoof an
-OpenCode identity, or promise unlimited free API access. Provider restrictions and
-availability still apply. A working request does not establish permission to
-redistribute another service. Use access you are authorized to use.
-
-This is an independently written extraction of a locally tested prototype, not a
-fork of another gateway. Existing alternatives and their tradeoffs are documented
-in [the dated comparison](docs/prior-art.md). MIT license covers this bridge code,
-not access to third-party models.
+Upgrades also install the shipped Router terminal-error repair and republish the
+owned routes. Bridge rollback retains this additive shared-dependency repair and
+its backups; it does not downgrade Router source.

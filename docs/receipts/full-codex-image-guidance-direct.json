@@ -1,0 +1,141 @@
+{
+  "date": "2026-09-30T05:06:44.409Z",
+  "route": "direct_prepared_bridge_real_codex",
+  "model": "opencode/muse-spark-1.3-contributor-free",
+  "warnings": [
+    {
+      "elapsedMs": 15958,
+      "code": "client_alias_read"
+    },
+    {
+      "elapsedMs": 30998,
+      "code": "image_detail_auto"
+    },
+    {
+      "elapsedMs": 36186,
+      "code": "image_detail_auto"
+    },
+    {
+      "elapsedMs": 40469,
+      "code": "image_detail_auto"
+    }
+  ],
+  "media": [
+    {
+      "event": {
+        "model": "opencode/muse-spark-1.3-contributor-free",
+        "check": "text",
+        "passed": true
+      },
+      "counts": {
+        "imageParts": 0,
+        "inlineImages": 0,
+        "remoteImages": 0
+      },
+      "imageIntegrity": {
+        "expectedImages": 0,
+        "wireImages": 0,
+        "exactBytesInOrder": true
+      }
+    },
+    {
+      "event": {
+        "model": "opencode/muse-spark-1.3-contributor-free",
+        "check": "client_file_tools",
+        "passed": true
+      },
+      "counts": {
+        "imageParts": 0,
+        "inlineImages": 0,
+        "remoteImages": 0
+      },
+      "imageIntegrity": {
+        "expectedImages": 0,
+        "wireImages": 0,
+        "exactBytesInOrder": true
+      }
+    },
+    {
+      "event": {
+        "model": "opencode/muse-spark-1.3-contributor-free",
+        "check": "uploaded_image",
+        "passed": true
+      },
+      "counts": {
+        "imageParts": 1,
+        "inlineImages": 1,
+        "remoteImages": 0
+      },
+      "imageIntegrity": {
+        "expectedImages": 1,
+        "wireImages": 1,
+        "exactBytesInOrder": true
+      }
+    },
+    {
+      "event": {
+        "model": "opencode/muse-spark-1.3-contributor-free",
+        "check": "tool_returned_image",
+        "passed": true
+      },
+      "counts": {
+        "imageParts": 2,
+        "inlineImages": 2,
+        "remoteImages": 0
+      },
+      "imageIntegrity": {
+        "expectedImages": 2,
+        "wireImages": 2,
+        "exactBytesInOrder": true
+      }
+    }
+  ],
+  "sourceSha256": "2490fe314b28be4f760c1a218381499764c4f5b8e23c3daec3105617d5de657b",
+  "runtime": "2.0.18",
+  "client": {
+    "model": "opencode/muse-spark-1.3-contributor-free",
+    "route": "direct_prepared_bridge_real_codex",
+    "checks": [
+      {
+        "name": "text",
+        "passed": true,
+        "durationMs": 6425,
+        "clientToolEvents": 0,
+        "imageToolEvents": 0
+      },
+      {
+        "name": "client_file_tools",
+        "passed": true,
+        "durationMs": 24051,
+        "clientToolEvents": 3,
+        "imageToolEvents": 0
+      },
+      {
+        "name": "uploaded_image",
+        "passed": true,
+        "durationMs": 5185,
+        "clientToolEvents": 0,
+        "imageToolEvents": 0
+      },
+      {
+        "name": "tool_returned_image",
+        "passed": true,
+        "durationMs": 7629,
+        "clientToolEvents": 0,
+        "imageToolEvents": 1
+      }
+    ],
+    "desktopPickerVerified": false,
+    "imageDiagnostics": {
+      "finalTextLength": 6,
+      "agentMessages": 1,
+      "exactDigitMatch": true,
+      "containsExpectedDigitGroup": true,
+      "sixDigitGroups": 1,
+      "claimsMissingImage": false
+    },
+    "passed": true
+  },
+  "passed": true,
+  "cleaned": true
+}

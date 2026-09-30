@@ -1,0 +1,122 @@
+{
+  "date": "2026-09-29T03:55:06.975Z",
+  "mode": "full-suite",
+  "internalTools": "client-aliases",
+  "models": [
+    {
+      "model": "opencode/mimo-v2.6-flash-free",
+      "exitCode": 0,
+      "receipt": "mimo-v2.6-flash-free.json",
+      "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": true
+        },
+        {
+          "name": "followup",
+          "passed": true
+        },
+        {
+          "name": "repair",
+          "passed": true
+        },
+        {
+          "name": "denial",
+          "passed": true
+        },
+        {
+          "name": "cancel",
+          "passed": true
+        },
+        {
+          "name": "timeout",
+          "passed": true
+        },
+        {
+          "name": "recovery",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model": "opencode/nemotron-3-ultra-free",
+      "exitCode": 0,
+      "receipt": "nemotron-3-ultra-free.json",
+      "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": true
+        },
+        {
+          "name": "followup",
+          "passed": true
+        },
+        {
+          "name": "repair",
+          "passed": true
+        },
+        {
+          "name": "denial",
+          "passed": true
+        },
+        {
+          "name": "cancel",
+          "passed": true
+        },
+        {
+          "name": "timeout",
+          "passed": true
+        },
+        {
+          "name": "recovery",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model": "opencode/space-bunny-free",
+      "exitCode": 0,
+      "receipt": "space-bunny-free.json",
+      "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+      "sourceChangedDuringRun": false,
+      "scenarios": [
+        {
+          "name": "create",
+          "passed": true
+        },
+        {
+          "name": "followup",
+          "passed": true
+        },
+        {
+          "name": "repair",
+          "passed": true
+        },
+        {
+          "name": "denial",
+          "passed": true
+        },
+        {
+          "name": "cancel",
+          "passed": true
+        },
+        {
+          "name": "timeout",
+          "passed": true
+        },
+        {
+          "name": "recovery",
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}

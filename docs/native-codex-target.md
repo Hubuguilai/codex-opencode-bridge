@@ -70,12 +70,12 @@ Passing a greeting, a mocked tool event, a model-written JSON snippet or an HTTP
 | Gate | Evidence required | Current state |
 |---|---|---|
 | Text transport | Real short responses, JSON and SSE | Passed for Nemotron prototype / v0.1 smoke |
-| Native tools | Real file read/write/command/result loop executed by Codex | Not implemented |
-| Continuations | Multiple tool steps, follow-up edits, stable IDs/history | Not implemented |
-| Lifecycle | Cancel, timeout, permission refusal, bounded retries | Adapter tests exist; Desktop gate pending |
-| Desktop UX | Picker coexistence, restart, reversible install/uninstall | Existing prototype entry only |
+| Native tools | Real file read/write/command/result loop executed by Codex | Five exact models passed historical seven-case suites; current native-ID regression evidence is in docs/session-id-regression.md |
+| Continuations | Multiple tool steps, follow-up edits, stable IDs/history | Historical same-thread create/follow-up/repair passed; latest source/model cohort remains unverified |
+| Lifecycle | Cancel, timeout, permission refusal, bounded retries | Real Codex app-server cancel/timeout/denial/recovery passed |
+| Desktop UX | Picker coexistence, restart, reversible install/uninstall | Five-route Router/catalog rehearsal and reversible preparation passed; live activation and UI acceptance remain required |
 | Optional features | Per-model vision, reasoning and context tests | No blanket claim |
-| Public release | Reproducible supported-model matrix, docs and owner release decision | Pending |
+| Public release | Reproducible supported-model matrix, docs and owner release decision | Private candidate prepared; public release not authorized |
 
 ## Source finding
 
@@ -88,5 +88,30 @@ of native structured function calling or equivalent reliability. No code copied.
 The inspected local OpenCode 2.0.18 OpenAPI schema exposes session prompt and
 generate endpoints without arbitrary client tool-definition fields. This only
 establishes a limitation of those endpoints, not that all extension approaches
-are impossible. Extension support and an exact-model structured tool probe remain
-the next technical feasibility gate.
+are impossible. The official v2 plugin extension subsequently passed an exact-model structured
+tool probe and real Codex execution; see [development evidence](native-tool-progress.md).
+
+
+## Multi-model alias milestone
+
+The optional client-alias implementation keeps all file/command execution in
+Codex. Five exact models have passed complete suites and Nemotron repeated the
+suite twice on the same runtime source. This advances the original runtime-only
+model objective beyond the Space Bunny control. File aliases still appear as
+commands, not patch diffs, and failed/unknown models remain explicit. See the
+[model matrix](verification.md) and [alias contract](client-aliases.md).
+
+
+## Current completion audit (2026-09-29)
+
+The current candidate is not release-complete. Offline tests and isolated package,
+client-patch and runtime-lifecycle evidence do not replace current real-model and
+Desktop acceptance. The prepared Desktop plan still matches all three source
+Router document hashes and remains unapplied. The repository is private and PR #1
+is an open draft.
+
+A single official-runtime Plan control on Nemotron, without the bridge client-tool
+plugin, returned HTTP 403. See [the exact control receipt](receipts/nemotron-official-control.json).
+This is evidence of current access rejection on that runtime path, not proof that
+all official GUI modes fail, that all other models fail, or that quota is depleted.
+That control used a UUID-derived preallocated session ID. Subsequent controlled tests isolated an ID-format compatibility regression, now fixed; see [the diagnosis](session-id-regression.md). It is not a remaining blanket provider-access blocker. Coordinated Desktop activation and model-specific acceptance remain required.

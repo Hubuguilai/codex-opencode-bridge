@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-29T14:33:17.132Z",
+  "model": "opencode/muse-spark-1.3-contributor-free",
+  "sourceSha256": "8fbfe42ad7974804a66d4a26d599b30cb811a8a5a801fc44d0db9a04aa5b62e0",
+  "scope": "Official OpenCode native bridge and installed Codex CLI route; Desktop GUI restart/picker remains user verification",
+  "runtime": "2.0.18",
+  "image": {
+    "passed": true,
+    "randomCodeRead": true,
+    "threeColorsInOrder": true,
+    "client": "Codex CLI with installed Router, global summary preference and native image detail"
+  },
+  "patchScenarios": [
+    {
+      "name": "patch-create",
+      "passed": true
+    },
+    {
+      "name": "patch-update",
+      "passed": true
+    },
+    {
+      "name": "patch-denial",
+      "passed": true
+    }
+  ],
+  "fullSuite": {
+    "passed": false,
+    "blockedBy": "HTTP 429 on first scenario; not retried as a full suite"
+  },
+  "context": {
+    "configured": 1048576,
+    "maxLoadTested": false
+  },
+  "limits": [
+    "Attached user images only; no image tool results/audio/video/PDF",
+    "OpenCode automatic image detail",
+    "Reasoning summary omitted",
+    "Provider free-tier limits remain"
+  ],
+  "patchSourceSha256": "6416f0ba8ccacf6420e184d7ceb73b233a1b8c1ef7ed9937e4747df83c22a839",
+  "validation": {
+    "unitTestsPassed": 93,
+    "syntax": true,
+    "packaging": true
+  },
+  "clientToolRead": {
+    "passed": true,
+    "exit": 0,
+    "commands": 1,
+    "errors": []
+  }
+}

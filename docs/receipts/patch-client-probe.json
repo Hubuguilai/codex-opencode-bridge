@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-29T05:08:22.671Z",
+  "sourceSha256": "cae03263368f655cbebc014a56b03c71c9c8a02bcaf91014a450f14570c698a8",
+  "codex": "codex-cli 0.157.1",
+  "upstream": "deterministic-fake-model",
+  "modelGenerations": 0,
+  "scenarios": [
+    {
+      "name": "create",
+      "passed": true,
+      "nativeFileChanges": 1,
+      "commandExecutions": 0,
+      "approvalRequests": 0,
+      "toolResultReturned": true
+    },
+    {
+      "name": "update",
+      "passed": true,
+      "nativeFileChanges": 1,
+      "commandExecutions": 0,
+      "approvalRequests": 0,
+      "toolResultReturned": true
+    },
+    {
+      "name": "denial",
+      "passed": true,
+      "nativeFileChanges": 1,
+      "commandExecutions": 0,
+      "approvalRequests": 1,
+      "toolResultReturned": true
+    }
+  ],
+  "passed": true
+}

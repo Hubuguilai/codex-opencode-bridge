@@ -9,6 +9,17 @@ export function stateDirectory(env = process.env) {
 
 export function readConfig(env = process.env) {
   const stateDir = stateDirectory(env);
+  const mode = env.BRIDGE_MODE || 'text';
+  if (!['text', 'native-tools'].includes(mode)) throw new Error('BRIDGE_MODE must be text or native-tools.');
+  const reasoningSummaryPolicy = env.BRIDGE_REASONING_SUMMARY_POLICY || 'strict';
+  const imageDetailPolicy = env.BRIDGE_IMAGE_DETAIL_POLICY || 'strict';
+  if (!['strict', 'auto'].includes(imageDetailPolicy)) throw new Error('Invalid BRIDGE_IMAGE_DETAIL_POLICY.');
+  if (!['strict', 'omit'].includes(reasoningSummaryPolicy)) throw new Error('Invalid BRIDGE_REASONING_SUMMARY_POLICY.');
+  const toolTransport = env.BRIDGE_TOOL_TRANSPORT || 'direct';
+  if (!['direct', 'codemode'].includes(toolTransport)) throw new Error('BRIDGE_TOOL_TRANSPORT must be direct or codemode.');
+  const internalTools = env.BRIDGE_INTERNAL_TOOLS || 'guarded';
+  if (!['guarded', 'hidden', 'client-aliases'].includes(internalTools)) throw new Error('BRIDGE_INTERNAL_TOOLS must be guarded, hidden or client-aliases.');
+  if (internalTools === 'hidden' && toolTransport !== 'direct') throw new Error('Hidden internal tools require direct transport.');
   fs.mkdirSync(stateDir, { recursive: true, mode: 0o700 });
   const tokenPath = path.join(stateDir, 'local-token');
   let token = env.BRIDGE_TOKEN;
@@ -30,13 +41,17 @@ export function readConfig(env = process.env) {
   if (models.some(x => !/^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/.test(x))) {
     throw new Error('BRIDGE_MODELS must be comma-separated provider/model IDs.');
   }
+  const imageModels = [...new Set((env.BRIDGE_IMAGE_MODELS || '').split(',').map(x => x.trim()).filter(Boolean))];
+  if (imageModels.some(x => !models.includes(x)) || (imageModels.length && mode !== 'native-tools')) {
+    throw new Error('BRIDGE_IMAGE_MODELS must be a subset of BRIDGE_MODELS in native-tools mode.');
+  }
   return {
-    host: '127.0.0.1', port, upstreamPort, stateDir, tokenPath, token, models,
+    host: '127.0.0.1', port, upstreamPort, stateDir, tokenPath, token, models, imageModels, imageDetailPolicy, mode, toolTransport, internalTools, reasoningSummaryPolicy,
     timeoutMs: number('BRIDGE_TIMEOUT_MS', 180000, 3600000),
     pollMs: number('BRIDGE_POLL_MS', 250, 10000),
     maxBodyBytes: number('BRIDGE_MAX_BODY_BYTES', 16000000, 100000000),
     maxOutputBytes: number('BRIDGE_MAX_OUTPUT_BYTES', 8000000, 100000000),
-    maxConcurrent: number('BRIDGE_MAX_CONCURRENT', 2, 32),
+    maxConcurrent: mode === 'native-tools' ? 1 : number('BRIDGE_MAX_CONCURRENT', 2, 32),
   };
 }
 

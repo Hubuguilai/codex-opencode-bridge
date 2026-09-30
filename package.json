@@ -1,16 +1,35 @@
 {
   "name": "codex-opencode-bridge",
-  "version": "0.1.0",
+  "version": "0.2.0-rc.1",
   "private": true,
-  "description": "Local text-only OpenCode v2 session bridge with Chat Completions and Responses interfaces",
+  "description": "Experimental local OpenCode v2 bridge with native Codex client-tool relay",
   "type": "module",
   "license": "MIT",
-  "engines": { "node": ">=22" },
-  "bin": { "codex-opencode-bridge": "bin/bridge.mjs" },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "bin": {
+    "codex-opencode-bridge": "bin/bridge.mjs"
+  },
   "scripts": {
     "start": "node bin/bridge.mjs serve",
-    "test": "node --test",
+    "test": "node --test test/*.test.mjs",
+    "test:package": "node scripts/package-check.mjs",
     "check": "node scripts/check.mjs",
-    "smoke": "node scripts/smoke.mjs"
-  }
+    "smoke": "node scripts/smoke.mjs",
+    "acceptance": "node scripts/native-acceptance.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "scripts/",
+    "examples/",
+    "docs/",
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTING.md",
+    "ROADMAP.md",
+    "test/",
+    "runtime/"
+  ]
 }

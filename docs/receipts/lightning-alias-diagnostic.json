@@ -1,0 +1,28 @@
+{
+  "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+  "gitHead": "6e781a07d7065d8b221bed8621e312959951efe4",
+  "date": "2026-09-29T04:00:48.015Z",
+  "model": "opencode/nemotron-3.5-lightning-free",
+  "toolTransport": "direct",
+  "internalTools": "client-aliases",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "repair",
+      "status": "timeout",
+      "durationMs": 180083,
+      "checks": {
+        "testPassed": false,
+        "testUnchanged": true
+      },
+      "passed": false
+    }
+  ],
+  "opencode": "2.0.18",
+  "toolEvents": {
+    "internal_tool_blocked_glob": 1
+  },
+  "passed": false,
+  "sourceChangedDuringRun": false
+}

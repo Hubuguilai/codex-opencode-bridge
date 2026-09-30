@@ -57,11 +57,15 @@ export function normalizeRequest(payload, api, config) {
 
 export function usage(tokens = {}) {
   const nonnegative = x => typeof x === 'number' && Number.isFinite(x) && x >= 0 ? x : 0;
-  const input = nonnegative(tokens.input);
+  // OpenCode's input is uncached input; cached reads/writes are separate.
+  // Responses input_tokens includes the complete prompt, including cache hits.
+  const cached = nonnegative(tokens.cache?.read);
+  const input = nonnegative(tokens.input) + cached + nonnegative(tokens.cache?.write);
   const output = nonnegative(tokens.output);
   const reasoning = nonnegative(tokens.reasoning);
   // OpenCode reports visible output and reasoning separately.
   return { input_tokens: input, output_tokens: output + reasoning, total_tokens: input + output + reasoning,
+    input_tokens_details: { cached_tokens: cached },
     output_tokens_details: { reasoning_tokens: reasoning } };
 }
 
@@ -69,53 +73,79 @@ export function makeWriter(res, api, request) {
   const id = `${api === 'responses' ? 'resp' : 'chatcmpl'}_${randomUUID().replaceAll('-', '')}`;
   const itemId = `msg_${randomUUID().replaceAll('-', '')}`;
   const created = Math.floor(Date.now() / 1000);
-  let sequence = 0;
-  let text = '';
+  let sequence = 0, text = '', textStarted = false, toolCalls = [];
   const part = () => ({ type: 'output_text', text, annotations: [], logprobs: [] });
   const item = status => ({ id: itemId, type: 'message', role: 'assistant', status, content: [part()] });
+  const output = status => [...(textStarted ? [item(status)] : []), ...toolCalls];
   const response = (status, tokens) => ({ id, object: 'response', created_at: created, model: request.model,
-    status, error: null, incomplete_details: null, output: status === 'in_progress' ? [] : [item(status)],
-    parallel_tool_calls: false, tools: [], tool_choice: 'none', store: false,
+    status, error: null, incomplete_details: null, output: status === 'in_progress' ? [] : output(status),
+    parallel_tool_calls: false, store: false,
     ...(tokens ? { usage: usage(tokens) } : {}) });
-  const event = (type, value) => {
-    res.write(`event: ${type}\ndata: ${JSON.stringify({ type, sequence_number: sequence++, ...value })}\n\n`);
-  };
+  const event = (type, value) => res.write(`event: ${type}\ndata: ${JSON.stringify({ type, sequence_number: sequence++, ...value })}\n\n`);
   const chunk = (delta, finish = null) => res.write(`data: ${JSON.stringify({ id, object: 'chat.completion.chunk',
     created, model: request.model, choices: [{ index: 0, delta, finish_reason: finish }] })}\n\n`);
+  const indices = { item_id: itemId, output_index: 0, content_index: 0 };
   if (request.stream) {
     res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-store', 'x-accel-buffering': 'no' });
     res.flushHeaders();
     if (api === 'responses') {
       event('response.created', { response: response('in_progress') });
       event('response.in_progress', { response: response('in_progress') });
-      event('response.output_item.added', { output_index: 0, item: { ...item('in_progress'), content: [] } });
-      event('response.content_part.added', { item_id: itemId, output_index: 0, content_index: 0, part: part() });
     } else chunk({ role: 'assistant' });
   }
-  const indices = { item_id: itemId, output_index: 0, content_index: 0 };
+  function startText() {
+    if (textStarted) return;
+    textStarted = true;
+    if (request.stream && api === 'responses') {
+      event('response.output_item.added', { output_index: 0, item: { ...item('in_progress'), content: [] } });
+      event('response.content_part.added', { ...indices, part: part() });
+    }
+  }
+  function finishText() {
+    if (request.stream && api === 'responses' && textStarted) {
+      event('response.output_text.done', { ...indices, text, logprobs: [] });
+      event('response.content_part.done', { ...indices, part: part() });
+      event('response.output_item.done', { output_index: 0, item: item('completed') });
+    }
+  }
+  const chatCalls = () => toolCalls.map(call => ({ id: call.call_id, type: 'function', function: { name: call.name, arguments: call.arguments } }));
   return {
     delta(value) {
-      text += value;
+      startText(); text += value;
       if (!request.stream) return;
       if (api === 'responses') event('response.output_text.delta', { ...indices, delta: value, logprobs: [] });
       else chunk({ content: value });
     },
+    calls(calls) {
+      toolCalls = calls;
+    },
     finish(tokens) {
-      const u = usage(tokens);
-      const chatUsage = { prompt_tokens: u.input_tokens, completion_tokens: u.output_tokens,
-        total_tokens: u.total_tokens, completion_tokens_details: u.output_tokens_details };
+      if (!textStarted && !toolCalls.length) startText();
+      const u = tokens ? usage(tokens) : null;
+      const chatUsage = u ? { prompt_tokens: u.input_tokens, completion_tokens: u.output_tokens,
+        total_tokens: u.total_tokens, completion_tokens_details: u.output_tokens_details } : undefined;
       if (!request.stream) return json(res, 200, api === 'responses' ? response('completed', tokens) : {
         id, object: 'chat.completion', created, model: request.model,
-        choices: [{ index: 0, message: { role: 'assistant', content: text }, finish_reason: 'stop' }], usage: chatUsage,
+        choices: [{ index: 0, message: { role: 'assistant', content: text || null, ...(toolCalls.length ? { tool_calls: chatCalls() } : {}) },
+          finish_reason: toolCalls.length ? 'tool_calls' : 'stop' }], ...(chatUsage ? { usage: chatUsage } : {}),
       });
       if (api === 'responses') {
-        event('response.output_text.done', { ...indices, text, logprobs: [] });
-        event('response.content_part.done', { ...indices, part: part() });
-        event('response.output_item.done', { output_index: 0, item: item('completed') });
+        finishText();
+        for (const [index, call] of toolCalls.entries()) {
+          const output_index = (textStarted ? 1 : 0) + index;
+          const custom = call.type === 'custom_tool_call';
+          const key = custom ? 'input' : 'arguments';
+          const stem = custom ? 'response.custom_tool_call_input' : 'response.function_call_arguments';
+          event('response.output_item.added', { output_index, item: { ...call, [key]: '' } });
+          event(`${stem}.delta`, { item_id: call.id, output_index, delta: call[key] });
+          event(`${stem}.done`, { item_id: call.id, output_index, [key]: call[key] });
+          event('response.output_item.done', { output_index, item: call });
+        }
         event('response.completed', { response: response('completed', tokens) });
       } else {
-        chunk({}, 'stop');
-        if (request.includeUsage) res.write(`data: ${JSON.stringify({ id, object: 'chat.completion.chunk', created,
+        if (toolCalls.length) chunk({ tool_calls: chatCalls().map((call, index) => ({ index, ...call })) });
+        chunk({}, toolCalls.length ? 'tool_calls' : 'stop');
+        if (request.includeUsage && chatUsage) res.write(`data: ${JSON.stringify({ id, object: 'chat.completion.chunk', created,
           model: request.model, choices: [], usage: chatUsage })}\n\n`);
         res.write('data: [DONE]\n\n');
       }

@@ -1,0 +1,27 @@
+{
+  "sourceSha256": "e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298",
+  "gitHead": "6e781a07d7065d8b221bed8621e312959951efe4",
+  "date": "2026-09-29T03:58:20.417Z",
+  "model": "opencode/deepseek-v4-flash-free",
+  "toolTransport": "direct",
+  "internalTools": "client-aliases",
+  "node": "v24.4.1",
+  "codex": "codex-cli 0.157.1",
+  "scenarios": [
+    {
+      "name": "repair",
+      "status": "failed",
+      "error": "stream disconnected before completion: OpenCode generation failed.",
+      "commands": 0,
+      "durationMs": 2351,
+      "checks": {
+        "testPassed": false,
+        "testUnchanged": true
+      },
+      "passed": false
+    }
+  ],
+  "opencode": "2.0.18",
+  "passed": false,
+  "sourceChangedDuringRun": false
+}

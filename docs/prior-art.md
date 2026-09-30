@@ -54,3 +54,24 @@ Official interface references:
 For OpenCode v2 request shapes, the installed 2.0.18 server's `/openapi.json` was
 queried directly. It requires `{text}` on `/api/session/{id}/prompt`; older/other
 versions can differ. HTTP 200 HTML is not treated as JSON API readiness.
+
+## Native-tool implementation decision — 2026-09-29
+
+The requirement advanced beyond v0.1. Review of OpenCode2API's parser and prompt
+contract found a text-markup normalization path; no code was copied. This project
+instead uses the official v2 plugin registration and tool hooks to capture actual
+function invocations. The installed `@opencode/plugin` and `@opencode/ai` 2.0.18
+schema declarations were inspected for native message/tool-result shapes. SDK
+packages are not bundled or imported as runtime dependencies.
+
+Relevant official interfaces:
+
+- [OpenCode v2 plugins](https://opencode.ai/v2/docs/build/plugins)
+- [OpenCode v2 tools and Code Mode boundaries](https://opencode.ai/v2/docs/tools/)
+- [OpenCode v2 permission rules](https://opencode.ai/v2/docs/permissions)
+
+The direct dispatcher has a complete Space Bunny control receipt. The opt-in
+Code Mode dispatcher remains experimental. Nemotron did not pass the complete
+workflow gate, and removing all internal tool definitions produced an upstream
+access rejection. Neither a README claim nor an isolated successful call overrides
+those local negative results. No identity/header spoofing was introduced.

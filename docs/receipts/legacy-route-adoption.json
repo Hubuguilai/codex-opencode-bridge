@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-30T05:32:05.327Z",
+  "isolatedState": true,
+  "realRouterApis": true,
+  "nativeAuthProbe": "synthetic signed-in CLI fixture; no real account",
+  "servicesRestarted": false,
+  "modelRequests": 0,
+  "checks": {
+    "publicationFailureRestored": true,
+    "adoptedAndOwned": true,
+    "managedRepeat": true,
+    "credentialPreserved": true,
+    "contextAndStrictImagesPreserved": true,
+    "nativeSourcePreserved": true
+  },
+  "scope": "Route transaction only; no service cutover, process-crash recovery, GUI or inference acceptance."
+}
