@@ -1,0 +1,46 @@
+{
+  "date": "2026-09-30T06:50:51.987Z",
+  "kind": "onboarding-isolated-rehearsal",
+  "cleanMachine": false,
+  "desktopPickerVerified": false,
+  "existingPinnedRouterDependency": true,
+  "sharedRouterRestart": false,
+  "nativeCatalogFixture": true,
+  "realLaunchd": true,
+  "realCodex": true,
+  "first": {
+    "ready": true,
+    "installed": true,
+    "models": [
+      "opencode/big-pickle"
+    ],
+    "checks": [
+      {
+        "model": "opencode-native-bridge/opencode/big-pickle",
+        "route": "codex_router_gateway_forwarder_installed_bridge",
+        "checks": [
+          {
+            "name": "text",
+            "passed": true,
+            "durationMs": 4354,
+            "clientToolEvents": 0,
+            "imageToolEvents": 0
+          },
+          {
+            "name": "client_file_tools",
+            "passed": true,
+            "durationMs": 37276,
+            "clientToolEvents": 5,
+            "imageToolEvents": 0
+          }
+        ],
+        "desktopPickerVerified": false,
+        "passed": true,
+        "nativeImageInput": false
+      }
+    ],
+    "next": "验证通过。完全退出并重新打开 Codex，在模型菜单选择 OpenCode Native Bridge 模型，新建对话试用。"
+  },
+  "repeatReused": true,
+  "removed": true
+}
