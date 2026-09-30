@@ -1,13 +1,13 @@
 {
   "target": "Simple macOS Codex desktop installation from README or a Codex prompt",
-  "status": "in_progress",
+  "status": "private_trial_candidate",
   "publicReleaseAuthorized": false,
   "gates": {
     "standalone_muse_schema_and_image_compatibility": "verified_live",
     "big_pickle_and_muse_prepared_profiles": "verified_offline",
     "read_only_prerequisite_doctor": "implemented_unit_tested",
-    "automatic_dependency_and_desktop_installer": "pending",
-    "transactional_backup_upgrade_uninstall_restore": "pending",
+    "automatic_dependency_and_desktop_installer": "implemented_isolated_macos_lifecycle_verified_clean_machine_pending",
+    "transactional_backup_upgrade_uninstall_restore": "isolated_real_launchd_lifecycle_verified_arbitrary_interruptions_unverified",
     "official_access_guide_and_model_checks": "official_guide_written_model_checks_pending",
     "english_chinese_readme_install_diagnostic_prompts": "written_current_commands_checked_clean_user_execution_pending",
     "clean_macos_install_from_readme": "pending",
@@ -15,9 +15,9 @@
     "current_source_full_client_workflows_each_primary_model": "both_passed_10_of_10_frozen_commit_3a096e9_release_revision_reconciliation_pending",
     "uploaded_images": "verified_live_muse",
     "image_tool_results": "verified_live_muse_codex_view_image",
-    "installed_lifecycle_restart_upgrade_uninstall": "pending",
+    "installed_lifecycle_restart_upgrade_uninstall": "isolated_service_lifecycle_verified_desktop_app_restart_acceptance_pending",
     "actionable_error_categories_and_stream_failures": "verified_24_local_fault_requests_real_runtime_both_modes_client_reconnect_and_real_context_overflow_pending",
-    "docs_support_matrix_default_branch_consistency": "pending",
+    "docs_support_matrix_default_branch_consistency": "candidate_documents_reconciled_merge_and_head_verification_recorded_in_github_pr",
     "pinned_managed_opencode_dependency": "verified_macos_arm64_new_directory_and_repeat",
     "managed_launchd_service_component": "verified_live_install_repeat_remove_macos_arm64",
     "router_registration_component": "real_isolated_catalog_publication_verified_pinned_upstream",
@@ -46,5 +46,9 @@
     "manual_router_source_reconciliation": "explicit_merge_preserves_customization_recomputed_on_repeat_real_sigkill_recovery_unit_passed_actual_source_copy_rehearsal_passed_active_source_unchanged",
     "legacy_service_migration_coordinator": "real_isolated_launchd_cutover_restore_retry_repeat_and_seven_sigkill_checkpoints_passed_cli_restart_and_additional_interruptions_pending",
     "legacy_migration_crash_recovery": "seven_real_sigkill_checkpoints_recovered_with_real_launchd_runtime_and_router_publication_dependency_and_publication_child_boundaries_unverified"
+  },
+  "scopeDecision": {
+    "date": "2026-09-30",
+    "decision": "Owner requested a quick closeout as a private trial candidate. Remaining public-release acceptance gates are deferred, not passed."
   }
 }

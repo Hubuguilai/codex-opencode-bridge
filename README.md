@@ -7,7 +7,7 @@ runtime and your own model access.
 [中文说明](docs/README.zh-CN.md) · [Model access](docs/opencode-access.md) ·
 [Verification](docs/verification.md) · [Release checklist](docs/release-readiness.json)
 
-**Private development candidate: 0.2.0-rc.1.** The installer is implemented, but a
+**Private trial candidate: 0.2.0-rc.1.** See the [delivery summary and deferred gates](docs/private-trial.md). The installer is implemented, but a
 complete clean-machine desktop installation has not passed acceptance. There is
 no public release yet. Upgrade and model-selection lifecycle checks have passed;
 clean-client acceptance, current-release full model workflows and some first-install recovery remain open. Do not interpret an install
