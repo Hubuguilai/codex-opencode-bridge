@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/duolahypercho/codex-router.git",
+  "revision": "b90aa60e257bbcc33855aad7d43954c1a09b1311",
+  "packageName": "codex-model-router",
+  "note": "Pinned source dependency. Existing installations are reused without checkout updates."
+}

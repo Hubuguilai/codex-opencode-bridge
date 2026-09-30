@@ -1,8 +1,8 @@
 # Router registration component
 
 The bridge now has registration/removal commands for an explicitly selected,
-already installed Codex Router. Automatic Router dependency installation and
-version pinning are still pending. Do not describe this as the complete installer.
+already installed Codex Router. The unified installer can now bootstrap a pinned Router dependency; its full
+first-time setup is still awaiting clean-machine verification. Do not describe this as the complete installer.
 
 ```sh
 node bin/bridge.mjs register-router /absolute/plan-directory --router-root /absolute/router-directory
@@ -54,3 +54,11 @@ It uses temporary Router state and does not publish to the installed clients.
 增加了新模型，会停止自动移除并说明原因。备份可能包含本地认证信息，不要上传。
 
 目前隔离测试已验证数据操作与失败恢复，但没有用这些测试替代真实菜单和重启验证。
+
+
+A later isolated check exercised **real** catalog publication and removal with
+the downloaded pinned Router source, preserving the user's adopted catalog file.
+Run `node scripts/router-publication-check.mjs /absolute/router-directory` from
+this repository. This uses temporary Codex and Router state and does not restart
+services. Signed-in native GPT behavior and the actual Desktop picker are still
+unverified by this check.

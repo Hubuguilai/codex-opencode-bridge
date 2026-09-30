@@ -5,7 +5,7 @@ function fixture(t,{failHealth=false}={}){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'desktop-flow-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const routerRoot=path.join(root,'router');fs.mkdirSync(path.join(routerRoot,'src'),{recursive:true});fs.writeFileSync(path.join(routerRoot,'src/model-overlay-publication.mjs'),'');
  const options={directory:path.join(root,'installation'),routerRoot,platform:'darwin'};const calls=[];let port=6000;
- const deps={loadRouter:async()=>({paths:{STATE_DIR:'isolated-state'}}),installRuntime:async()=>({binary:'/managed/opencode'}),freePort:async()=>port++,
+ const deps={ensureRouter:async root=>{if(!fs.existsSync(root))throw Error("Router installation failed");return {root};},loadRouter:async()=>({paths:{STATE_DIR:'isolated-state'}}),installRuntime:async()=>({binary:'/managed/opencode'}),freePort:async()=>port++,
  prepareDirectory:dir=>{calls.push('prepare');fs.mkdirSync(dir);},prepareRouterPlan:dir=>{calls.push('plan');fs.mkdirSync(dir);},
  installService:async()=>calls.push('service'),removeService:()=>calls.push('stop'),
  checkBridge:async()=>{calls.push('health');if(failHealth)throw Error('health failed');},
@@ -30,8 +30,8 @@ test('Health failure prevents model registration and retains recovery record',as
  assert.ok(!fs.existsSync(path.join(f.options.directory,'.installation-lock')));
  await assert.rejects(installDesktop(f.options,f.deps),/incomplete/);
 });
-test('Missing Router fails before changing installation state',async t=>{
+test('Failed Router bootstrap fails before changing installation state',async t=>{
  const f=fixture(t);fs.rmSync(f.options.routerRoot,{recursive:true});
- await assert.rejects(installDesktop(f.options,f.deps),/not installed/);
+ await assert.rejects(installDesktop(f.options,f.deps),/Router installation failed/);
  assert.ok(!fs.existsSync(f.options.directory));assert.deepEqual(f.calls,[]);
 });

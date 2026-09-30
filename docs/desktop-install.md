@@ -1,8 +1,9 @@
 # Unified installer candidate
 
-The unified command currently requires an existing compatible Codex Router.
-Automatic first-time Router installation, managed upgrades, model-set changes
-and interrupted-install recovery are still pending. This is a development
+The unified command reuses an existing compatible Codex Router. When absent, it
+downloads the source revision pinned in `runtime/router.json`, installs its locked
+Node dependencies and invokes its own installer. Managed upgrades, model-set
+changes and interrupted-install recovery are still pending. This is a development
 candidate, not the complete README installation promised for the release.
 
 From the bridge checkout/package, on macOS:
@@ -15,7 +16,7 @@ Defaults: install under `~/.local/share/codex-opencode-bridge/desktop`, discover
 Router under `~/.local/share/codex-router`, and select Big Pickle plus Muse Spark
 1.3 Contributor Free. Override discovery with `--router-root`; use `--directory`
 for a separate managed installation and `--models` for documented model IDs.
-The selected Router must already be set up for this user's Codex. Existing bridge
+An existing selected Router must already be set up for this user's Codex. Existing bridge
 providers are not silently adopted; identity conflicts stop before registration.
 
 The command installs its pinned OpenCode runtime, chooses unused local ports,
@@ -44,8 +45,8 @@ cleanup, clean reinstall after uninstall and upgrades are not yet integrated.
 
 ## Installation Prompt for the current candidate
 
-This prompt intentionally stops when the candidate cannot meet its prerequisites;
-it must not invent the missing automatic Router bootstrap.
+This prompt uses the maintained installer and reports any unresolved prerequisite
+or incomplete installation. Full clean-machine acceptance remains pending.
 
 ```text
 Set up this codex-opencode-bridge checkout using its maintained installer.
@@ -62,9 +63,9 @@ Do not call the installation verified until those client checks actually pass.
 
 ## 中文说明
 
-当前可用的统一安装命令会串起运行时、模型准备、后台服务和模型注册，但要求电脑
-已经安装兼容的 Codex Router。首次自动安装 Router、升级、修改模型集合、失败后
-自动恢复与卸载后重新安装尚未完成，因此仍是开发候选。
+当前可用的统一安装命令会串起运行时、模型准备、后台服务和模型注册。它会
+复用已有兼容的 Codex Router；缺失时会下载固定版本并调用上游安装器。首次完整
+桌面安装尚未实测，升级、修改模型集合、失败后自动恢复与卸载后重新安装尚未完成，因此仍是开发候选。
 
 安装成功返回只代表配置流程完成，还需验证模型权限、重启后的菜单及真实任务。
 卸载保留已有 Router、其他模型、账号登录和备份；遇到用户修改时会停止并说明原因。
@@ -80,3 +81,14 @@ Do not call the installation verified until those client checks actually pass.
 菜单可见性和真实文字/工具/图片任务，并说明是否需要我重启 Codex。未实测的项目
 明确标记为未验证，不要把安装命令成功当作全部验收通过。
 ```
+
+
+Pinned dependency checks on 2026-09-30 downloaded the exact upstream revision and
+installed its Node dependencies. The upstream full setup step was intercepted in
+that download test, so a complete first-time desktop setup is **not yet verified**.
+A separate real publication test used the unmodified downloaded source, generated
+both bridge model entries, removed them again, and preserved an adopted user
+catalog file. It did not restart a service, inspect a Desktop picker, or exercise
+a signed-in GPT session. Fresh Router setup uses `--no-provider` without
+`--no-discovery`: the latter disables all configured routes and prevents the
+new bridge models from being published.

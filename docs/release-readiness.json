@@ -20,7 +20,8 @@
     "docs_support_matrix_default_branch_consistency": "pending",
     "pinned_managed_opencode_dependency": "verified_macos_arm64_new_directory_and_repeat",
     "managed_launchd_service_component": "verified_live_install_repeat_remove_macos_arm64",
-    "router_registration_component": "isolated_state_verified_publication_stubbed",
-    "unified_installer_existing_router": "implemented_ordering_failure_tests_passed_live_pending"
+    "router_registration_component": "real_isolated_catalog_publication_verified_pinned_upstream",
+    "unified_installer_existing_router": "implemented_ordering_failure_tests_passed_live_pending",
+    "pinned_router_bootstrap": "implemented_download_and_npm_verified_full_setup_pending"
   }
 }

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import net from 'node:net';
+import {ensureRouter} from './router-install.mjs';
 import {modelProfile} from './model-profiles.mjs';
 import {installRuntime} from './runtime-install.mjs';
 import {prepareDirectory,preparedEnvironment} from './setup.mjs';
@@ -21,7 +22,7 @@ export async function checkBridge(prepared,{fetchImpl=fetch}={}){
  }
  throw new Error('Bridge did not become healthy. Check service-status and local service logs. No model registration was attempted.');
 }
-const real={installRuntime,prepareDirectory,installService,removeService,prepareRouterPlan,loadRouter,registerRouter,unregisterRouter,checkBridge,freePort};
+const real={ensureRouter,installRuntime,prepareDirectory,installService,removeService,prepareRouterPlan,loadRouter,registerRouter,unregisterRouter,checkBridge,freePort};
 export async function installDesktop({directory=path.join(os.homedir(),'.local/share/codex-opencode-bridge/desktop'),
  routerRoot=path.join(os.homedir(),'.local/share/codex-router'),models=defaults,platform=process.platform}={},deps=real){
  if(platform!=='darwin')throw new Error('Desktop installation currently targets macOS only.');
@@ -29,7 +30,8 @@ export async function installDesktop({directory=path.join(os.homedir(),'.local/s
  const root=path.resolve(directory),receiptPath=path.join(root,'desktop-install.json');
  if(fs.existsSync(root)&&fs.lstatSync(root).isSymbolicLink())throw new Error('Installation directory must not be a symbolic link.');
  // Resolve dependencies before creating or mutating the user's installation.
- if(!fs.existsSync(path.join(routerRoot,'src/model-overlay-publication.mjs')))throw new Error('Codex Router is not installed. Automatic Router bootstrap is pending in this candidate; see docs/desktop-install.md. No settings changed.');
+ const router=await deps.ensureRouter(routerRoot);
+ routerRoot=router.root;
  const api=await deps.loadRouter(routerRoot);
  fs.mkdirSync(root,{recursive:true,mode:0o700});
  const lock=path.join(root,'.installation-lock');
