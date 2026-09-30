@@ -107,8 +107,16 @@ node bin/bridge.mjs status
   文件，保留旧计划与备份，再继续配置。
 - **卸载**：运行 `node bin/bridge.mjs uninstall`。移除本项目的模型注册和服务，
   保留已有 Router、其他模型、登录、备份与准备目录。可用相同安装命令重新安装。
-- **首次选择模型**：通过 `--models` 指定文档支持的准确 ID。修改已安装的模型集合
-  尚未实现。
+- **首次选择模型**：通过 `--models` 指定文档支持的准确 ID。
+- **调整已安装模型**：先结束正在运行的任务，再提供希望保留的完整模型列表。
+  只保留 Big Pickle：`node bin/bridge.mjs models --models opencode/big-pickle`。
+  同时启用两款：`node bin/bridge.mjs models --models opencode/big-pickle,opencode/muse-spark-1.3-contributor-free`。
+  程序同步更新服务允许调用的模型与菜单目录，保留本地令牌，检查服务后再发布菜单。
+  失败时恢复原选择。完成后重新打开 Codex 并验证实际任务。
+- **模型调整中断**：先运行 `node bin/bridge.mjs recover-models`，恢复保存的配置和
+  模型目录，再进行其他安装操作。遇到额外用户修改时不会强行覆盖。
+  删除整个接入请使用 `uninstall`，不能传入空模型列表。
+  后续运行 `install` 时，省略 `--models` 会保留记录中的模型选择。
 - **升级**：先结束正在运行的模型任务，再从准备使用的项目版本运行
   `node bin/bridge.mjs upgrade`。程序保存代码副本，按需安装该版本固定的 OpenCode
   运行时，切换本项目服务并检查健康状态。模型注册、凭据和准备配置保持原样。

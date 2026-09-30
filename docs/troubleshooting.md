@@ -88,3 +88,14 @@ Inspect private service logs if restoration still cannot start the old service.
 access failure. A healthy restored service still needs an actual model task check.
 Legacy installations without an independent managed release currently require
 migration; the upgrade command refuses them rather than inferring an old code copy.
+
+
+### Model selection stopped midway
+
+Run `status` with the original installation directory. A `changing-models` record
+requires `recover-models` before install, uninstall, upgrade or another selection.
+Keep the durable record: it contains the previous configuration and registration.
+Recovery can restore a mix of old/new generated files after interruption, but it
+refuses additional user edits or changed credentials. Finish model tasks before
+changing selection; checking active requests is not an atomic block on new tasks.
+Legacy installations need migration before these managed commands can be used.

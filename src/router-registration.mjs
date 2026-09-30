@@ -119,7 +119,8 @@ export async function unregisterRouter(directory,{api,restart=true}={}){
 
 // Changes only this registration's model entries. The desktop coordinator must
 // separately update/restart the bridge allowlist before treating this as usable.
-export async function updateRouterModels(directory,{models,api,restart=true}={}){
+export async function updateRouterModels(directory,{models,api,restart=true,restoreSelection}={}){
+ if(restoreSelection)models=JSON.parse(restoreSelection['router-plan.json']).models.map(x=>x.upstreamModel);
  if(!Array.isArray(models)||!models.length||new Set(models).size!==models.length||models.some(id=>!modelProfile(id)))fail('Choose distinct supported model IDs; use uninstall to remove the entire bridge.');
  const root=path.resolve(directory),planFile=path.join(root,'router-plan.json'),plan=readPlan(root),recordFile=path.join(root,'registration.json');
  if(path.resolve(api.paths.STATE_DIR)!==path.resolve(plan.routerState))fail('Selected Router uses a different state directory than this plan.');
@@ -127,7 +128,15 @@ export async function updateRouterModels(directory,{models,api,restart=true}={})
  if(receipt.kind!=='bridge-router-registration'||receipt.planHash!==fingerprint(plan))fail('Invalid registration record.');
  const template=JSON.parse(fs.readFileSync(new URL('../examples/native-models.json',import.meta.url))).models[0];
  const additions=routerModelsFromCatalog(models,{models:models.map(id=>modelCatalogEntry(id,template))});
- const entries=additions.map(x=>x.entry),slugs=entries.map(x=>x.slug),oldSlugs=Object.keys(receipt.modelHashes),removed=oldSlugs.filter(x=>!slugs.includes(x));
+ let entries=additions.map(x=>x.entry);
+ if(restoreSelection){
+  const oldPlan=JSON.parse(restoreSelection['router-plan.json']),oldReceipt=JSON.parse(restoreSelection['registration.json']);
+  if(oldReceipt.planHash!==fingerprint(oldPlan)||['providerId','providerHash','credentialId','credentialHash','tokenPath','tokenHash'].some(key=>oldReceipt[key]!==receipt[key]))fail('Saved model selection does not belong to this provider.');
+  for(const name of planArtifacts)if(hash(restoreSelection[name])!==oldReceipt.artifactHashes?.[name])fail('Saved model artifacts failed integrity checks.');
+  if(oldPlan.models.some(x=>fingerprint(x)!==oldReceipt.modelHashes?.[x.slug]))fail('Saved models failed integrity checks.');
+  entries=oldPlan.models;
+ }
+ const slugs=entries.map(x=>x.slug),oldSlugs=Object.keys(receipt.modelHashes),removed=oldSlugs.filter(x=>!slugs.includes(x));
  const artifacts=['router-plan.json','user-model-additions.json','menu-preview.json','REVIEW.md'].map(name=>path.join(root,name));
  const publication=checkedPublication(api,{present:slugs,absent:removed});
  await api.overlay.transactModelOverlayMutation({restart,applyPublication:publication,
@@ -150,6 +159,18 @@ export async function updateRouterModels(directory,{models,api,restart=true}={})
    save(path.join(root,'menu-preview.json'),{...catalog,models:[...catalog.models.filter(x=>!oldSlugs.includes(x.slug)),...additions.map(x=>x.catalog)]});
    fs.writeFileSync(path.join(root,'REVIEW.md'),'# Registered bridge model selection\n\n'+entries.map(x=>'- '+x.displayName).join('\n')+'\n\nThis selection updates Router entries only. Desktop activation and live bridge model access require separate verification. Previous configuration is retained in private backups.\n',{mode:0o600});
    save(recordFile,{...receipt,planHash:fingerprint(nextPlan),artifactHashes:artifactHashes(root),modelHashes:Object.fromEntries(entries.map(x=>[x.slug,fingerprint(x)]))});
+   if(restoreSelection)for(const name of ['router-plan.json','registration.json',...planArtifacts])fs.writeFileSync(path.join(root,name),restoreSelection[name],{mode:0o600});
   }});
  return {updated:true,models,providerAndCredentialsPreserved:true,bridgeAllowlistUpdated:false,restartCodexRequired:true};
+}
+
+export function captureRouterSelection(directory){
+ return Object.fromEntries(['router-plan.json','registration.json',...planArtifacts].map(name=>{const file=path.join(directory,name);if(fs.lstatSync(file).isSymbolicLink())fail('Model plan must not contain symbolic links.');return [name,fs.readFileSync(file,'utf8')];}));
+}
+export function verifyRouterSelection(directory,{api}){
+ const plan=readPlan(directory),receipt=JSON.parse(fs.readFileSync(path.join(directory,'registration.json')));
+ if(path.resolve(api.paths.STATE_DIR)!==path.resolve(plan.routerState)||receipt.kind!=='bridge-router-registration'||receipt.planHash!==fingerprint(plan))fail('Invalid model registration ownership.');
+ validateOwned(api,receipt);
+ if(!receipt.artifactHashes||fingerprint(artifactHashes(directory))!==fingerprint(receipt.artifactHashes))fail('Model plan artifacts were edited or lack ownership hashes.');
+ return {verified:true};
 }

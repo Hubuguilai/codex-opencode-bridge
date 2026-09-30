@@ -132,7 +132,17 @@ New managed installations run a content-verified code copy under their installat
   registration and service, preserving the existing Router, login, backups and
   preparation. Reinstall with the same `install` command.
 - **Choose models on the first install:** use `--models` with documented exact IDs.
-  Changing an existing installation's model set is not implemented yet.
+- **Change installed models:** finish active tasks, then pass the complete desired
+  list to `node bin/bridge.mjs models --models opencode/big-pickle` to keep only
+  Big Pickle, or `node bin/bridge.mjs models --models opencode/big-pickle,opencode/muse-spark-1.3-contributor-free`
+  to enable both. This updates the service allowlist and Router catalog together.
+  It preserves the local token and checks service health before publication.
+  A failure restores the original selection; reopen Codex and verify actual tasks.
+- **Interrupted model change:** run `node bin/bridge.mjs recover-models` before
+  other installation operations. It restores the saved configuration and catalog.
+  It refuses unrelated user edits rather than overwriting them. Use `uninstall`
+  to remove the whole integration; an empty model list is not accepted.
+  A later `install` without `--models` retains the recorded selection.
 - **Upgrade:** finish active model tasks, then run `node bin/bridge.mjs upgrade`
   from the desired checked-out project version. It saves that code, installs its
   pinned OpenCode runtime if needed, switches only this bridge service and checks

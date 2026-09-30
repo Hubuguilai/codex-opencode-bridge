@@ -8,14 +8,14 @@ import {preparedEnvironment} from './setup.mjs';
 import {serviceConfiguration,installService,removeService,availablePort} from './service.mjs';
 import {checkBridge,validateReceipt} from './desktop-install.mjs';
 const defaultDirectory=()=>path.join(os.homedir(),'.local/share/codex-opencode-bridge/desktop');
-async function checkIdle(prepared){
+export async function checkIdle(prepared){
  const env=preparedEnvironment(prepared,{});
  const response=await fetch(`http://127.0.0.1:${env.BRIDGE_PORT}/health`,{signal:AbortSignal.timeout(3000)});
  const health=await response.json();
  if(!response.ok||!health.ok||health.active!==0)throw Error('Bridge is unavailable or has active requests. Finish tasks before upgrading.');
 }
-async function waitStopped(prepared){
- const env=preparedEnvironment(prepared,{});
+export async function waitStopped(prepared,{environment}={}){
+ const env=environment??preparedEnvironment(prepared,{});
  for(let i=0;i<50;i++){
   try{await availablePort(Number(env.BRIDGE_PORT));await availablePort(Number(env.OPENCODE_PORT));return;}catch{}
   await new Promise(resolve=>setTimeout(resolve,200));
@@ -50,6 +50,7 @@ export async function upgradeDesktop({directory=defaultDirectory(),rollback=fals
  const root=path.resolve(directory),unlock=acquireInstallLock(root);
  try{
   const original=read(root);
+  if(original.modelChange)throw Error('An interrupted model change needs recover-models first.');
   if(original.upgrade)throw Error('An interrupted upgrade needs recover-upgrade first.');
   if(original.status!=='installed')throw Error('Install and verify the bridge before upgrading.');
   const before=checkRelease(root,original.release,deps);

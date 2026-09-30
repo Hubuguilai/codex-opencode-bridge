@@ -11,6 +11,8 @@ if(!process.env.BRIDGE_LIFECYCLE_CHILD){
  process.exit(result.status??1);
 }
 const {installDesktop,uninstallDesktop,checkBridge}=await import('../src/desktop-install.mjs');
+const {setDesktopModels,recoverDesktopModels}=await import('../src/desktop-models.mjs');
+const {updateRouterModels}=await import('../src/router-registration.mjs');
 const {upgradeDesktop,recoverDesktopUpgrade}=await import('../src/desktop-upgrade.mjs');
 const {stageRelease,verifyRelease}=await import('../src/releases.mjs');
 const {installRuntime}=await import('../src/runtime-install.mjs');
@@ -84,6 +86,22 @@ try{
  assert.equal(fs.readFileSync(path.join(options.directory,'desktop-install.json'),'utf8'),beforeFailure);receipt.checks.explicitUpgradeRecovery=true;
  assert.equal(createHash('sha256').update(fs.readFileSync(tokenPath)).digest('hex'),tokenHash);
  assert.equal(fs.readFileSync(source,'utf8'),JSON.stringify(native));receipt.checks.upgradeConfigurationPreserved=true;
+ const modelDeps={updateRouterModels:(dir,opts)=>updateRouterModels(dir,{...opts,restart:false})};
+ const installedList=async()=>{const env=preparedEnvironment(prepared,{}),token=fs.readFileSync(tokenPath,'utf8').trim();const response=await fetch(`http://127.0.0.1:${env.BRIDGE_PORT}/v1/models`,{headers:{authorization:'Bearer '+token}});assert.equal(response.status,200);return (await response.json()).data.map(x=>x.id);};
+ assert.equal((await setDesktopModels({...options,models:['opencode/big-pickle']},modelDeps)).updated,true);
+ assert.deepEqual(await installedList(),['opencode/big-pickle']);assert.ok(!catalogSlugs().includes('opencode-native-bridge/opencode/muse-spark-1.3-contributor-free'));receipt.checks.modelRemove=true;
+ assert.equal((await installDesktop(options,deps)).reused,true);assert.deepEqual(await installedList(),['opencode/big-pickle']);receipt.checks.repeatRetainsSelection=true;
+ const both=['opencode/big-pickle','opencode/muse-spark-1.3-contributor-free'];
+ await setDesktopModels({...options,models:both},modelDeps);assert.deepEqual(await installedList(),both);assert.ok(catalogSlugs().includes('opencode-native-bridge/opencode/muse-spark-1.3-contributor-free'));receipt.checks.modelAdd=true;
+ const beforeModels=fs.readFileSync(path.join(options.directory,'desktop-install.json'),'utf8');let modelFail=true;
+ await assert.rejects(setDesktopModels({...options,models:['opencode/big-pickle']},{...modelDeps,checkBridge:async dir=>{await checkBridge(dir);if(modelFail){modelFail=false;throw Error('Injected model startup check failure');}}}),/previous configuration/);
+ assert.deepEqual(await installedList(),both);assert.equal(fs.readFileSync(path.join(options.directory,'desktop-install.json'),'utf8'),beforeModels);receipt.checks.modelFailureRestore=true;
+ let failPublished=true;
+ await assert.rejects(setDesktopModels({...options,models:['opencode/big-pickle']},{...modelDeps,updateRouterModels:async(dir,opts)=>{await updateRouterModels(dir,{...opts,restart:false});if(failPublished){failPublished=false;throw Error('Injected after-publication failure');}}}),/previous configuration/);
+ assert.deepEqual(await installedList(),both);assert.ok(catalogSlugs().includes('opencode-native-bridge/opencode/muse-spark-1.3-contributor-free'));receipt.checks.postPublicationModelRestore=true;
+ await assert.rejects(setDesktopModels({...options,models:['opencode/big-pickle']},{...modelDeps,checkBridge:async()=>{throw Error('Injected model recovery failure');}}),/recover-models/);
+ assert.equal((await recoverDesktopModels(options,modelDeps)).restored,true);assert.deepEqual(await installedList(),both);receipt.checks.modelExplicitRecovery=true;
+ assert.equal(createHash('sha256').update(fs.readFileSync(tokenPath)).digest('hex'),tokenHash);assert.equal(fs.readFileSync(source,'utf8'),JSON.stringify(native));receipt.checks.modelConfigurationPreserved=true;
  receipt.passed=true;
 }catch(error){receipt.passed=false;receipt.error=error.message.replaceAll(root,'<temporary-workspace>');if(error.errors)receipt.causes=error.errors.map(x=>x.message.replaceAll(root,'<temporary-workspace>')); process.exitCode=1;}
 finally{

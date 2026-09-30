@@ -1,7 +1,7 @@
 import {parseArgs} from 'node:util';
 
 const commands = {
-  'upgrade': ['directory'], 'rollback': ['directory'], 'recover-upgrade': ['directory'], 'status': ['directory'], 'install': ['directory','router-root','models'], 'uninstall': ['directory'], 'register-router': ['router-root'], 'unregister-router': ['router-root'], 'install-service': ['binary'], 'service-status': [], 'remove-service': [], 'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
+  'models': ['directory','models'], 'recover-models': ['directory'], 'upgrade': ['directory'], 'rollback': ['directory'], 'recover-upgrade': ['directory'], 'status': ['directory'], 'install': ['directory','router-root','models'], 'uninstall': ['directory'], 'register-router': ['router-root'], 'unregister-router': ['router-root'], 'install-service': ['binary'], 'service-status': [], 'remove-service': [], 'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
   prepare: ['models', 'model', 'catalog'],
   'prepare-router': ['prepared', 'router-state'],
 };
@@ -30,6 +30,7 @@ export function parseCommand(args) {
   if (positionals.length > (needsDirectory.has(command) ? 1 : 0)) throw new Error('Unexpected positional arguments. Use --help.');
   if (values.help) return {command: 'help', options: {}};
   if (needsDirectory.has(command) && !positionals[0]?.trim()) throw new Error('Provide one explicit directory. Use --help.');
+  if(command==='models'&&!values.models)throw new Error('Provide --models with the complete desired model list.');
   if (['prepare-router','register-router','unregister-router'].includes(command)) {
     for (const name of commands[command]) if (!values[name]) throw new Error(`Missing required option --${name}.`);
   }

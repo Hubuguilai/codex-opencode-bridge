@@ -29,6 +29,7 @@
     "big_pickle_frozen_source_full_workflow": "passed_10_of_10_commit_3a096e9",
     "independent_service_code_releases": "verified_real_launchd_lifecycle_and_upgrade_switch",
     "bridge_upgrade_rollback_recovery": "verified_real_launchd_health_lifecycle_post_upgrade_model_workflows_pending",
-    "model_selection_router_component": "verified_real_publication_preservation_and_rollback_desktop_coordinator_pending"
+    "model_selection_router_component": "verified_real_publication_preservation_and_rollback",
+    "installed_model_selection": "verified_real_service_inventory_publication_and_recovery_live_model_workflows_pending"
   }
 }

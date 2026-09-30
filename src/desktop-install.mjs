@@ -26,11 +26,12 @@ export async function checkBridge(prepared,{fetchImpl=fetch}={}){
 }
 const real={preparedEnvironment,ensureRouter,installRuntime,prepareDirectory,installService,removeService,prepareRouterPlan,loadRouter,registerRouter,unregisterRouter,checkBridge,freePort};
 export async function installDesktop({directory=path.join(os.homedir(),'.local/share/codex-opencode-bridge/desktop'),
- routerRoot=path.join(os.homedir(),'.local/share/codex-router'),models=defaults,platform=process.platform}={},deps=real){
+ routerRoot=path.join(os.homedir(),'.local/share/codex-router'),models,platform=process.platform}={},deps=real){
  if(platform!=='darwin')throw new Error('Desktop installation currently targets macOS only.');
- if(!Array.isArray(models)||!models.length||new Set(models).size!==models.length||models.some(x=>!modelProfile(x)))throw new Error('Choose distinct supported model IDs.');
  const root=path.resolve(directory),receiptPath=path.join(root,'desktop-install.json');
  if(fs.existsSync(root)&&fs.lstatSync(root).isSymbolicLink())throw new Error('Installation directory must not be a symbolic link.');
+ if(models===undefined)models=fs.existsSync(receiptPath)?JSON.parse(fs.readFileSync(receiptPath)).models:defaults;
+ if(!Array.isArray(models)||!models.length||new Set(models).size!==models.length||models.some(x=>!modelProfile(x)))throw new Error('Choose distinct supported model IDs.');
  // Resolve dependencies before creating or mutating the user's installation.
  const router=await deps.ensureRouter(routerRoot);
  routerRoot=router.root;
@@ -41,8 +42,9 @@ export async function installDesktop({directory=path.join(os.homedir(),'.local/s
  try{
   if(fs.existsSync(receiptPath)){
    receipt=JSON.parse(fs.readFileSync(receiptPath));
-   if(receipt.kind!=='bridge-desktop-install'||receipt.routerRoot!==path.resolve(routerRoot)||JSON.stringify(receipt.models)!==JSON.stringify(models))throw new Error('Existing installation settings differ; keep its record and use its original settings. Model updates are pending in this candidate.');
+   if(receipt.kind!=='bridge-desktop-install'||receipt.routerRoot!==path.resolve(routerRoot)||JSON.stringify(receipt.models)!==JSON.stringify(models))throw new Error('Existing installation settings differ; keep its record and use its original settings. Use the models command to change an installed selection.');
    validateReceipt(root,receipt);
+   if(receipt.modelChange)throw new Error('An interrupted model change needs recover-models first.');
    if(receipt.upgrade)throw new Error('An interrupted upgrade needs recover-upgrade before installation.');
    if(receipt.status==='installed'){
    const code=receipt.release?verifyRelease(receipt.release):undefined;
@@ -89,7 +91,8 @@ export async function uninstallDesktop({directory=path.join(os.homedir(),'.local
  const release=acquireInstallLock(root);
  try{
   const receipt=JSON.parse(fs.readFileSync(file));validateReceipt(root,receipt);
-  if(receipt.upgrade)throw new Error('An interrupted upgrade needs recover-upgrade before uninstall.');
+  if(receipt.modelChange)throw new Error('An interrupted model change needs recover-models first.');
+   if(receipt.upgrade)throw new Error('An interrupted upgrade needs recover-upgrade before uninstall.');
   const api=await deps.loadRouter(receipt.routerRoot);
   // Remove model routes first, keeping a working service if ownership checks fail.
   if(fs.existsSync(path.join(receipt.plan,'registration.json')))await deps.unregisterRouter(receipt.plan,{api});

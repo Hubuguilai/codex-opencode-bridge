@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 133 tests. This does not replace the pending
+The latest completed local unit suite has 138 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -480,8 +480,29 @@ publication, restored state was incorrectly checked against the intended new mod
 set. Restore now explicitly disables those forward-only checks. The regression
 covers this case without depending on a prior publication attempt.
 
-This component does not yet update the running bridge's allowlist or expose a
-user-facing model-change command. The desktop coordinator must combine configuration,
-service restart and Router publication with durable recovery before that command
-can be considered implemented. No service restart, model inference or Desktop GUI
+At this component milestone, service allowlist updates and a user command were
+still pending. The subsequent desktop coordinator is described below. No service restart, model inference or Desktop GUI
 verification occurred in this component test.
+
+
+## Coordinated installed model selection
+
+`models --models ID,ID` and `recover-models` now coordinate prepared files, the
+running bridge service and Router publication with a durable original-state record.
+Individual configuration files are replaced atomically; recovery recognizes mixed
+before/after files after interruption and refuses unrelated user edits. The local
+token, ports, code release and runtime remain selected as before.
+
+[The real lifecycle receipt](receipts/desktop-model-selection.json) verifies Muse
+removal and addition in both the running service's authenticated model inventory
+and the published catalog. It also verifies repeat install keeps the selected
+models, startup-check failure restores the old selection, failure after successful
+publication restores both sides, and an explicit recovery succeeds after an injected
+recovery failure. Token and native catalog source preservation and test-service
+cleanup passed. No model inference or Desktop GUI verification occurred; shared
+Router service restart was disabled for this isolated test.
+
+The commands require independent managed code releases and owned registration
+artifacts; older installation migration remains separate unfinished work. A model
+inventory match verifies routing configuration, not account entitlement or task
+quality. Actual Desktop selection and post-change model workflows remain required.
