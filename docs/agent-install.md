@@ -2,7 +2,7 @@
 
 This is the authoritative procedure for the Codex agent executing the README
 prompt. Do the work; do not ask the user to clone, edit TOML, pick ports or manage
-background services. Do not publish the private repository.
+background services. This is the installation procedure for users of the public project.
 
 ## 1. Obtain the requested version
 
@@ -14,13 +14,22 @@ Check Git first. If Apple's Git/Python developer tools are missing, initiate
 `xcode-select --install` and ask the user to finish that specific system dialog.
 Resume the same task when they return. Do not repeatedly run the installer.
 
-Clone `https://github.com/Hubuguilai/codex-opencode-bridge` using the user's existing
-GitHub authentication, or `gh repo clone` when GitHub CLI is already authenticated.
-Fetch and detach at the exact tag `onboarding-2026-09-30`. Record its resolved commit.
-For an existing checkout, verify its remote, requested tag and clean state before
-switching; preserve local modifications. Never use reset --hard or delete it.
-If private-repository access fails, explain GitHub sign-in/collaborator access;
-do not invent a public download or ask for a token in chat.
+Clone the public repository over HTTPS; GitHub login, GitHub CLI and collaborator
+invitations are not prerequisites:
+
+```sh
+git clone --depth 1 --branch main https://github.com/Hubuguilai/codex-opencode-bridge.git "$HOME/.local/share/codex-opencode-bridge/source"
+```
+
+Create the parent directory first. Record the resolved commit with `git rev-parse HEAD`
+and keep the same checkout throughout this installation. If the user explicitly
+requested a release/tag, resolve and use it instead. Do not use the obsolete
+initial onboarding tag as the default: it contains older onboarding instructions.
+For an existing checkout, verify its remote and local state; preserve modifications
+and existing installed versions. Never use reset --hard or delete it to make room.
+A public clone does not need a GitHub token. If downloading fails, check the URL,
+network and repository availability, then report the exact obstacle. Do not ask
+new users to become collaborators or collect GitHub credentials in chat.
 
 Read this file from the checked-out version before proceeding.
 
@@ -67,8 +76,10 @@ not evidence that paying or logging in will fix it.
   PATH. Do not replace an existing global CLI or modify shell profiles. Re-run
   the maintained entry point. This fallback needs an official CLI version with
   `app-server`; it is not an assertion that every desktop build bundles a CLI.
-- **OpenCode authentication required:** have the user run the following command
-  in an interactive local terminal opened at this checkout. It installs/reuses
+- **OpenCode authentication required:** open an interactive local terminal at the actual checkout when available,
+  then run the following command for the user. Otherwise provide one copyable
+  command containing the quoted absolute checkout path and the login command.
+  Do not ask a beginner to work out which directory to open. It installs/reuses
   the pinned runtime and opens official Zen login. Let the user type the Key
   themselves; do not capture the terminal during secret entry.
 
@@ -111,7 +122,7 @@ bash scripts/start.sh uninstall
 
 Use the same `--directory` for custom installations. Read the saved state before
 selecting a recovery action. Upgrade from an explicitly chosen newer checkout;
-rerunning the initial pinned tag does not mean upgrading to the latest release.
+rerunning a checkout does not automatically upgrade an existing installation.
 After a model change or upgrade, verify again. Preserve backups after uninstall.
 See [advanced lifecycle details](advanced.en.md) only when needed.
 

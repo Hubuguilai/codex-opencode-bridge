@@ -46,5 +46,17 @@ Existing manually modified Router installations remain a documented diagnosis
 path, not a fully automatic migration.
 
 Official public OpenCode documentation and landing-page labels were checked.
-No signed-in account dashboard or purchase was exercised. The project remains
-private, so GitHub collaborator access is still a prerequisite for downloading it.
+No signed-in account dashboard or purchase was exercised. The private-tag download check above records the original test environment; it is
+not an instruction for public users. The updated README and agent runbook target
+a public HTTPS clone of main, record the resolved commit and require no GitHub
+account. Repository visibility remains an owner-controlled release action.
+
+## Registration-guide revision
+
+The public-facing prompts no longer contain private-repository access instructions
+or the old onboarding tag. The registration guide now identifies GitHub/Google
+sign-in, workspace selection, API Keys → Create API Key → copy, the new-user Copy
+Key shortcut, and the exact local-login handoff. Relative links and both prompt
+blocks were checked. Labels were verified against official source; a signed-in
+browser walkthrough and account screenshots remain unperformed. See
+[provenance](onboarding-sources.md). No runtime or active installation changed.
