@@ -25,7 +25,12 @@ export function nativeHistory(history, tools) {
   }else if(['function_call_output','custom_tool_call_output'].includes(item.type)){
    const name=calls.get(item.call_id);
    if(!name)throw invalid('Historical result has no tool call.');
-   push('tool',{type:'tool-result',id:item.call_id,name,result:{type:'text',value:item.output}});
+   const result=Array.isArray(item.output)
+    ? {type:'content',value:item.output.map(part=>part.type==='media'
+      ? {type:'file',mime:part.mediaType,uri:`data:${part.mediaType};base64,${part.data}`}
+      : part)}
+    : {type:'text',value:item.output};
+   push('tool',{type:'tool-result',id:item.call_id,name,result});
   }else {
    // OpenCode has one operator-instruction role; developer and system both
    // use it. Tool/user content is never promoted to that role.

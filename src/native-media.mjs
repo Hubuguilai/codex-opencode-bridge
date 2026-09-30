@@ -9,7 +9,7 @@ export function nativeContent(content, {images = false, role = 'user', detailPol
     if (['input_text', 'output_text', 'text'].includes(part?.type) && typeof part.text === 'string') {
       return {type: 'text', text: part.text};
     }
-    if (!images || role !== 'user' || !['input_image', 'image_url'].includes(part?.type)) {
+    if (!images || !['user', 'tool'].includes(role) || !['input_image', 'image_url'].includes(part?.type)) {
       throw unsupported('This route/role does not support this content type.');
     }
     const url = part.type === 'input_image' ? part.image_url : part.image_url?.url;
@@ -29,6 +29,9 @@ export function nativeContent(content, {images = false, role = 'user', detailPol
 }
 
 export function promptHistory(history) {
-  return history.map(item => Array.isArray(item.content) ? {...item, content: item.content.map(part =>
-    part.type === 'media' ? {type: 'text', text: '[Image supplied in native message content]'} : part)} : item);
+  const redact = value => Array.isArray(value) ? value.map(part =>
+    part.type === 'media' ? {type: 'text', text: '[Image supplied in native message content]'} : part) : value;
+  return history.map(item => ({...item,
+    ...(item.content !== undefined ? {content: redact(item.content)} : {}),
+    ...(item.output !== undefined ? {output: redact(item.output)} : {})}));
 }

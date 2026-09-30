@@ -4,17 +4,6 @@ import { nativeHistory } from './native-history.mjs';
 import { nativeContent, promptHistory } from './native-media.mjs';
 import { invalid, unsupported, BridgeError } from './errors.mjs';
 
-function contentText(content) {
-  if (typeof content === 'string') return content;
-  if (!Array.isArray(content)) throw invalid('Expected textual message content.');
-  return content.map(part => {
-    if (!['input_text', 'output_text', 'text'].includes(part?.type) || typeof part.text !== 'string') {
-      throw unsupported('This model route accepts text only; images/files/audio are not supported.');
-    }
-    return part.text;
-  }).join('\n');
-}
-
 export function normalizeTools(definitions = [], api = 'responses') {
   if (!Array.isArray(definitions)) throw invalid('tools must be an array.');
   const tools = [];
@@ -93,9 +82,9 @@ export function normalizeNativeRequest(payload, api, config) {
         ...(item.namespace ? { namespace: item.namespace } : {}),
         ...(item.type === 'function_call' ? { arguments: item.arguments } : { input: item.input }) });
     } else if (['function_call_output', 'custom_tool_call_output'].includes(item.type)) {
-      output({ type: item.type, call_id: item.call_id, output: contentText(item.output) });
+      output({ type: item.type, call_id: item.call_id, output: nativeContent(item.output, {images: config.imageModels?.includes(payload.model), role: 'tool', detailPolicy: config.imageDetailPolicy, warnings}) });
     } else if (api === 'chat' && item.role === 'tool') {
-      output({ type: 'function_call_output', call_id: item.tool_call_id, output: contentText(item.content) });
+      output({ type: 'function_call_output', call_id: item.tool_call_id, output: nativeContent(item.content, {images: config.imageModels?.includes(payload.model), role: 'tool', detailPolicy: config.imageDetailPolicy, warnings}) });
     } else if (item.type === 'reasoning') {
       if (item.encrypted_content) throw unsupported('Foreign encrypted reasoning state cannot be resumed.');
       // Optional visible reasoning summaries are context, never executable calls.

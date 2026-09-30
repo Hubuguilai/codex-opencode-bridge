@@ -1,6 +1,6 @@
 # Image input through official OpenCode
 
-Native mode accepts inline PNG/JPEG/WebP/GIF image data URLs in user messages
+Native mode accepts inline PNG/JPEG/WebP/GIF image data URLs in user messages and client tool results
 for models explicitly listed in `BRIDGE_IMAGE_MODELS`. This is a capability
 allowlist, not a way to add vision to a text-only model. The default is empty.
 
@@ -12,7 +12,7 @@ runtime object, not a JSON object with `mediaType` and `data` fields. Base64 is
 never embedded as prose in the fallback conversation prompt.
 
 Remote/file URLs, file IDs, audio/video/PDF,
-images in assistant/system messages, and images in tool results are currently
+images in assistant/system messages are currently
 rejected explicitly. The HTTP body byte limit still applies. This does not
 establish multimodal or long-context parity with an OpenAI model.
 
@@ -30,3 +30,13 @@ identified three colored squares in order through the native bridge. Separate
 Codex patch create/update/denial scenarios passed. The plain external Zen
 Responses route returned an OpenCode-only free-tier denial; these results apply
 to the official OpenCode runtime route, not unrestricted direct API access.
+
+
+Live verification on 2026-09-30: a real Codex client called `view_image`,
+returned an `input_image` in `function_call_output`, and Muse correctly read
+an image-only six-character code and three square colors. The turn completed.
+Tool images retain their tool role and call identity; OpenCode receives native
+content results with file MIME/data URI parts. They are never promoted to user
+instructions or embedded as base64 prose. This test used the installed local
+Router and bridge, but did not retry the user's original Desktop conversation.
+See [receipt](receipts/muse-tool-image.json).

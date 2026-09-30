@@ -42,3 +42,18 @@ test('Plugin reuses native media class instances, preserves order and refuses mi
  hooks.context(context);assert.equal(context.messages[0].content[1],media);assert.equal(context.messages[0].content[1].media.bytes(),'actual image');
  await hooks.prompt();assert.throws(()=>hooks.context({tools:{},system:[],options:{},messages:[]}),/NATIVE_IMAGE_ATTACHMENT_MISSING/);
 });
+test('Tool image results retain call identity, interleaved content and image capability gate',()=>{
+ const input=[{role:'user',content:'Inspect the file'},
+  {type:'function_call',namespace:'functions',name:'view_image',call_id:'v1',arguments:'{"path":"probe.png"}'},
+  {type:'function_call_output',call_id:'v1',output:[{type:'input_text',text:'before'},image,{type:'input_text',text:'after'}]}];
+ const actual=normalizeNativeRequest({model:'opencode/vision',input},'responses',config);
+ const message=actual.messages.at(-1);
+ assert.equal(message.role,'tool');assert.equal(message.content[0].id,'v1');
+ assert.deepEqual(message.content[0].result,{type:'content',value:[{type:'text',text:'before'},
+  {type:'file',mime:'image/png',uri:image.image_url},{type:'text',text:'after'}]});
+ assert.ok(!actual.prompt.includes(data));
+ assert.throws(()=>normalizeNativeRequest({model:'opencode/text',input},'responses',config),{status:422});
+ const chat=normalizeNativeRequest({model:'opencode/vision',messages:[{role:'assistant',tool_calls:[{id:'v1',function:{name:'view_image',arguments:'{}'}}]},
+  {role:'tool',tool_call_id:'v1',content:[{type:'image_url',image_url:{url:image.image_url}}]}]},'chat',config);
+ assert.equal(chat.messages.at(-1).content[0].result.value[0].uri,image.image_url);
+});

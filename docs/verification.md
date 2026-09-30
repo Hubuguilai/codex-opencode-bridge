@@ -37,7 +37,8 @@ not a production success-rate estimate or full GPT feature parity.
 | `opencode/deepseek-v4-flash-free` | Absent from runtime inventory; repair failed before a client command | Not verified; do not confuse with paid/Go DeepSeek routes |
 | `opencode/muse-spark-1.3-contributor-free` | See newer image/capacity and standalone schema tests above | Partial live verification; complete workflow remains pending |
 | Attached user images | Muse only; see newer evidence above | Implemented and tested |
-| Image tool results/audio/PDF/video, hosted search, adjustable reasoning | Explicitly rejected | Unsupported |
+| Image tool results | Muse: actual Codex `view_image` call and completed answer; see [receipt](receipts/muse-tool-image.json) | Verified targeted workflow |
+| Audio/PDF/video, hosted search, adjustable reasoning | Explicitly rejected | Unsupported |
 
 [Client-alias semantics](client-aliases.md) explain why file aliases show command
 execution instead of a native patch diff. Original supplied Codex tools remain
