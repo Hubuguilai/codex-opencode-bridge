@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 132 tests. This does not replace the pending
+The latest completed local unit suite has 133 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -464,3 +464,24 @@ it is not a real launchd crash-timing certificate.
 Legacy service migration, shared Router upgrade and configuration-format migrations
 remain pending. Clean-machine installation, actual Desktop selection, reboot and
 post-upgrade model workflows still require their own acceptance evidence.
+
+
+## Transactional model-directory changes
+
+The Router component can now replace this installation's model selection without
+removing its provider or credentials. [The isolated real-publisher receipt](receipts/router-model-update.json)
+checks removing Muse, adding it again, publication-failure rollback, exact retention
+of provider and credential state, an unrelated user model and the adopted native
+catalog source. User-edited model entries and plan artifacts stop the operation
+without overwriting those edits. Source hashes identify the tested implementation.
+
+The test exposed an earlier rollback-check bug: when mutation failed before forward
+publication, restored state was incorrectly checked against the intended new model
+set. Restore now explicitly disables those forward-only checks. The regression
+covers this case without depending on a prior publication attempt.
+
+This component does not yet update the running bridge's allowlist or expose a
+user-facing model-change command. The desktop coordinator must combine configuration,
+service restart and Router publication with durable recovery before that command
+can be considered implemented. No service restart, model inference or Desktop GUI
+verification occurred in this component test.

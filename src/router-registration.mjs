@@ -1,9 +1,13 @@
 import fs from 'node:fs';
+import {modelProfile,modelCatalogEntry} from './model-profiles.mjs';
+import {routerModelsFromCatalog} from './router-plan.mjs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
-import {createHash} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
 const hash=x=>createHash('sha256').update(x).digest('hex');
 const fingerprint=x=>hash(JSON.stringify(x));
+const planArtifacts=['user-model-additions.json','menu-preview.json','REVIEW.md'];
+const artifactHashes=root=>Object.fromEntries(planArtifacts.map(name=>{const file=path.join(root,name);if(fs.lstatSync(file).isSymbolicLink())throw Error('Model plan artifacts must not be symbolic links.');return [name,hash(fs.readFileSync(file))];}));
 const fail=x=>{throw new Error(x);};
 const save=(file,value)=>fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n',{mode:0o600});
 
@@ -39,7 +43,7 @@ function validateOwned(api,receipt){
 // the failed new model set.
 export function checkedPublication(api,{present=[],absent=[]}={}){
  let forward=true;
- return async options=>{
+ const publish=async options=>{
   const verify=forward;forward=false;
   const result=await api.overlay.applyModelOverlayPublication(options);
   if(verify){
@@ -52,20 +56,23 @@ export function checkedPublication(api,{present=[],absent=[]}={}){
   }
   return result;
  };
+ publish.restoring=()=>{forward=false;};
+ return publish;
 }
 export async function registerRouter(directory,{api,restart=true}={}){
  const root=path.resolve(directory),plan=readPlan(root),record=path.join(root,'registration.json');
  if(path.resolve(api.paths.STATE_DIR)!==path.resolve(plan.routerState))fail('Selected Router uses a different state directory than this plan.');
  let reused=false;
  const tokenPath=api.secrets.genericProviderCredentialPath(plan.provider.id);
- await api.overlay.transactModelOverlayMutation({restart,applyPublication:checkedPublication(api,{present:plan.models.map(x=>x.slug)}),
+ const publication=checkedPublication(api,{present:plan.models.map(x=>x.slug)});
+ await api.overlay.transactModelOverlayMutation({restart,applyPublication:publication,
   capture:()=>{
    const snapshots=api.overlay.captureModelOverlayFiles(files(api,tokenPath,record));
    // Durable private pre-mutation backup; never printed or committed.
    const backup=path.join(root,'backups');fs.mkdirSync(backup,{recursive:true,mode:0o700});
-   save(path.join(backup,`${Date.now()}-${process.pid}.json`),snapshots);return snapshots;
+   save(path.join(backup,`${Date.now()}-${randomUUID()}.json`),snapshots);return snapshots;
   },
-  restore:snapshots=>api.overlay.restoreModelOverlayFiles(snapshots),
+  restore:snapshots=>{publication.restoring();return api.overlay.restoreModelOverlayFiles(snapshots);},
   mutate:()=>{
    if(fs.existsSync(record)){
     const receipt=JSON.parse(fs.readFileSync(record));
@@ -87,7 +94,7 @@ export async function registerRouter(directory,{api,restart=true}={}){
    api.picker.setModelsVisible(plan.models.map(x=>x.slug),true);
    save(record,{kind:'bridge-router-registration',planHash:fingerprint(plan),providerId:plan.provider.id,
     providerHash:fingerprint(api.providers.getGenericProvider(plan.provider.id)),credentialId:credential.id,credentialHash:fingerprint(credential),
-    tokenPath,tokenHash:hash(fs.readFileSync(tokenPath)),modelHashes:Object.fromEntries(plan.models.map(x=>[x.slug,fingerprint(x)]))});
+    tokenPath,tokenHash:hash(fs.readFileSync(tokenPath)),artifactHashes:artifactHashes(root),modelHashes:Object.fromEntries(plan.models.map(x=>[x.slug,fingerprint(x)]))});
   }});
  return {registered:true,reused,models:plan.models.map(x=>x.displayName),restartCodexRequired:true};
 }
@@ -97,7 +104,8 @@ export async function unregisterRouter(directory,{api,restart=true}={}){
  if(!fs.existsSync(record))return {removed:true,alreadyAbsent:true};
  const receipt=JSON.parse(fs.readFileSync(record));
  if(receipt.kind!=='bridge-router-registration'||receipt.planHash!==fingerprint(plan))fail('Invalid registration record.');
- await api.overlay.transactModelOverlayMutation({restart,applyPublication:checkedPublication(api,{absent:Object.keys(receipt.modelHashes)}),files:files(api,receipt.tokenPath,record),mutate:()=>{
+ const publication=checkedPublication(api,{absent:Object.keys(receipt.modelHashes)});
+ await api.overlay.transactModelOverlayMutation({restart,applyPublication:publication,files:files(api,receipt.tokenPath,record),restore:snapshots=>{publication.restoring();return api.overlay.restoreModelOverlayFiles(snapshots);},mutate:()=>{
   const users=validateOwned(api,receipt),slugs=Object.keys(receipt.modelHashes);
   api.users.writeUserModels(users.filter(x=>!slugs.includes(x.slug)));
   api.picker.forgetModelVisibility(slugs);
@@ -107,4 +115,41 @@ export async function unregisterRouter(directory,{api,restart=true}={}){
   fs.unlinkSync(receipt.tokenPath);fs.unlinkSync(record);
  }});
  return {removed:true,unrelatedModelsPreserved:true,backupsPreserved:true,restartCodexRequired:true};
+}
+
+// Changes only this registration's model entries. The desktop coordinator must
+// separately update/restart the bridge allowlist before treating this as usable.
+export async function updateRouterModels(directory,{models,api,restart=true}={}){
+ if(!Array.isArray(models)||!models.length||new Set(models).size!==models.length||models.some(id=>!modelProfile(id)))fail('Choose distinct supported model IDs; use uninstall to remove the entire bridge.');
+ const root=path.resolve(directory),planFile=path.join(root,'router-plan.json'),plan=readPlan(root),recordFile=path.join(root,'registration.json');
+ if(path.resolve(api.paths.STATE_DIR)!==path.resolve(plan.routerState))fail('Selected Router uses a different state directory than this plan.');
+ const receipt=JSON.parse(fs.readFileSync(recordFile));
+ if(receipt.kind!=='bridge-router-registration'||receipt.planHash!==fingerprint(plan))fail('Invalid registration record.');
+ const template=JSON.parse(fs.readFileSync(new URL('../examples/native-models.json',import.meta.url))).models[0];
+ const additions=routerModelsFromCatalog(models,{models:models.map(id=>modelCatalogEntry(id,template))});
+ const entries=additions.map(x=>x.entry),slugs=entries.map(x=>x.slug),oldSlugs=Object.keys(receipt.modelHashes),removed=oldSlugs.filter(x=>!slugs.includes(x));
+ const artifacts=['router-plan.json','user-model-additions.json','menu-preview.json','REVIEW.md'].map(name=>path.join(root,name));
+ const publication=checkedPublication(api,{present:slugs,absent:removed});
+ await api.overlay.transactModelOverlayMutation({restart,applyPublication:publication,
+  capture:()=>{
+   const snapshot=api.overlay.captureModelOverlayFiles([...files(api,receipt.tokenPath,recordFile),...artifacts]);
+   const backup=path.join(root,'backups');fs.mkdirSync(backup,{recursive:true,mode:0o700});
+   save(path.join(backup,`models-${Date.now()}-${randomUUID()}.json`),snapshot);return snapshot;
+  },restore:snapshot=>{publication.restoring();return api.overlay.restoreModelOverlayFiles(snapshot);},mutate:()=>{
+   // Re-read under Router's mutation lock: another bridge operation must not
+   // invalidate the record captured before we acquired that lock.
+   if(fingerprint(JSON.parse(fs.readFileSync(recordFile)))!==fingerprint(receipt)||fingerprint(readPlan(root))!==fingerprint(plan))fail('Registration changed while waiting for its lock; retry after the other operation.');
+   if(!receipt.artifactHashes||fingerprint(artifactHashes(root))!==fingerprint(receipt.artifactHashes))fail('Model plan artifacts were edited or lack ownership hashes; preserve them before updating.');
+   const users=validateOwned(api,receipt),unrelated=users.filter(x=>!oldSlugs.includes(x.slug));
+   if(entries.some(x=>unrelated.some(y=>x.slug===y.slug||x.gatewayModel===y.gatewayModel)))fail('A requested model identity belongs to another registration.');
+   const nextPlan={...plan,models:entries};
+   api.users.writeUserModels([...unrelated,...entries]);
+   api.picker.forgetModelVisibility(removed);api.picker.setModelsVisible(slugs,true);
+   save(planFile,nextPlan);save(path.join(root,'user-model-additions.json'),{version:1,models:entries});
+   const catalog=JSON.parse(fs.readFileSync(api.paths.MERGED_CATALOG_PATH));
+   save(path.join(root,'menu-preview.json'),{...catalog,models:[...catalog.models.filter(x=>!oldSlugs.includes(x.slug)),...additions.map(x=>x.catalog)]});
+   fs.writeFileSync(path.join(root,'REVIEW.md'),'# Registered bridge model selection\n\n'+entries.map(x=>'- '+x.displayName).join('\n')+'\n\nThis selection updates Router entries only. Desktop activation and live bridge model access require separate verification. Previous configuration is retained in private backups.\n',{mode:0o600});
+   save(recordFile,{...receipt,planHash:fingerprint(nextPlan),artifactHashes:artifactHashes(root),modelHashes:Object.fromEntries(entries.map(x=>[x.slug,fingerprint(x)]))});
+  }});
+ return {updated:true,models,providerAndCredentialsPreserved:true,bridgeAllowlistUpdated:false,restartCodexRequired:true};
 }

@@ -28,6 +28,7 @@
     "read_only_installation_status": "implemented_unit_tested_no_inference",
     "big_pickle_frozen_source_full_workflow": "passed_10_of_10_commit_3a096e9",
     "independent_service_code_releases": "verified_real_launchd_lifecycle_and_upgrade_switch",
-    "bridge_upgrade_rollback_recovery": "verified_real_launchd_health_lifecycle_post_upgrade_model_workflows_pending"
+    "bridge_upgrade_rollback_recovery": "verified_real_launchd_health_lifecycle_post_upgrade_model_workflows_pending",
+    "model_selection_router_component": "verified_real_publication_preservation_and_rollback_desktop_coordinator_pending"
   }
 }

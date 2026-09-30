@@ -17,3 +17,9 @@ test('Registration requires visible models and removal requires actual absence',
  fs.writeFileSync(api.paths.MERGED_CATALOG_PATH,JSON.stringify({models:[{slug:'unrelated',visibility:'list'}]}));
  assert.deepEqual(await checkedPublication(api,{absent:['wanted']})({}),{published:true});
 });
+test('Mutation failure before publication restores old catalog without new-state checks',async t=>{
+ const api=fixture(t,[{slug:'old',visibility:'list'}]);
+ const publish=checkedPublication(api,{present:['new'],absent:['old']});
+ publish.restoring();
+ assert.deepEqual(await publish({}),{published:true});
+});

@@ -1,5 +1,5 @@
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import assert from 'node:assert/strict';
-import {spawnSync} from 'node:child_process';
+import {spawnSync} from 'node:child_process';import {createHash} from 'node:crypto';
 if(!process.env.BRIDGE_PUBLICATION_CHILD){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-publication-'));
  const router=process.argv[2];if(!router)throw Error('Provide an explicit Router source directory.');
@@ -7,7 +7,7 @@ if(!process.env.BRIDGE_PUBLICATION_CHILD){
  console.log(result.stdout);console.log(result.stderr.slice(-1200));if(result.status===0)fs.rmSync(root,{recursive:true,force:true});process.exit(result.status??1);
 }
 const {prepareDirectory}=await import('../src/setup.mjs');const {prepareRouterPlan}=await import('../src/router-plan.mjs');
-const {loadRouter,registerRouter,unregisterRouter}=await import('../src/router-registration.mjs');
+const {loadRouter,registerRouter,unregisterRouter,updateRouterModels}=await import('../src/router-registration.mjs');
 const api=await loadRouter(process.argv[2]);const state=api.paths.STATE_DIR;fs.mkdirSync(state,{recursive:true});fs.mkdirSync(process.env.CODEX_HOME,{recursive:true});
 fs.writeFileSync(path.join(state,'generic-providers.json'),JSON.stringify({version:1,providers:[]}));
 api.users.writeUserModels([]);
@@ -30,7 +30,34 @@ fs.renameSync(plan,plan+'-failed-publication');prepareRouterPlan(plan,{prepared,
 await registerRouter(plan,{api,restart:false});
 const catalog=JSON.parse(fs.readFileSync(path.join(state,'merged-models.json')));
 const slugs=catalog.models.map(x=>x.slug);assert.ok(slugs.includes('opencode-native-bridge/opencode/big-pickle'));assert.ok(slugs.includes('opencode-native-bridge/opencode/muse-spark-1.3-contributor-free'));assert.equal(JSON.parse(fs.readFileSync(originalCatalog)).models[0].slug,'gpt-native-sentinel');
+const currentUsers=api.users.readUserModels();
+api.users.writeUserModels([...currentUsers,{...currentUsers[0],slug:'unrelated/model',gatewayModel:'unrelated-model',compHash:'unrelated-model-user-v1',provider:'unrelated-provider',displayName:'Unrelated model'}]);
+const unrelatedBefore=api.users.readUserModels().find(x=>x.slug==='unrelated/model');
+const ownedModels=()=>api.users.readUserModels().filter(x=>x.provider==='opencode-native-bridge');
+const providerBefore=JSON.stringify(api.providers.readGenericProviders()),credentialsBefore=fs.readFileSync(api.paths.PROVIDER_CREDENTIAL_STORE_PATH);
+const tokenFile=api.secrets.genericProviderCredentialPath('opencode-native-bridge'),tokenBefore=fs.readFileSync(tokenFile);
+const capture=()=>Object.fromEntries(['router-plan.json','registration.json','user-model-additions.json','menu-preview.json','REVIEW.md'].map(name=>[name,fs.readFileSync(path.join(plan,name),'utf8')]));
+const beforeUpdate=capture();
+fs.appendFileSync(path.join(plan,'REVIEW.md'),'User annotation');
+await assert.rejects(updateRouterModels(plan,{api,restart:false,models:['opencode/big-pickle']}),/artifacts were edited/);
+assert.ok(fs.readFileSync(path.join(plan,'REVIEW.md'),'utf8').endsWith('User annotation'));
+fs.writeFileSync(path.join(plan,'REVIEW.md'),beforeUpdate['REVIEW.md']);
+omitOnce=true;
+await assert.rejects(updateRouterModels(plan,{api,restart:false,models:['opencode/big-pickle']}),/omitted/);
+assert.deepEqual(capture(),beforeUpdate);assert.equal(ownedModels().length,2);
+await updateRouterModels(plan,{api,restart:false,models:['opencode/big-pickle']});
+assert.equal(ownedModels().length,1);
+assert.ok(!JSON.parse(fs.readFileSync(api.paths.MERGED_CATALOG_PATH)).models.some(x=>x.slug==='opencode-native-bridge/opencode/muse-spark-1.3-contributor-free'));
+await updateRouterModels(plan,{api,restart:false,models:['opencode/big-pickle','opencode/muse-spark-1.3-contributor-free']});
+assert.equal(ownedModels().length,2);
+assert.equal(JSON.stringify(api.providers.readGenericProviders()),providerBefore);
+assert.deepEqual(fs.readFileSync(api.paths.PROVIDER_CREDENTIAL_STORE_PATH),credentialsBefore);assert.deepEqual(fs.readFileSync(tokenFile),tokenBefore);
+await registerRouter(plan,{api,restart:false});
+const edited=api.users.readUserModels(),ownedIndex=edited.findIndex(x=>x.provider==='opencode-native-bridge');edited[ownedIndex].displayName='User edited';api.users.writeUserModels(edited);
+await assert.rejects(updateRouterModels(plan,{api,restart:false,models:['opencode/big-pickle']}),/edited/);
+edited[ownedIndex]=JSON.parse(fs.readFileSync(path.join(plan,'router-plan.json'))).models[0];api.users.writeUserModels(edited);
 await unregisterRouter(plan,{api,restart:false});
+assert.deepEqual(api.users.readUserModels().find(x=>x.slug==='unrelated/model'),unrelatedBefore);
 const after=JSON.parse(fs.readFileSync(path.join(state,'merged-models.json'))).models.map(x=>x.slug);assert.equal(JSON.parse(fs.readFileSync(originalCatalog)).models[0].slug,'gpt-native-sentinel');assert.ok(!after.includes('opencode-native-bridge/opencode/big-pickle'));
-const receipt={passed:true,upstreamPinnedUnmodified:true,realCatalogPublication:true,missingModelRollback:true,nativeSourcePreserved:true,nativeSignedInPickerUntested:true,registrationRemoval:true,serviceRestartTested:false,desktopPickerTested:false};
+const receipt={date:new Date().toISOString(),sourceFiles:Object.fromEntries(['src/router-registration.mjs','src/router-plan.mjs','src/model-profiles.mjs','scripts/router-publication-check.mjs'].map(name=>[name,createHash('sha256').update(fs.readFileSync(name)).digest('hex')])),passed:true,upstreamPinnedUnmodified:true,realCatalogPublication:true,missingModelRollback:true,nativeSourcePreserved:true,nativeSignedInPickerUntested:true,registrationRemoval:true,modelRemoveAndAdd:true,modelUpdatePublicationRollback:true,providerAndCredentialsPreserved:true,modelEditsPreserved:true,unrelatedUserModelPreserved:true,serviceRestartTested:false,desktopPickerTested:false};
 fs.mkdirSync('generated',{recursive:true});fs.writeFileSync('generated/router-publication-receipt.json',JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt));
