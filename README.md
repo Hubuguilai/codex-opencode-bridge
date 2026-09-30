@@ -122,6 +122,8 @@ conflicts and explain the specific conflict. Never retry quota failures in a loo
 Report what was reproduced, changed, verified and still unknown.
 ```
 
+New managed installations run a content-verified code copy under their installation directory. Updating the checkout does not silently update that service; repeat installation retains the selected copy. Older installations retain their existing service paths. An explicit upgrade/rollback command is still pending.
+
 ## Repeat, change, update or remove
 
 - **Repeat / recover a bridge-stage failure:** run the same `install` command with

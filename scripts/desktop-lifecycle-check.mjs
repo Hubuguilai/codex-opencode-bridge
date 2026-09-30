@@ -11,6 +11,7 @@ if(!process.env.BRIDGE_LIFECYCLE_CHILD){
  process.exit(result.status??1);
 }
 const {installDesktop,uninstallDesktop,checkBridge}=await import('../src/desktop-install.mjs');
+const {verifyRelease}=await import('../src/releases.mjs');
 const {installRuntime}=await import('../src/runtime-install.mjs');
 const {ensureRouter}=await import('../src/router-install.mjs');
 const {prepareDirectory,preparedEnvironment}=await import('../src/setup.mjs');
@@ -47,6 +48,12 @@ try{
  const first=await installDesktop(options,deps);assert.equal(first.installed,true);
  assert.ok(catalogSlugs().includes('opencode-native-bridge/opencode/big-pickle'));assert.ok(catalogSlugs().includes('opencode-native-bridge/opencode/muse-spark-1.3-contributor-free'));
  receipt.checks.installHealthyAndPublished=true;
+ const installed=JSON.parse(fs.readFileSync(path.join(options.directory,'desktop-install.json')));
+ const code=verifyRelease(installed.release);
+ const serviceId=createHash('sha256').update(prepared).digest('hex').slice(0,16);
+ const service=JSON.parse(fs.readFileSync(path.join(os.homedir(),'.local/share/codex-opencode-bridge/services',serviceId,'service.json')));
+ assert.equal(service.cli,code.cli);assert.notEqual(service.cli,path.resolve('bin/bridge.mjs'));
+ receipt.checks.independentCodeRelease=true;receipt.codeReleaseSha256=code.id;
  const tokenPath=path.join(prepared,'state/local-token'),tokenHash=createHash('sha256').update(fs.readFileSync(tokenPath)).digest('hex');
  assert.equal((await installDesktop(options,deps)).reused,true);receipt.checks.repeat=true;
  await uninstallDesktop(options,deps);await stopped();assert.ok(!catalogSlugs().includes('opencode-native-bridge/opencode/big-pickle'));receipt.checks.uninstall=true;

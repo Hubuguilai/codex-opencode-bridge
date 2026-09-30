@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {preparedEnvironment} from './setup.mjs';
+import {verifyRelease} from './releases.mjs';
 import {serviceStatus} from './service.mjs';
 
 // No provider inference, credential display or state mutations.
@@ -18,6 +19,14 @@ export async function installationStatus({directory=path.join(os.homedir(),'.loc
  }
  result.status=record.status;result.phase=record.phase;result.installed=record.status==='installed';
  add('record',result.installed,'Installation state: '+record.status,record.status==='uninstalled'?'Run install to restore this bridge.':'Re-run install with the same options to resume a bridge-stage failure.');
+ result.managedCodeRelease=Boolean(record.release);
+ if(record.release){
+  try{
+   if(path.dirname(record.release)!==path.join(root,'releases'))throw Error('Unexpected release location');
+   const code=verifyRelease(record.release);result.codeRelease=code.id;
+   add('code',true,'Managed code release matches its recorded content.');
+  }catch{add('code',false,'Managed code release is missing or modified.','Preserve the affected release and diagnose it; do not overwrite or start edited code.');}
+ }
  let env;
  try{env=preparedEnvironment(record.prepared,{});add('preparation',true,'Prepared files match their ownership checks.');}catch{
   add('preparation',false,'Prepared files are missing, moved or edited.','Preserve user edits and inspect the preparation before changing configuration.');return result;

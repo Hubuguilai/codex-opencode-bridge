@@ -39,3 +39,13 @@ test('Edited service files and occupied ports are not overwritten',async t=>{
  await assert.rejects(installService(other,{...f.opts,checkPort:async()=>{throw Error('Port occupied');}}),/Port occupied/);
  assert.equal(fs.readdirSync(path.dirname(file)).length,1);
 });
+
+test('Service uses the selected release entrypoint and refuses an implicit version switch',async t=>{
+ const f=fixture(t);const cli=path.join(f.home,'release.mjs');fs.writeFileSync(cli,'// fixture');
+ const first=await installService(f.directory,{...f.opts,cli});
+ const text=fs.readFileSync(path.join(f.home,'Library/LaunchAgents',first.label+'.plist'),'utf8');
+ assert.ok(text.includes(cli));
+ assert.equal((await installService(f.directory,{...f.opts,cli})).reused,true);
+ await assert.rejects(installService(f.directory,f.opts),/Service paths changed/);
+ removeService(f.directory,f.opts);
+});

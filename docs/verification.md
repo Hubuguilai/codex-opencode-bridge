@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 121 tests. This does not replace the pending
+The latest completed local unit suite has 125 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -416,3 +416,22 @@ GUI picker selection, signed-in GPT preservation, reboot, upgrade, long-context
 compression or general model reliability. Later installer and documentation changes
 are not included in this exact source certificate; final release reconciliation
 remains required. Big Pickle remains text-only.
+
+
+## Independent service code releases
+
+New desktop installations copy shipped runtime assets into a private content-addressed
+release directory. The service entrypoint points there rather than at the mutable
+checkout. Repeat installation verifies and retains the chosen release. Edited or
+symlinked release files fail verification without being overwritten; older receipts
+retain their legacy service paths pending explicit migration. Status checks verify
+release integrity separately from service health. This is a foundation for upgrades,
+not yet an upgrade/rollback command.
+
+[The real lifecycle receipt](receipts/desktop-release-lifecycle.json) verifies the
+recorded service entrypoint uses the independent release, then repeats installation,
+uninstall, reinstall and recovery from an injected health-stage failure. It preserves
+the local token and adopted catalog source, and cleans up its test service. This
+uses isolated client state and real macOS launchd; it does not restart the shared
+Router, call models, verify a GUI picker or certify clean-machine installation.
+The receipt identifies the captured code copy by its content hash.

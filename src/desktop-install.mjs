@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {stageRelease,verifyRelease} from './releases.mjs';
 import path from 'node:path';
 import os from 'node:os';
 import net from 'node:net';
@@ -43,7 +44,8 @@ export async function installDesktop({directory=path.join(os.homedir(),'.local/s
    if(receipt.kind!=='bridge-desktop-install'||receipt.routerRoot!==path.resolve(routerRoot)||JSON.stringify(receipt.models)!==JSON.stringify(models))throw new Error('Existing installation settings differ; keep its record and use its original settings. Model updates are pending in this candidate.');
    validateReceipt(root,receipt);
    if(receipt.status==='installed'){
-   await deps.installService(receipt.prepared,{binary:receipt.binary});await deps.checkBridge(receipt.prepared);
+   const code=receipt.release?verifyRelease(receipt.release):undefined;
+   await deps.installService(receipt.prepared,{binary:receipt.binary,cli:code?.cli});await deps.checkBridge(receipt.prepared);
    await deps.registerRouter(receipt.plan,{api});
    return {installed:true,reused:true,models,modelAccessVerified:false,restartCodexRequired:true};
    }
@@ -54,7 +56,9 @@ export async function installDesktop({directory=path.join(os.homedir(),'.local/s
   const port=await deps.freePort();let upstreamPort=await deps.freePort();while(upstreamPort===port)upstreamPort=await deps.freePort();
   const prepared=path.join(root,'prepared'),plan=path.join(root,'router-plan');
   const resumed=Boolean(receipt);
-  receipt={kind:'bridge-desktop-install',status:'installing',phase:'preparing',routerRoot:path.resolve(routerRoot),models,prepared,plan,binary:runtime.binary};save(receiptPath,receipt);ownsOperation=true;
+  // Preserve legacy service paths on resume; migration belongs to explicit upgrade.
+  const code=receipt?(receipt.release?verifyRelease(receipt.release):undefined):stageRelease(path.join(root,'releases'));
+  receipt={kind:'bridge-desktop-install',status:'installing',phase:'preparing',routerRoot:path.resolve(routerRoot),models,prepared,plan,binary:runtime.binary,release:code?.directory};save(receiptPath,receipt);ownsOperation=true;
   if(fs.existsSync(prepared))deps.preparedEnvironment(prepared,{});
   else deps.prepareDirectory(prepared,{models,port,upstreamPort});
   if(fs.existsSync(plan)&&!fs.existsSync(path.join(plan,'registration.json'))){
@@ -63,7 +67,7 @@ export async function installDesktop({directory=path.join(os.homedir(),'.local/s
   }
   if(!fs.existsSync(plan))deps.prepareRouterPlan(plan,{prepared,routerState:api.paths.STATE_DIR});
   receipt.phase='starting-service';save(receiptPath,receipt);
-  await deps.installService(prepared,{binary:runtime.binary});
+  await deps.installService(prepared,{binary:runtime.binary,cli:code?.cli});
   await deps.checkBridge(prepared);
   receipt.phase='registering-models';save(receiptPath,receipt);
   await deps.registerRouter(plan,{api});
@@ -96,5 +100,6 @@ export async function uninstallDesktop({directory=path.join(os.homedir(),'.local
 
 function validateReceipt(root,receipt){
  if(receipt.kind!=='bridge-desktop-install'||receipt.prepared!==path.join(root,'prepared')||receipt.plan!==path.join(root,'router-plan')||!path.isAbsolute(receipt.routerRoot))throw new Error('Invalid managed desktop installation record.');
+ if(receipt.release&&(path.dirname(receipt.release)!==path.join(root,'releases')||!/^[a-f0-9]{64}$/.test(path.basename(receipt.release))))throw new Error('Invalid managed code release path.');
  for(const candidate of [receipt.prepared,receipt.plan])if(fs.existsSync(candidate)&&fs.lstatSync(candidate).isSymbolicLink())throw new Error('Managed installation paths must not be symbolic links.');
 }
