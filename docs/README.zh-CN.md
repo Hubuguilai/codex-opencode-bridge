@@ -3,7 +3,7 @@
 **先取得模型，再把下面一段话复制给 Codex。安装、配置和测试交给它完成。**
 你不需要提前下载这个项目，也不需要手动修改配置文件。
 
-[English](../README.md) · 当前：macOS Apple Silicon 私有试用版。仓库未公开，需有访问权限。
+[English](../README.md) · 当前优先支持 macOS Apple Silicon，处于试用阶段。
 Intel Mac 尚未实测；Windows/Linux 暂不提供这条安装路径。
 
 ## 第一步：选好你要用的模型
@@ -18,10 +18,18 @@ Intel Mac 尚未实测；Windows/Linux 暂不提供这条安装路径。
 盲目充值。已有可用账号的用户，应先确认 OpenCode 中这个准确模型能回答。
 [按步骤取得模型：免费、登录、Go 订阅分别怎么做 →](opencode-access.md)
 
-如果你要注册并连接 OpenCode Zen：打开 [Zen 官网](https://opencode.ai/zen)，点
-**Get started with Zen / Login**，按页面完成登录和账号要求，取得自己的 API Key。
-安装过程中，Codex 会在需要时给你打开本地登录入口。**Key 只输入本地登录终端，不发进聊天。**
-Zen 页面可能要求账单设置；不要把这一条付费开户流程当作 Big Pickle 免费试用的必需步骤。
+**需要账号和 Key？照这条路径操作：**
+
+1. 打开 [OpenCode 登录页](https://opencode.ai/auth)，选择自己的 **GitHub 或 Google** 账号登录。
+2. 进入控制台后使用默认工作区；需要选择时点 **Select workspace**。
+3. 首页如果有 **Copy Key**，直接复制。否则点 **API Keys → Create API Key**。
+4. 名称填 `Codex Bridge`，点 **Create**，再点击新 Key 那一行的复制图标。
+5. 先保存到自己的密码管理器，**不要把 Key 发进聊天**。继续下面第二步；Codex 需要认证时会给你本地登录入口。
+6. 在那个本地窗口输入 Key，登录成功后回到原对话说“登录完成，请继续”。
+
+看到 **Enable billing** 是账单设置，**Subscribe to Go** 是可选订阅，都不要误当成
+本项目必须购买的东西。每一步应该看到什么、找不到 Key 或遇到收费页面如何处理，
+见[带完成标志的详细注册教程](opencode-access.md)。
 
 ## 第二步：把这一整段复制给 Codex
 
@@ -29,26 +37,23 @@ Zen 页面可能要求账单设置；不要把这一条付费开户流程当作 
 不需要先把本仓库添加成项目。复制下面整段并发送：
 
 ```text
-请帮我在这台 Mac 的 Codex 中安装 codex-opencode-bridge，让我能从模型菜单使用 Big Pickle。
-仓库：https://github.com/Hubuguilai/codex-opencode-bridge
-安装版本：onboarding-2026-09-30。
-请实际完成安装和测试，不要只给我操作教程。我尚未下载仓库，请你先检查系统和已有安装，
-把上述版本下载到你为该项目选择的固定用户目录；已有目录不要覆盖、清空或重置。
-仓库目前私有，如果没有访问权限，只告诉我需要完成的 GitHub 登录或协作者授权步骤。
-下载后先阅读该版本 docs/agent-install.md，严格通过其中的统一入口完成依赖准备、
-安装或恢复和真实验证，不要自行拼接第二套配置。允许安装项目所需的独立依赖并运行
-Big Pickle 的文字与文件测试，使用我自己的模型权限；不要购买、充值或启用付费后备模型。
-保留我原有的 GPT、其他模型、登录和配置。遇到旧手动安装或归属冲突时保留现状并诊断，
-不要强行迁移。需要我登录时，给我一个具体的本地操作；不要让我把 API Key 发进聊天。
-完成后告诉我验证结果、模型菜单名称，以及是否需要完全退出并重新打开 Codex。
-没有实际验证的项目明确标注；失败时给出具体原因和一个下一步，不要循环重试。
+请帮我在这台 Mac 的 Codex 中安装并配置 codex-opencode-bridge：
+https://github.com/Hubuguilai/codex-opencode-bridge
+请下载仓库 main 分支，先阅读 README 和 docs/agent-install.md，再实际完成安装，
+不要只给我操作步骤。我没有提前下载项目或准备运行环境，请你检查并准备所需依赖。
+默认安装 Big Pickle；如果我另行说明需要 Muse，也请加入并分别验证。
+请使用项目提供的统一安装入口，保留已有 GPT、其他模型、登录和配置。
+我授权运行所选模型的必要验证；不要替我购买订阅、充值或开启付费后备。
+需要我登录 OpenCode 或完成系统授权时，一次告诉我一个具体操作；API Key 只在
+本地登录窗口输入，不要让我发进聊天。完成后报告测试结果，并告诉我重开 Codex 后
+应该选择哪个模型。若失败，请诊断并修复可逆问题，明确仍需我处理的事项。
 ```
 
 想同时加入 Muse？在上述 Prompt 末尾加一句：
 **“我已确认 Muse Spark 1.3 Contributor Free 在我的 OpenCode 中可用，请同时安装并验证它的图片能力。”**
 不确定就先装 Big Pickle，之后再加。
 
-过程中通常只需你完成必要的 GitHub 登录、OpenCode 登录或系统开发工具安装提示。
+过程中通常只需你完成必要的 OpenCode 登录或系统开发工具安装提示。
 Codex 会继续处理余下步骤。安装可能下载依赖，请等它报告结果，不用反复发送 Prompt。
 
 ## 第三步：重开 Codex，选择模型
@@ -68,7 +73,7 @@ Muse 可以再上传一张无敏感信息的图片，让它描述具体内容。
 ```text
 请诊断我的 codex-opencode-bridge 安装。先查找之前的项目目录和安装记录，阅读其中
 的 docs/agent-install.md 和 docs/troubleshooting.md。不要覆盖配置或重装一遍碰运气。
-检查 status、后台服务、模型菜单注册以及实际失败的模型；区分 GitHub 权限、缺依赖、
+检查 status、后台服务、模型菜单注册以及实际失败的模型；区分仓库下载失败、缺依赖、
 OpenCode 登录、地区/模型权限、429 限流、图片不支持和流中断。
 不要输出 Key、认证文件或原始私有对话。只用项目维护的恢复方式处理可逆故障。
 告诉我出了什么问题、修复并验证了什么，以及现在只需要我完成的一个操作。
