@@ -17,9 +17,21 @@ function validate(root,tx){if(tx.release&&(path.dirname(tx.release)!==path.join(
 function installedRecord(tx){return {kind:'bridge-desktop-install',status:'installed',phase:'awaiting-client-verification',routerRoot:tx.routerRoot,models:tx.legacy.models,prepared:tx.prepared,plan:tx.plan,binary:tx.binary,release:tx.release,migratedLegacyService:true};}
 async function recover(root,tx,deps){
  const file=path.join(root,'desktop-migration.json');validate(root,tx);
- transition(file,tx,'restoring-legacy-service');await deps.restoreLegacyService(tx.legacy,{backup:tx.backup});await deps.waitLegacyService(tx.legacy,{check:deps.checkLegacyService});
+ transition(file,tx,'restoring-legacy-service');await deps.waitLegacyService(tx.legacy,{check:async snapshot=>{await deps.restoreLegacyService(snapshot,{backup:tx.backup});return deps.checkLegacyService(snapshot);}});
  if(tx.routeRecovery){transition(file,tx,'restoring-legacy-route');await deps.restoreLegacyRouterRoute(tx.plan,{api:await deps.loadRouter(tx.routerRoot),recovery:tx.routeRecovery});}
- delete tx.routeRecovery;transition(file,tx,'removing-candidate-service');await deps.removeService(tx.prepared);if(fs.existsSync(tx.prepared))await deps.waitStopped(tx.prepared);
+ delete tx.routeRecovery;transition(file,tx,'removing-candidate-service');await deps.removeService(tx.prepared);
+ if(tx.candidatePorts)await deps.waitStopped(tx.prepared,{environment:tx.candidatePorts});
+ else if(fs.existsSync(tx.prepared))await deps.waitStopped(tx.prepared);
+ if(tx.preparation==='creating'){
+  if(fs.existsSync(tx.prepared)){
+   try{deps.preparedEnvironment(tx.prepared,{});}catch{
+    const history=path.join(root,'history');fs.mkdirSync(history,{recursive:true,mode:0o700});
+    fs.renameSync(tx.prepared,path.join(history,'interrupted-preparation-'+randomUUID()));
+    delete tx.candidateTokenHashes;
+   }
+  }
+  delete tx.preparation;
+ }
  tx.status='restored';transition(file,tx,'legacy-restored');return {restored:true,legacyServiceHealthy:true,backupsPreserved:true};
 }
 // Internal coordinator until isolated real-service lifecycle and crash scenarios
@@ -54,7 +66,9 @@ export async function migrateDesktop({directory=defaultDirectory(),routerRoot=pa
   const code=tx.release?deps.verifyRelease(tx.release):deps.stageRelease(path.join(root,'releases'));tx.release=code.directory;save(file,tx);
   if(!fs.existsSync(tx.prepared)){
    let port,upstreamPort;do{port=await deps.freePort();}while([tx.legacy.port,tx.legacy.upstreamPort].includes(port));do{upstreamPort=await deps.freePort();}while([port,tx.legacy.port,tx.legacy.upstreamPort].includes(upstreamPort));
+   tx.candidatePorts={BRIDGE_PORT:port,OPENCODE_PORT:upstreamPort};tx.preparation='creating';save(file,tx);
    deps.prepareDirectory(tx.prepared,{models:tx.legacy.models,modelOverrides:tx.route.modelOverrides,port,upstreamPort});
+   tx.preparation='ready';save(file,tx);
   }else deps.preparedEnvironment(tx.prepared,{});
   if(fs.lstatSync(path.join(tx.prepared,'state')).isSymbolicLink())throw Error('Migration token directory must not be a symbolic link.');
   const tokenPath=path.join(tx.prepared,'state/local-token'),token=regularToken(tx.legacy.tokenPath).bytes,current=regularToken(tokenPath).bytes;

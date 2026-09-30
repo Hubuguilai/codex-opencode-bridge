@@ -1,4 +1,4 @@
-import fs from 'node:fs';import path from 'node:path';import {createHash} from 'node:crypto';
+import fs from 'node:fs';import {trackedOverlayMutation} from './overlay-mutation-lease.mjs';import path from 'node:path';import {createHash} from 'node:crypto';
 import {inspectLegacyRouterRoute} from './legacy-router-route.mjs';
 import {checkedPublication} from './router-registration.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex'),fingerprint=x=>hash(JSON.stringify(x));
@@ -16,7 +16,7 @@ export async function restoreLegacyRouterRoute(directory,{api,recovery,restart=t
  const id=old.legacy.providerId,slugs=old.models.map(x=>x.slug),targetProvider={...old.provider,baseUrl:plan.provider.baseUrl};
  if(fingerprint(old.provider)!==old.legacy.providerHash||fingerprint(Object.fromEntries(old.models.map(x=>[x.slug,fingerprint(x)])))!==fingerprint(old.legacy.modelHashes))throw Error('Legacy recovery originals failed integrity checks.');
  const publication=checkedPublication(api);
- await api.overlay.transactModelOverlayMutation({restart,applyPublication:publication,files:[api.providers.GENERIC_PROVIDERS_PATH,api.users.USER_MODELS_PATH,api.picker.MODEL_PICKER_STATE_PATH,record],mutate:()=>{
+ await trackedOverlayMutation(directory,api,{restart,applyPublication:publication,files:[api.providers.GENERIC_PROVIDERS_PATH,api.users.USER_MODELS_PATH,api.picker.MODEL_PICKER_STATE_PATH,record],mutate:()=>{
   const provider=api.providers.getGenericProvider(id),users=api.users.readUserModels(),owned=users.filter(x=>x.provider===id);
   if(![fingerprint(old.provider),fingerprint(targetProvider)].includes(fingerprint(provider)))throw Error('Adopted provider has unknown changes; recovery stopped.');
   if(owned.length!==slugs.length||owned.some(x=>!slugs.includes(x.slug)||![old.models.find(y=>y.slug===x.slug),plan.models.find(y=>y.slug===x.slug)].some(y=>y&&fingerprint(y)===fingerprint(x))))throw Error('Adopted models have unknown changes; recovery stopped.');

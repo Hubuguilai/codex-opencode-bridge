@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {trackedOverlayMutation} from './overlay-mutation-lease.mjs';
 import {writeInstallState} from './install-state.mjs';
 import {modelProfile,modelCatalogEntry} from './model-profiles.mjs';
 import {routerModelsFromCatalog} from './router-plan.mjs';
@@ -19,7 +20,9 @@ export async function loadRouter(root){
  const get=name=>import(pathToFileURL(path.join(path.resolve(root),'src',name+'.mjs')).href);
  const [providers,users,picker,credentials,secrets,overlay,paths]=await Promise.all([
   get('generic-providers'),get('user-models'),get('model-picker-state'),get('provider-credential-store'),get('provider-credentials'),get('model-overlay-publication'),get('paths')]);
- return {providers,users,picker,credentials,secrets,overlay,paths};
+ const pin=JSON.parse(fs.readFileSync(new URL('../runtime/router.json',import.meta.url)));
+ const overlayLockVerified=hash(fs.readFileSync(path.join(root,'src/model-overlay-lock.mjs')))===pin.overlayLockSha256;
+ return {providers,users,picker,credentials,secrets,overlay,paths,overlayLockVerified};
 }
 function readPlan(directory){
  const plan=JSON.parse(fs.readFileSync(path.join(directory,'router-plan.json')));
@@ -72,7 +75,8 @@ async function registerRouterRoute(directory,{api,restart=true}={},adopt){
  let reused=false;
  const tokenPath=api.secrets.genericProviderCredentialPath(plan.provider.id);
  const publication=checkedPublication(api,{present:plan.models.map(x=>x.slug)});
- await api.overlay.transactModelOverlayMutation({restart,applyPublication:publication,
+ const transact=adopt?options=>trackedOverlayMutation(root,api,options):options=>api.overlay.transactModelOverlayMutation(options);
+ await transact({restart,applyPublication:publication,
   capture:()=>{
    const snapshots=api.overlay.captureModelOverlayFiles(files(api,tokenPath,record));
    // Durable private pre-mutation backup; never printed or committed.

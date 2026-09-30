@@ -49,13 +49,14 @@ export async function restoreLegacyService(snapshot,{backup,...options}={}){
  if(hash(regular(backup))!==snapshot.sha256)throw Error('Legacy service backup changed.');
  if(fs.existsSync(snapshot.plist)){if(hash(regular(snapshot.plist))!==snapshot.sha256)throw Error('Legacy service configuration changed; restoration stopped.');}
  else fs.writeFileSync(snapshot.plist,bytes,{mode:0o600,flag:'wx'});
- if(launch(c,['print',c.target]).status!==0){
+ const current=launch(c,['print',c.target]);
+ if(current.status!==0){
   for(let i=0;i<20;i++){
-   const result=launch(c,['bootstrap',c.domain,snapshot.plist]);if(result.status===0)return {restored:true};
+   const result=launch(c,['bootstrap',c.domain,snapshot.plist]);if(result.status===0){if(launch(c,['kickstart',c.target]).status!==0)throw Error('Restored service could not be started.');return {restored:true};}
    if(result.status!==5||i===19)throw Error('Could not restore the legacy service; original configuration is retained.');
    await new Promise(resolve=>setTimeout(resolve,250));
   }
- }
+ }else if(!/state = running/.test(current.stdout??'')&&launch(c,['kickstart',c.target]).status!==0)throw Error('Restored service could not be started.');
  return {restored:true};
 }
 export async function waitLegacyService(snapshot,{check=checkLegacyService,delay=()=>new Promise(resolve=>setTimeout(resolve,500)),attempts=40}={}){

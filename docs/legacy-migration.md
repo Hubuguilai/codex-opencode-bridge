@@ -33,8 +33,13 @@ Initial rehearsals found and fixed an empty visibility-list call, a readiness
 race when restoring the old service, and a missing dependency binding for the
 new readiness helper. These failures are retained in the verification ledger.
 
-Required before exposing the command: actual process-kill recovery across the
-whole coordinator, reconciliation plus cutover on a customized Router fixture,
+Seven real SIGKILL checkpoints now pass: partial preparation, healthy candidate,
+provider-only write, model write, publication completed, legacy retired and
+completed journal before installation bookkeeping. See the
+[crash receipt](receipts/desktop-migration-crash-recovery.json). This covers those
+checkpoints, not every possible dependency/publication-child interruption.
+
+Required before exposing the command: reconciliation plus cutover on a customized Router fixture,
 Router restart with current client requests, and end-user command/diagnostic
 integration. Actual account, Desktop picker, model workflow and clean-user
 acceptance remain separate requirements. The maintainer's active manual
@@ -42,5 +47,5 @@ installation has not been migrated by this rehearsal.
 
 中文版：旧服务迁移编排已在隔离的真实 macOS 服务和 Router 上验证，但还没有开放为
 普通用户迁移命令。已验证先启动健康的新服务、切换路由、停用旧服务，以及失败回退、
-重复执行和旧服务停用后的恢复。仍需完成整个编排的真实进程终止测试、带本地修改的
+重复执行和旧服务停用后的恢复。七个关键时点的真实进程强制终止及恢复测试已通过；仍需完成带本地修改的
 Router 联合演练、Router 重启及桌面验收。演练没有迁移当前用户的运行服务。

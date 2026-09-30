@@ -1,0 +1,55 @@
+{
+  "date": "2026-09-30T06:08:40.055Z",
+  "isolatedState": true,
+  "realLaunchd": true,
+  "realRouterPublication": true,
+  "routerServiceRestart": false,
+  "nativeAuthProbe": "synthetic fixture; no account credentials",
+  "modelRequests": 0,
+  "checks": {
+    "failedCutoverRestoredRealLegacy": true,
+    "realServiceCutover": true,
+    "repeat": true,
+    "credentialsContextsAndNativeCatalogPreserved": true,
+    "interruptedRetirementRecovery": true,
+    "testServicesStopped": true
+  },
+  "crashCheckpoints": [
+    {
+      "checkpoint": "preparation_partial",
+      "observedSignal": "SIGKILL",
+      "recovered": true
+    },
+    {
+      "checkpoint": "candidate_healthy",
+      "observedSignal": "SIGKILL",
+      "recovered": true
+    },
+    {
+      "checkpoint": "provider_written",
+      "observedSignal": "SIGKILL",
+      "recovered": true
+    },
+    {
+      "checkpoint": "models_written",
+      "observedSignal": "SIGKILL",
+      "recovered": true
+    },
+    {
+      "checkpoint": "route_published",
+      "observedSignal": "SIGKILL",
+      "recovered": true
+    },
+    {
+      "checkpoint": "legacy_retired",
+      "observedSignal": "SIGKILL",
+      "recovered": true
+    },
+    {
+      "checkpoint": "complete_before_install_record",
+      "observedSignal": "SIGKILL",
+      "recovered": true
+    }
+  ],
+  "scope": "Real isolated bridge service migration and Router catalog; optional listed SIGKILL checkpoints only. No shared Router restart, model inference, actual account/GUI or clean-user install. Other interruption boundaries remain unverified."
+}

@@ -38,3 +38,14 @@ test('Retry refuses an edited candidate credential instead of silently overwriti
  const token=path.join(f.root,'prepared/state/local-token'),changed='user-edited-local-credential-preserve-me';fs.writeFileSync(token,changed);
  await assert.rejects(migrateDesktop(f.options,f.deps),/were restored/);assert.equal(fs.readFileSync(token,'utf8'),changed);assert.equal(f.state.route,'old');assert.equal(f.state.old,true);
 });
+test('Interrupted preparation is preserved in history and does not permanently block retry',async t=>{
+ const f=fixture(t);await assert.rejects(migrateDesktop(f.options,{...f.deps,prepareDirectory:dir=>{fs.mkdirSync(dir);fs.writeFileSync(path.join(dir,'models.json'),'partial-output');throw Error('Interrupted preparation');}}),/were restored/);
+ assert.equal(fs.existsSync(path.join(f.root,'prepared')),false);const archived=fs.readdirSync(path.join(f.root,'history')).find(x=>x.startsWith('interrupted-preparation-'));
+ assert.equal(fs.readFileSync(path.join(f.root,'history',archived,'models.json'),'utf8'),'partial-output');assert.equal(f.state.old,true);
+ assert.equal((await migrateDesktop(f.options,f.deps)).migrated,true);
+});
+test('Recovery rechecks service loading when an earlier asynchronous stop completes late',async t=>{
+ const f=fixture(t);f.state.fail='publish';let lateUnload=false;const {waitLegacyService}=await import('../src/legacy-service.mjs');
+ const deps={...f.deps,waitLegacyService:(snapshot,options)=>waitLegacyService(snapshot,{...options,delay:async()=>{},attempts:3}),checkLegacyService:async()=>{if(f.state.calls.includes('restore-old')&&!lateUnload){lateUnload=true;f.state.old=false;throw Error('late unload completed');}return f.deps.checkLegacyService();}};
+ await assert.rejects(migrateDesktop(f.options,deps),/legacy route and healthy service were restored/);assert.equal(f.state.old,true);assert.equal(f.state.route,'old');assert.ok(f.state.calls.filter(x=>x==='restore-old').length>=2);
+});

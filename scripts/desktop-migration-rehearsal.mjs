@@ -37,10 +37,39 @@ try{
  // Reconstruct the durable boundary immediately after retirement but before
  // final installation bookkeeping. This is not a SIGKILL certification.
  fs.unlinkSync(path.join(directory,'desktop-install.json'));const file=path.join(directory,'desktop-migration.json'),tx=JSON.parse(fs.readFileSync(file));tx.status='migrating';tx.phase='retiring-legacy';fs.writeFileSync(file,JSON.stringify(tx));
- assert.equal((await recoverDesktopMigration({directory},deps)).restored,true);await checkLegacyService({port});assert.equal(api.providers.getGenericProvider(id).baseUrl,`http://127.0.0.1:${port}/v1`);receipt.checks.interruptedRetirementRecovery=true;success=true;
+ assert.equal((await recoverDesktopMigration({directory},deps)).restored,true);await checkLegacyService({port});assert.equal(api.providers.getGenericProvider(id).baseUrl,`http://127.0.0.1:${port}/v1`);receipt.checks.interruptedRetirementRecovery=true;
+ if(process.env.BRIDGE_MIGRATION_CRASH_MATRIX==='1'){
+  receipt.crashCheckpoints=[];
+  for(const checkpoint of ['preparation_partial','candidate_healthy','provider_written','models_written','route_published','legacy_retired','complete_before_install_record']){
+   if(checkpoint==='preparation_partial'){
+    const history=path.join(directory,'history');fs.mkdirSync(history,{recursive:true,mode:0o700});fs.renameSync(path.join(directory,'prepared'),path.join(history,'previous-complete-preparation'));
+    const journal=path.join(directory,'desktop-migration.json'),saved=JSON.parse(fs.readFileSync(journal));delete saved.candidateTokenHashes;delete saved.candidatePorts;delete saved.preparation;fs.writeFileSync(journal,JSON.stringify(saved));
+   }
+   fs.writeFileSync(path.join(root,'crash-progress.json'),JSON.stringify({checkpoint,status:'starting'}));
+   const worker=spawnSync(process.execPath,['scripts/migration-crash-worker.mjs',root,routerRoot,runtime.binary,checkpoint],{env:process.env,encoding:'utf8',timeout:90000});
+   assert.equal(worker.signal,'SIGKILL','Crash checkpoint '+checkpoint+' did not terminate as requested: '+(worker.stderr??'').slice(-600));
+   fs.writeFileSync(path.join(root,'crash-progress.json'),JSON.stringify({checkpoint,status:'killed',signal:worker.signal}));
+   const interrupted=JSON.parse(fs.readFileSync(path.join(directory,'desktop-migration.json')));
+   if(checkpoint==='complete_before_install_record'){
+    assert.equal(interrupted.status,'complete');assert.equal(fs.existsSync(path.join(directory,'desktop-install.json')),false);
+    assert.equal((await migrateDesktop(options,deps)).reused,true);assert.ok(fs.existsSync(path.join(directory,'desktop-install.json')));
+   }else{
+    assert.equal((await recoverDesktopMigration({directory},deps)).restored,true);await checkLegacyService({port});
+    assert.equal(api.providers.getGenericProvider(id).baseUrl,`http://127.0.0.1:${port}/v1`);assert.deepEqual(api.users.readUserModels(),owned);
+   }
+   assert.deepEqual(fs.readFileSync(api.paths.PROVIDER_CREDENTIAL_STORE_PATH),credentialBefore);assert.deepEqual(fs.readFileSync(api.secrets.genericProviderCredentialPath(id)),tokenBefore);
+   if(checkpoint==='preparation_partial'){assert.equal(fs.existsSync(path.join(directory,'prepared')),false);assert.ok(fs.readdirSync(path.join(directory,'history')).some(x=>x.startsWith('interrupted-preparation-')));}
+   receipt.crashCheckpoints.push({checkpoint,observedSignal:worker.signal,recovered:true});
+  }
+ }
+ success=true;
+}catch(error){
+ const progress=path.join(root,'crash-progress.json');if(fs.existsSync(progress))console.error(fs.readFileSync(progress,'utf8'));
+ const status=spawnSync('launchctl',['print',target],{encoding:'utf8'});console.error((status.stdout??'').split('\n').filter(line=>/^\s*(state =|pid =|last exit code =)/.test(line)).join('\n'));
+ throw error;
 }finally{
  await removeService(path.join(directory,'prepared'));if(fs.existsSync(path.join(directory,'prepared')))await waitStopped(path.join(directory,'prepared'));
  if(spawnSync('launchctl',['print',target],{encoding:'utf8'}).status===0)assert.equal(spawnSync('launchctl',['bootout',target],{encoding:'utf8'}).status,0);
  if(fs.existsSync(plist))fs.unlinkSync(plist);await waitStopped('',{environment:{BRIDGE_PORT:port,OPENCODE_PORT:upstreamPort}});
 }
-if(success){receipt.checks.testServicesStopped=true;receipt.scope='Real isolated bridge service migration and Router catalog. No shared Router restart, model inference, actual account/GUI, clean-user install or full coordinator SIGKILL certification.';fs.mkdirSync('generated',{recursive:true});fs.writeFileSync('generated/desktop-migration-rehearsal.json',JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt,null,2));}
+if(success){receipt.checks.testServicesStopped=true;receipt.scope='Real isolated bridge service migration and Router catalog; optional listed SIGKILL checkpoints only. No shared Router restart, model inference, actual account/GUI or clean-user install. Other interruption boundaries remain unverified.';fs.mkdirSync('generated',{recursive:true});fs.writeFileSync('generated/desktop-migration-rehearsal.json',JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt,null,2));}

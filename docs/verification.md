@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 215 tests. This does not replace the pending
+The latest completed local unit suite has 222 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -878,3 +878,33 @@ This does not certify coordinator SIGKILL recovery, actual account login, shared
 Router restart, current Desktop workflows, or clean-user installation. The source
 reconciliation SIGKILL test and this reconstructed service-recovery boundary have
 different scopes. A complete user-facing migration command is not yet published.
+
+## Legacy migration SIGKILL checkpoints — 2026-09-30
+
+A real isolated launchd/runtime/Router-publication run killed the migration worker
+with SIGKILL at seven checkpoints and recovered: partial preparation, healthy
+candidate, provider-only write, model write, completed publication, legacy
+retirement, and completed journal before the installation record. Credentials
+and original route/model state were checked after rollback; the last checkpoint
+completed the missing installation bookkeeping instead. All test services were
+stopped. [Receipt](receipts/desktop-migration-crash-recovery.json).
+
+The first attempts exposed a 120-second recovery timeout: the pinned Router's
+overlay lock has a ten-minute stale horizon. Adoption/recovery now record a
+sidecar identifying their exact lock directory and owner during mutation. Early
+recovery requires the fingerprinted pinned lock implementation, a dead owner,
+matching filesystem identity, a fresh empty lock, and the pre-publication phase.
+Live, aged, publishing, unknown or replaced locks remain under native recovery.
+The sidecar never sits inside the Router lock directory and does not obstruct
+its normal release. Publication can have child workers, so those leases are
+explicitly excluded from early reclamation.
+
+SIGKILL also exposed a late macOS unload racing restoration. Recovery now
+rechecks loading and explicitly starts a non-running owned service while waiting
+for health. Interrupted preparation is retained in private history, with ports
+checked before a new preparation. The latest suite has 222 passing tests.
+
+Only the seven listed process boundaries are certified by this run. Dependency
+installation, arbitrary publication-child termination, power loss, source-merge
+plus full cutover, shared Router restart, actual account/GUI and clean-user
+installation remain outside this evidence. No active user service was migrated.
