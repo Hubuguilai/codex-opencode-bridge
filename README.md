@@ -46,13 +46,18 @@ See [the precise installer behavior and remaining gaps](docs/desktop-install.md)
 
 `verify --live` uses your OpenCode access and can consume paid quota if applicable.
 It starts an ephemeral Codex client, connects through the installed Router, checks a
-random text reply and a temporary file task for each model, then an uploaded image
+random text reply and a temporary file task for each model, then uploaded and tool-returned images
 for Muse. It leaves private receipts in the installation's `verification` directory.
 Use `verify --live --route bridge` to isolate the bridge from Router when diagnosing
 failures. Image checks use the installed model's declared capability, not a Router
 vision fallback. The full Router path passed three consecutive Muse image checks after two earlier
-failures; their cause is still unproven. This is a bounded acceptance check.
-This does not certify the Desktop picker, image tool results,
+failures; their cause is still unproven. A newer owned-profile migration run
+passed both models’ text/file checks but Muse uploaded-image streaming failed
+before the tool-image check. See [the retained failure](docs/receipts/legacy-profile-router-client-failure.json);
+vision reliability remains unresolved.
+The verifier requires an actual `view_image` event for the expected file and the
+correct image-only answer; command/OCR fallback does not pass that check.
+This does not certify the Desktop picker,
 permissions, full workflows or long context. Access/quota failure stops remaining
 model checks. `doctor` and `status` remain read-only without model inference.
 

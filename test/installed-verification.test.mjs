@@ -1,6 +1,6 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
-import {verifyClientRoute,classifyVerificationError,finalClientText} from '../src/client-verification.mjs';
+import {verifyClientRoute,classifyVerificationError,finalClientText,verifiedToolImage} from '../src/client-verification.mjs';
 import {verificationImage} from '../src/verification-image.mjs';
 import {verifyInstalled} from '../src/installed-verification.mjs';
 import {prepareDirectory} from '../src/setup.mjs';import {stageRelease} from '../src/releases.mjs';
@@ -52,4 +52,12 @@ test('Default installed verification follows Router while retaining declared nat
  const result=await verifyInstalled({directory,live:true},{checkBridge:async()=>{},checkIdle:async()=>{},routerVerificationRoute:async()=>({name:'test_router',baseUrl:'http://127.0.0.1:1234/v1',token:'LOCAL_SECRET',models:models.map((id,index)=>({id,model:'registered/'+id,entry:{slug:'registered/'+id,input_modalities:['text','image']},images:index===1,routerAdvertisesImages:true}))}),verifyClientRoute:async options=>{calls.push(options);return {model:options.model,passed:true};}});
  assert.equal(result.routerForwardingVerified,true);assert.deepEqual(calls.map(x=>x.images),[false,true]);assert.ok(calls.every(x=>x.baseUrl==='http://127.0.0.1:1234/v1'&&x.route==='test_router'));
  assert.equal(result.models[0].routerAddsImageCapability,true);assert.ok(!JSON.stringify(result).includes('LOCAL_SECRET'));
+});
+
+// A correct answer alone must not certify the screenshot failure path.
+test('Tool-image verification requires the exact viewed file without command fallback',()=>{
+ const base={text:'123456',tools:0,imagePaths:['/test/challenge.png']};
+ assert.equal(verifiedToolImage(base,'/test/challenge.png','123456'),true);
+ for(const patch of [{imagePaths:[]},{imagePaths:['/test/other.png']},{tools:1},{text:'654321'}])
+  assert.equal(verifiedToolImage({...base,...patch},'/test/challenge.png','123456'),false);
 });

@@ -35,7 +35,20 @@ const native=JSON.parse(fs.readFileSync('examples/native-models.json'));native.m
 const source=path.join(root,'user-catalog.json');fs.writeFileSync(source,JSON.stringify(native));
 fs.writeFileSync(api.paths.NATIVE_CATALOG_SOURCE_PATH,JSON.stringify({version:1,path:source,status:'active'}));
 fs.writeFileSync(path.join(state,'native-models.json'),JSON.stringify(native));
-const deps={ensureRouter,installRuntime,prepareDirectory,preparedEnvironment,installService,removeService,prepareRouterPlan,loadRouter,freePort,checkBridge,
+const prepareProfilePlan=(directory,options)=>{
+ const result=prepareRouterPlan(directory,options);
+ if(process.env.BRIDGE_LEGACY_PROFILE_FIXTURE==='1'){
+  // Reproduce the older owned profile before registration computes ownership
+  // hashes. Never alter receipts or bypass ownership validation after install.
+  for(const name of ['router-plan.json','user-model-additions.json']){
+   const file=path.join(directory,name),value=JSON.parse(fs.readFileSync(file));
+   for(const model of value.models){delete model.visionBridge;delete model.bridgeStrictImages;}
+   fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n',{mode:0o600});
+  }
+ }
+ return result;
+};
+const deps={ensureRouter,installRuntime,prepareDirectory,preparedEnvironment,installService,removeService,prepareRouterPlan:prepareProfilePlan,loadRouter,freePort,checkBridge,
  registerRouter:(dir,opts)=>registerRouter(dir,{...opts,restart:false}),
  unregisterRouter:(dir,opts)=>unregisterRouter(dir,{...opts,restart:false})};
 const options={directory:path.join(root,'installation'),routerRoot};
@@ -55,11 +68,30 @@ try{
  const first=await installDesktop(options,deps);assert.equal(first.installed,true);
  assert.ok(catalogSlugs().includes('opencode-native-bridge/opencode/big-pickle'));assert.ok(catalogSlugs().includes('opencode-native-bridge/opencode/muse-spark-1.3-contributor-free'));
  receipt.checks.installHealthyAndPublished=true;
+ if(process.env.BRIDGE_LEGACY_PROFILE_FIXTURE==='1'){
+  const both=['opencode/big-pickle','opencode/muse-spark-1.3-contributor-free'];
+  const original=JSON.parse(fs.readFileSync(path.join(options.directory,'desktop-install.json')));
+  const credential=path.join(prepared,'state/local-token'),beforeToken=fs.readFileSync(credential);
+  const profile=()=>JSON.parse(fs.readFileSync(path.join(original.plan,'router-plan.json'))).models;
+  assert.ok(profile().every(x=>!Object.hasOwn(x,'bridgeStrictImages')&&!Object.hasOwn(x,'visionBridge')));
+  const modelDeps={updateRouterModels:(dir,opts)=>updateRouterModels(dir,{...opts,restart:false})};
+  assert.equal((await setDesktopModels({...options,models:both},modelDeps)).updated,true);
+  assert.ok(profile().every(x=>x.bridgeStrictImages===true&&x.visionBridge===false));
+  const users=api.users.readUserModels();
+  assert.ok(users.filter(x=>x.provider==='opencode-native-bridge').every(x=>x.bridgeStrictImages===true&&x.visionBridge===false));
+  assert.deepEqual(fs.readFileSync(credential),beforeToken);
+  assert.equal(fs.readFileSync(source,'utf8'),JSON.stringify(native));
+  assert.equal((await setDesktopModels({...options,models:both},modelDeps)).alreadyCurrent,true);
+  await checkBridge(prepared);
+  receipt.checks.olderOwnedProfileRefresh=true;
+  receipt.checks.profileRefreshRepeatAndPreservation=true;
+  receipt.legacyFixture='Owned model profiles lacking strict-image flags; current bridge code and pinned compatible Router. Not an unowned manual installation.';
+ }
  if(process.env.BRIDGE_VERIFY_ROUTER==='1'){
   receipt.modelRequests='live_router_client_verification';
   const stack=await startIsolatedRouter({routerRoot,api});
   let report;
-  const verificationDeps=process.env.BRIDGE_SYNTHETIC_DIAGNOSTICS==='1'?{verifyClientRoute:args=>verifyClientRoute({...args,imageTrials:Number(process.env.BRIDGE_IMAGE_TRIALS||1),onSyntheticImageResult:result=>fs.appendFileSync('generated/synthetic-image-answers.jsonl',JSON.stringify(result)+'\n',{mode:0o600})})}:{};
+  const verificationDeps=process.env.BRIDGE_SYNTHETIC_DIAGNOSTICS==='1'?{verifyClientRoute:args=>verifyClientRoute({...args,imageTrials:Number(process.env.BRIDGE_IMAGE_TRIALS||1),onPrivateError:error=>fs.appendFileSync('generated/private-client-errors.jsonl',JSON.stringify(error)+'\n',{mode:0o600}),onSyntheticImageResult:result=>fs.appendFileSync('generated/synthetic-image-answers.jsonl',JSON.stringify(result)+'\n',{mode:0o600})})}:{};
   try{report=await verifyInstalled({directory:options.directory,live:true,onProgress:event=>console.log(JSON.stringify(event))},verificationDeps);report={...report,receipt:undefined,actualPublishedGatewayConfig:true,pinnedRouterWithRecordedCompatibility:true};}
   finally{await stack.stop();if(report)fs.writeFileSync('generated/router-client-verification.json',JSON.stringify(report,null,2)+'\n');}
   assert.equal(report.passed,true);receipt.checks.realRouterClientVerification=true;

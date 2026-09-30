@@ -671,3 +671,32 @@ of its conversation. Output exhaustion is classified separately from input
 overflow. Unknown runtime errors remain broad and do not imply quota exhaustion.
 The unit suite passed 168 tests. Desktop reconnect behavior, full context overflow
 and current-release model workflows remain separate acceptance gates.
+
+
+## Older owned model profile refresh
+
+The [real managed-profile lifecycle receipt](receipts/legacy-managed-profile-lifecycle.json)
+starts from profiles missing both strict-image flags, registered normally before
+ownership hashes are created. The unchanged model selection is then refreshed
+through the public model-change implementation. It verifies the published owned
+profiles, a second no-op refresh, credential/native catalog preservation, actual
+LaunchAgent health and the complete install/upgrade/rollback/model-change/removal
+lifecycle. Cleanup passed and no model requests were made.
+
+This reproduces an older **owned profile**, using current bridge code and the
+pinned compatible Router. It does not migrate unowned manual services, old code
+without independent releases, or user-edited profiles. Those remain separate work.
+
+Installed verification now also asks a vision model to open a separate random
+image through Codex `view_image`. A pass requires the actual imageView event for
+the expected path, exact six-digit recognition and no command/file-operation
+fallback. Uploaded-image recognition alone cannot pass this new check.
+
+A subsequent [actual Router/client run](receipts/legacy-profile-router-client-failure.json)
+after that profile refresh passed text and file tasks for both primary models,
+then failed with stream_interrupted during Muse uploaded-image recognition.
+The tool-returned-image check was not reached. Its [lifecycle record](receipts/legacy-profile-router-lifecycle-failure.json)
+confirms cleanup after failure. Earlier successes do not override this negative
+result; current vision reliability remains unresolved. The private optional
+client diagnostic callback now retains the exact failing stage and local error
+message for investigation; public receipts contain only categories and checks.
