@@ -1,11 +1,11 @@
 import {parseArgs} from 'node:util';
 
 const commands = {
-  'install-service': ['binary'], 'service-status': [], 'remove-service': [], 'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
+  'register-router': ['router-root'], 'unregister-router': ['router-root'], 'install-service': ['binary'], 'service-status': [], 'remove-service': [], 'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
   prepare: ['models', 'model', 'catalog'],
   'prepare-router': ['prepared', 'router-state'],
 };
-const needsDirectory = new Set(['install-service','service-status','remove-service','prepare', 'prepare-router', 'serve-prepared', 'remove-prepared', 'recover-prepared']);
+const needsDirectory = new Set(['register-router','unregister-router','install-service','service-status','remove-service','prepare', 'prepare-router', 'serve-prepared', 'remove-prepared', 'recover-prepared']);
 
 // Validate the entire invocation before configuration can create a token or
 // an operation can write/remove files. Never silently accept a misspelled flag.
@@ -30,7 +30,7 @@ export function parseCommand(args) {
   if (positionals.length > (needsDirectory.has(command) ? 1 : 0)) throw new Error('Unexpected positional arguments. Use --help.');
   if (values.help) return {command: 'help', options: {}};
   if (needsDirectory.has(command) && !positionals[0]?.trim()) throw new Error('Provide one explicit directory. Use --help.');
-  if (command === 'prepare-router') {
+  if (['prepare-router','register-router','unregister-router'].includes(command)) {
     for (const name of commands[command]) if (!values[name]) throw new Error(`Missing required option --${name}.`);
   }
   return {command, directory: positionals[0], options: values};

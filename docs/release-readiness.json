@@ -19,6 +19,7 @@
     "actionable_error_categories_and_stream_failures": "pending",
     "docs_support_matrix_default_branch_consistency": "pending",
     "pinned_managed_opencode_dependency": "verified_macos_arm64_new_directory_and_repeat",
-    "managed_launchd_service_component": "verified_live_install_repeat_remove_macos_arm64"
+    "managed_launchd_service_component": "verified_live_install_repeat_remove_macos_arm64",
+    "router_registration_component": "isolated_state_verified_publication_stubbed"
   }
 }
