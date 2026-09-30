@@ -57,3 +57,15 @@ test('Tool image results retain call identity, interleaved content and image cap
   {role:'tool',tool_call_id:'v1',content:[{type:'image_url',image_url:{url:image.image_url}}]}]},'chat',config);
  assert.equal(chat.messages.at(-1).content[0].result.value[0].uri,image.image_url);
 });
+
+
+import {wireImageCounts} from '../src/wire-media-diagnostics.mjs';
+test('Wire media diagnostics count native images without copying text, URLs or schemas',()=>{
+ const summary=wireImageCounts({messages:[{content:[{type:'text',text:'SECRET'},
+  {type:'image_url',image_url:{url:'data:image/png;base64,PRIVATE'}},
+  {type:'image_url',image_url:{url:'https://private.example/image'}}]}],
+  tools:[{type:'input_image',image_url:'data:image/png;base64,FAKE_SCHEMA'}]});
+ assert.deepEqual(summary,{imageParts:2,inlineImages:1,remoteImages:1});
+ assert.ok(!JSON.stringify(summary).includes('PRIVATE'));
+ assert.deepEqual(wireImageCounts({input:[{role:'user',content:[{type:'input_image',image_url:'data:image/png;base64,PRIVATE'}]}]}),{imageParts:1,inlineImages:1,remoteImages:0});
+});

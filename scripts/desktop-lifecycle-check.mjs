@@ -91,8 +91,21 @@ try{
   receipt.modelRequests='live_router_client_verification';
   const stack=await startIsolatedRouter({routerRoot,api});
   let report;
+  const progress=event=>{
+   console.log(JSON.stringify(event));
+   if(process.env.BRIDGE_SYNTHETIC_DIAGNOSTICS==='1'){
+    const state=path.join(prepared,'state');
+    for(const name of fs.readdirSync(state).filter(x=>x.startsWith('work-'))){
+     const wire=path.join(state,name,'bridge-wire-surface.json');
+     if(fs.existsSync(wire)){
+      const {media}=JSON.parse(fs.readFileSync(wire));
+      fs.appendFileSync('generated/private-wire-media.jsonl',JSON.stringify({event,media})+'\n',{mode:0o600});
+     }
+    }
+   }
+  };
   const verificationDeps=process.env.BRIDGE_SYNTHETIC_DIAGNOSTICS==='1'?{verifyClientRoute:args=>verifyClientRoute({...args,imageTrials:Number(process.env.BRIDGE_IMAGE_TRIALS||1),onPrivateError:error=>fs.appendFileSync('generated/private-client-errors.jsonl',JSON.stringify(error)+'\n',{mode:0o600}),onSyntheticImageResult:result=>fs.appendFileSync('generated/synthetic-image-answers.jsonl',JSON.stringify(result)+'\n',{mode:0o600})})}:{};
-  try{report=await verifyInstalled({directory:options.directory,live:true,onProgress:event=>console.log(JSON.stringify(event))},verificationDeps);report={...report,receipt:undefined,actualPublishedGatewayConfig:true,pinnedRouterWithRecordedCompatibility:true};}
+  try{report=await verifyInstalled({directory:options.directory,live:true,onProgress:progress},verificationDeps);report={...report,receipt:undefined,actualPublishedGatewayConfig:true,pinnedRouterWithRecordedCompatibility:true};}
   finally{await stack.stop();if(report)fs.writeFileSync('generated/router-client-verification.json',JSON.stringify(report,null,2)+'\n');}
   assert.equal(report.passed,true);receipt.checks.realRouterClientVerification=true;
  }

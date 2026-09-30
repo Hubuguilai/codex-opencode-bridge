@@ -63,7 +63,7 @@ export function createBridge(config, backend) {
       }
       controller = new AbortController();
       active.add(controller);
-      res.on('close', () => { if (!res.writableEnded) controller.abort(); });
+      res.on('close', () => { if (!res.writableEnded) { backend.warn?.('client_disconnected'); controller.abort(); } });
       const payload = await readBody(req, res, config.maxBodyBytes);
       const request = config.mode === 'native-tools' ? normalizeNativeRequest(payload, api, config) : normalizeRequest(payload, api, config);
       if (request.warnings?.length) {
@@ -71,7 +71,7 @@ export function createBridge(config, backend) {
         for (const warning of request.warnings) backend.warn?.(warning);
       }
       controller.signal.throwIfAborted();
-      deadline = setTimeout(() => controller.abort(), config.timeoutMs);
+      deadline = setTimeout(() => { backend.warn?.('request_deadline'); controller.abort(); }, config.timeoutMs);
       writer = makeWriter(res, api, request);
       const result = await generateWithCorrection(backend, request, { signal: controller.signal, onDelta: async delta => {
         controller.signal.throwIfAborted();
@@ -82,8 +82,10 @@ export function createBridge(config, backend) {
       if (result.calls) writer.calls(result.calls);
       writer.finish(result.tokens);
     } catch (error) {
+      const safe = publicError(error);
+      // Fixed error codes only: no provider payload, conversation or credentials.
+      backend.warn?.('request_failed_' + (/^[a-z_]{1,80}$/.test(safe.code) ? safe.code : 'unknown'));
       if (!res.destroyed && !res.writableEnded) {
-        const safe = publicError(error);
         if (writer) writer.fail(safe);
         else json(res, safe.status, { error: { code: safe.code, message: safe.message } });
       }

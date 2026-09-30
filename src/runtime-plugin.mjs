@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import { clientAliases } from './client-aliases.mjs';
 import path from 'node:path';
+import {wireImageCounts} from './wire-media-diagnostics.mjs';
 
 export default {
   id: 'codex-client-tool-relay',
@@ -137,6 +138,7 @@ export default {
       }
       fs.writeFileSync(path.join(root, 'bridge-wire-surface.json'), JSON.stringify({
         requestId: manifest.requestId, mode: manifest.internalTools || 'guarded', tools: names,
+        media: wireImageCounts(body),
       }), { mode: 0o600 });
     });
     await ctx.session.hook('http.response', event => {

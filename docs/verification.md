@@ -700,3 +700,29 @@ confirms cleanup after failure. Earlier successes do not override this negative
 result; current vision reliability remains unresolved. The private optional
 client diagnostic callback now retains the exact failing stage and local error
 message for investigation; public receipts contain only categories and checks.
+
+
+## Image failure diagnostic follow-up
+
+The [next diagnostic run](receipts/router-image-diagnostic-failure.json) again
+passed both primary models’ text/file tasks, but Muse completed its uploaded-image
+turn without reading the image and failed the assertion. This differs from the
+preceding stream interruption and does not prove a shared root cause. The
+[lifecycle receipt](receipts/router-image-diagnostic-lifecycle.json) confirms
+cleanup. The expected digits were not present in the final answer.
+
+Runtime wire diagnostics now record counts of recognized native image parts,
+inline data images and remote image URLs in message content. They exclude raw
+images, URLs, text, tool arguments, schemas and credentials. This helps locate a
+missing-image boundary, but counts alone neither verify byte identity nor prove
+that a provider actually interpreted the image.
+
+The [wire-instrumented follow-up](receipts/router-wire-image-stream-failure.json)
+again passed text/file tasks but failed during Muse uploaded-image streaming.
+[Metadata captured at failure](receipts/router-wire-image-metadata.json) shows
+one inline native image part in OpenCode’s primary provider request. This rules
+out complete image omission before that boundary for this request; it does not
+prove byte identity, provider perception or the reason the stream ended. Cleanup
+[completed](receipts/router-wire-image-stream-lifecycle.json). Service diagnostics
+now distinguish fixed request_deadline, client_disconnected and request_failed_*
+codes without persisting user/provider content.

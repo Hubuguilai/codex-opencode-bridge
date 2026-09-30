@@ -275,3 +275,18 @@ test('Mismatched creation identity fails without prompting or deleting the retur
  assert.equal(calls.some(x=>x.path.includes('ses_unrelated')||x.path.endsWith('/prompt')),false);
  assert.equal(calls.at(-1).path,'/api/session/'+calls[0].body.id);
 });
+
+
+test('Streaming timeout logs safe stage codes and never sends a completed response',async t=>{
+ const {request,backend,calls}=await fixture(t,(req,res)=>{
+  if(!req.url.endsWith('/message?limit=100&order=asc'))return false;
+  res.end('{"data":[]}');return true;
+ },{timeoutMs:80});
+ const warnings=[];backend.warn=code=>warnings.push(code);
+ const response=await request('/v1/responses',{model,input:'PRIVATE_INPUT',stream:true});
+ const wire=await response.text();
+ assert.ok(wire.includes('response.failed'));assert.ok(!wire.includes('response.completed'));
+ assert.deepEqual(warnings,['request_deadline','request_failed_request_cancelled']);
+ assert.ok(calls.some(x=>x.method==='DELETE'));
+ assert.ok(!JSON.stringify(warnings).includes('PRIVATE_INPUT'));
+});
