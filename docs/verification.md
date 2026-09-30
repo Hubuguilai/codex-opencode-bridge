@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 203 tests. This does not replace the pending
+The latest completed local unit suite has 215 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -855,3 +855,26 @@ the actual current compatibility-file customizations also passed merge, syntax,
 interruption/resume and repeated compatibility inspection.
 [Scoped receipt](receipts/source-reconciliation.json). These tests do not restart
 the active Router or certify actual service migration or all local customizations.
+
+## Legacy service migration coordinator — 2026-09-30
+
+The internal coordinator passed a real macOS LaunchAgent and pinned-runtime
+rehearsal with actual Router publication in isolated state. It starts and checks
+a separate candidate, publishes its route, retires the original service, and
+creates a managed installation record. Checks passed for a deliberately failed
+post-publication cutover, healthy legacy restoration, retry, repeat, preserved
+credentials/1M/891289 preferences/native catalog, and recovery from a reconstructed
+post-retirement journal boundary. All test services were stopped.
+[Receipt](receipts/desktop-migration.json), [scope](legacy-migration.md).
+
+Earlier rehearsal failures were not passes: empty visibility lists were rejected
+by the real Router; immediate health checking raced restored-service startup;
+and the newly added readiness helper initially lacked its coordinator dependency
+binding. These were corrected before the final successful run. Unit coverage now
+includes the empty-list constraint and delayed startup, plus edited-credential
+refusal. The final local suite has 215 passing tests.
+
+This does not certify coordinator SIGKILL recovery, actual account login, shared
+Router restart, current Desktop workflows, or clean-user installation. The source
+reconciliation SIGKILL test and this reconstructed service-recovery boundary have
+different scopes. A complete user-facing migration command is not yet published.

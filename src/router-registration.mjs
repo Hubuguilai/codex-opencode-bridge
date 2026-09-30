@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {writeInstallState} from './install-state.mjs';
 import {modelProfile,modelCatalogEntry} from './model-profiles.mjs';
 import {routerModelsFromCatalog} from './router-plan.mjs';
 import {inspectLegacyRouterRoute,regularToken} from './legacy-router-route.mjs';
@@ -10,7 +11,7 @@ const fingerprint=x=>hash(JSON.stringify(x));
 const planArtifacts=['user-model-additions.json','menu-preview.json','REVIEW.md'];
 const artifactHashes=root=>Object.fromEntries(planArtifacts.map(name=>{const file=path.join(root,name);if(fs.lstatSync(file).isSymbolicLink())throw Error('Model plan artifacts must not be symbolic links.');return [name,hash(fs.readFileSync(file))];}));
 const fail=x=>{throw new Error(x);};
-const save=(file,value)=>fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n',{mode:0o600});
+const save=writeInstallState;
 
 // Import only an explicitly selected installation. State identity is checked
 // before mutation; do not redirect a loaded Router module through env changes.

@@ -3,6 +3,7 @@ import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 import {prepareDirectory} from '../src/setup.mjs';
 import {prepareRouterPlan,routerModelsFromCatalog} from '../src/router-plan.mjs';
 import {inspectLegacyRouterRoute} from '../src/legacy-router-route.mjs';
+import {captureLegacyRouteRecovery,restoreLegacyRouterRoute} from '../src/legacy-route-recovery.mjs';
 import {registerRouter,adoptLegacyRouterRoute,verifyRouterSelection} from '../src/router-registration.mjs';
 function fixture(t){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'legacy-route-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
@@ -22,11 +23,13 @@ function fixture(t){
  providers:{GENERIC_PROVIDERS_PATH:path.join(state,'generic-providers.json'),getGenericProvider:id=>read('generic-providers.json').providers.find(x=>x.id===id),readGenericProviders:()=>read('generic-providers.json').providers,updateGenericProvider:(id,patch)=>write('generic-providers.json',{providers:read('generic-providers.json').providers.map(x=>x.id===id?{...x,...patch}:x)})},
  users:{USER_MODELS_PATH:path.join(state,'user-models.json'),readUserModels:()=>read('user-models.json').models,writeUserModels:models=>write('user-models.json',{models})},
  credentials:{readProviderCredentialStore:()=>read('credentials.json')},secrets:{genericProviderCredentialPath:()=>tokenFile},
- picker:{MODEL_PICKER_STATE_PATH:path.join(state,'picker.json'),setModelsVisible:slugs=>write('picker.json',{keep:true,visible:slugs})},overlay:{}};
+ picker:{MODEL_PICKER_STATE_PATH:path.join(state,'picker.json'),setModelsVisible:slugs=>{if(!slugs.length)throw Error('At least one model slug is required.');write('picker.json',{keep:true,visible:slugs});}},overlay:{}};
  api.overlay.captureModelOverlayFiles=files=>files.map(file=>({file,bytes:fs.existsSync(file)?fs.readFileSync(file).toString('base64'):null}));
  api.overlay.restoreModelOverlayFiles=rows=>{for(const {file,bytes} of rows)if(bytes===null)fs.rmSync(file,{force:true});else fs.writeFileSync(file,Buffer.from(bytes,'base64'));};
  api.overlay.applyModelOverlayPublication=async()=>write('merged-models.json',{models:[{slug:'gpt-native',visibility:'list'},...api.users.readUserModels().map(x=>({...x,visibility:'list'}))]});
- api.overlay.transactModelOverlayMutation=async({capture,mutate,restore,applyPublication})=>{const before=capture();try{await mutate();await applyPublication({});}catch(error){await restore(before);await applyPublication({});throw error;}};
+ api.overlay.transactModelOverlayMutation=async({capture,files,mutate,restore=api.overlay.restoreModelOverlayFiles,applyPublication})=>{const before=capture?capture():api.overlay.captureModelOverlayFiles(files);try{await mutate();await applyPublication({});}catch(error){await restore(before);await applyPublication({});throw error;}};
+ api.picker.modelPickerSnapshot=()=>({hidden:[],visible:owned.map(x=>x.slug),seeded:owned.map(x=>x.slug)});
+ api.picker.forgetModelVisibility=()=>{};
  const legacy=inspectLegacyRouterRoute(api,{legacyTokenPath});
  const makePlan=()=>prepareRouterPlan(out,{prepared,routerState:state,legacy});
  return {root,state,out,api,legacy,makePlan,prepared,tokenFile,token,unrelated,credential,write,read};
@@ -68,4 +71,21 @@ test('Adoption refuses changed context preferences and added legacy models',t=>{
  assert.throws(()=>prepareRouterPlan(f.out,{prepared:different,routerState:f.state,legacy:f.legacy}),/context preferences/);assert.equal(fs.existsSync(f.out),false);
  f.write('user-models.json',{models:[...f.api.users.readUserModels(),{slug:'unexpected',provider:'opencode-native-bridge'}]});
  assert.throws(f.makePlan,/model set changed/);
+});
+
+test('Semantic legacy rollback recovers a partial provider-only cutover and preserves unrelated edits',async t=>{
+ const f=fixture(t);f.makePlan();const recovery=captureLegacyRouteRecovery(f.out,{api:f.api});
+ const plan=JSON.parse(fs.readFileSync(path.join(f.out,'router-plan.json')));
+ f.api.providers.updateGenericProvider('opencode-native-bridge',{baseUrl:plan.provider.baseUrl});
+ f.api.users.writeUserModels([...f.api.users.readUserModels(),{slug:'other/later',provider:'other',gatewayModel:'later'}]);
+ assert.equal((await restoreLegacyRouterRoute(f.out,{api:f.api,recovery,restart:false})).restored,true);
+ assert.equal(f.api.providers.getGenericProvider('opencode-native-bridge').baseUrl,recovery.provider.baseUrl);
+ assert.ok(f.api.users.readUserModels().some(x=>x.slug==='other/later'));
+ assert.equal((await restoreLegacyRouterRoute(f.out,{api:f.api,recovery,restart:false})).restored,true);
+});
+test('Semantic legacy rollback restores completed adoption but refuses unknown adopted edits',async t=>{
+ const f=fixture(t);f.makePlan();const recovery=captureLegacyRouteRecovery(f.out,{api:f.api});await adoptLegacyRouterRoute(f.out,{api:f.api,restart:false});
+ assert.equal((await restoreLegacyRouterRoute(f.out,{api:f.api,recovery,restart:false})).restored,true);assert.equal(fs.existsSync(path.join(f.out,'registration.json')),false);
+ f.api.providers.updateGenericProvider('opencode-native-bridge',{baseUrl:'http://127.0.0.1:1234/v1'});
+ await assert.rejects(restoreLegacyRouterRoute(f.out,{api:f.api,recovery,restart:false}),/unknown changes/);
 });

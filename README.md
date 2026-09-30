@@ -183,7 +183,7 @@ New managed installations run a content-verified code copy under their installat
   retry. A crash or ordinary failure during client setup still requires state
   recovery; it is not assumed to have rolled back.
 
-These commands verify startup health, not model workflows. Recheck actual model tasks after upgrading. Upgrading the shared Router or migrating configuration formats is not yet automated.
+These commands verify startup health, not model workflows. Recheck actual model tasks after upgrading. The pinned compatibility repair is managed; arbitrary future Router-version and configuration-format migrations are not automated. Legacy-service migration has passed an isolated real-service rehearsal, but its end-user command remains pending; see [migration scope](docs/legacy-migration.md).
 
 The default state directory is `~/.local/share/codex-opencode-bridge/desktop`.
 Use the same `--directory` on later operations if you chose a custom location.

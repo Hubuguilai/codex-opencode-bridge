@@ -149,7 +149,8 @@ node bin/bridge.mjs status
   不能代替所有 Router 安装阶段的恢复。
 
 这些命令验证的是启动健康，不代表模型工作流已验收。升级后仍需复验实际任务。
-共享 Router 的升级和配置格式迁移尚未自动化。
+固定版本的 Router 兼容修复已纳入管理；任意未来版本的升级和配置格式迁移尚未自动化。
+旧服务迁移已通过隔离的真实服务演练，普通用户迁移命令仍待完成，详见[迁移范围](legacy-migration.md)。
 
 默认安装状态目录是 `~/.local/share/codex-opencode-bridge/desktop`。如果首次使用
 自定义 `--directory`，后续操作也需使用同一路径。备份可能包含敏感本地状态，请勿

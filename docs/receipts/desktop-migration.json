@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-30T05:53:49.770Z",
+  "isolatedState": true,
+  "realLaunchd": true,
+  "realRouterPublication": true,
+  "routerServiceRestart": false,
+  "nativeAuthProbe": "synthetic fixture; no account credentials",
+  "modelRequests": 0,
+  "checks": {
+    "failedCutoverRestoredRealLegacy": true,
+    "realServiceCutover": true,
+    "repeat": true,
+    "credentialsContextsAndNativeCatalogPreserved": true,
+    "interruptedRetirementRecovery": true,
+    "testServicesStopped": true
+  },
+  "scope": "Real isolated bridge service migration and Router catalog. No shared Router restart, model inference, actual account/GUI, clean-user install or full coordinator SIGKILL certification."
+}
