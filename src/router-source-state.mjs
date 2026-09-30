@@ -23,7 +23,7 @@ export function verifyRouterSource(root,files){
   if(!fs.statSync(current).isFile())throw Error('Router source is not a regular file.');
   const actual=hash(fs.readFileSync(current));
   const patch=compatibility.files.find(x=>x.path===relative&&x.beforeSha256===expected);
-  if(actual!==expected&&actual!==patch?.afterSha256)throw Error('Router source changed after download; preserving it instead of rerunning installation.');
+  if(actual!==expected&&actual!==patch?.afterSha256&&!compatibility.predecessors?.some(x=>patch&&x.files[relative]===actual))throw Error('Router source changed after download; preserving it instead of rerunning installation.');
  }
  return true;
 }

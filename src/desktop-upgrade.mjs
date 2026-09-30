@@ -1,4 +1,7 @@
 import fs from 'node:fs';
+import {ensureRouterCompatibility} from './router-compatibility.mjs';
+import {loadRouter,registerRouter} from './router-registration.mjs';
+const refreshRouter=async record=>registerRouter(record.plan,{api:await loadRouter(record.routerRoot)});
 import path from 'node:path';
 import os from 'node:os';
 import {acquireInstallLock,writeInstallState as save} from './install-state.mjs';
@@ -22,7 +25,7 @@ export async function waitStopped(prepared,{environment}={}){
  }
  throw Error('Old service ports have not been released.');
 }
-const real={stageRelease,verifyRelease,installRuntime,serviceConfiguration,installService,removeService,checkBridge,checkIdle,waitStopped};
+const real={ensureRouterCompatibility,refreshRouter,stageRelease,verifyRelease,installRuntime,serviceConfiguration,installService,removeService,checkBridge,checkIdle,waitStopped};
 function read(root){
  if(fs.lstatSync(root).isSymbolicLink())throw Error('Installation directory must not be a symbolic link.');
  const file=path.join(root,'desktop-install.json');if(fs.lstatSync(file).isSymbolicLink())throw Error('Installation record must not be a symbolic link.');
@@ -42,6 +45,7 @@ async function restore(root,record,deps){
  deps.removeService(original.prepared);await deps.waitStopped(original.prepared);
  await deps.installService(original.prepared,{binary:original.binary,cli:code.cli,node:transaction.node,env:transaction.servicePath?{PATH:transaction.servicePath}:undefined});
  await deps.checkBridge(original.prepared);
+ await deps.refreshRouter(original);
  save(path.join(root,'desktop-install.json'),original);
  return {restored:true,release:code.id,modelAccessVerified:false};
 }
@@ -60,8 +64,9 @@ export async function upgradeDesktop({directory=defaultDirectory(),rollback=fals
   const target=rollback?checkRelease(root,original.previousRelease,deps):deps.stageRelease(path.join(root,'releases'));
   const binary=rollback?original.previousBinary:(await deps.installRuntime({directory:path.join(root,'runtimes')})).binary;
   if(!binary||!path.isAbsolute(binary))throw Error('Missing managed runtime for the selected version.');
-  if(target.id===before.id&&binary===original.binary){await deps.checkBridge(original.prepared);return {upgraded:false,alreadyCurrent:true,release:target.id,modelAccessVerified:false};}
   await deps.checkIdle(original.prepared);
+  deps.ensureRouterCompatibility(original.routerRoot);
+  if(target.id===before.id&&binary===original.binary){await deps.checkBridge(original.prepared);await deps.refreshRouter(original);return {upgraded:false,alreadyCurrent:true,release:target.id,modelAccessVerified:false};}
   // Journal before stopping: recovery always restores the original complete record.
   const record={...original,status:'upgrading',phase:'stopping-previous-version',upgrade:{kind:'bridge-code-upgrade',original,targetRelease:target.directory,targetBinary:binary,node:currentService.node,servicePath:currentService.servicePath}};
   save(path.join(root,'desktop-install.json'),record);
@@ -70,6 +75,8 @@ export async function upgradeDesktop({directory=defaultDirectory(),rollback=fals
    record.phase='starting-new-version';save(path.join(root,'desktop-install.json'),record);
    await deps.installService(original.prepared,{binary,cli:target.cli,node:currentService.node,env:currentService.servicePath?{PATH:currentService.servicePath}:undefined});
    await deps.checkBridge(original.prepared);
+   record.phase='refreshing-router';save(path.join(root,'desktop-install.json'),record);
+   await deps.refreshRouter(original);
    save(path.join(root,'desktop-install.json'),{...original,release:target.directory,binary,previousRelease:original.release,previousBinary:original.binary,phase:'awaiting-client-verification'});
    return {upgraded:true,rolledBack:rollback,release:target.id,previousRelease:before.id,modelAccessVerified:false};
   }catch(error){

@@ -29,15 +29,24 @@ export function ensureRouterCompatibility(root,{spec=shipped,afterWrite=()=>{}}=
  const unlock=acquireInstallLock(folder);
  try{
  const specHash=hash(JSON.stringify(spec));
- let record;
+ let record,predecessor;
  if(fs.existsSync(recordFile)){
   regular(recordFile);record=JSON.parse(fs.readFileSync(recordFile));
-  if(record.kind!=='bridge-router-compatibility'||record.specHash!==specHash)throw Error('Router compatibility ownership record differs; preserve it for recovery.');
+  if(record.kind!=='bridge-router-compatibility')throw Error('Router compatibility ownership record differs; preserve it for recovery.');
+  if(record.specHash!==specHash){
+   predecessor=spec.predecessors?.find(x=>x.specHash===record.specHash);
+   if(!predecessor||record.status!=='installed')throw Error('Router compatibility ownership record differs; preserve it for recovery.');
+  } else if(record.fromSpecHash){
+   predecessor=spec.predecessors?.find(x=>x.specHash===record.fromSpecHash);
+   if(!predecessor)throw Error('Unrecognized Router compatibility migration.');
+  }
  }
  const files=spec.files.map(item=>{
   if(!/^src\/[a-z0-9-]+\.mjs$/.test(item.path))throw Error('Invalid compatibility source path.');
   const file=path.join(root,item.path),stat=regular(file),bytes=fs.readFileSync(file),current=hash(bytes);
-  if(current!==item.beforeSha256&&current!==item.afterSha256)throw Error('Router source differs from the supported compatibility version; no files were changed.');
+  if(record?.specHash!==specHash&&predecessor&&current!==predecessor.files[item.path])throw Error('Previous Router compatibility source changed; migration stopped.');
+  if(record?.specHash===specHash&&record.status==='installed'&&current!==item.afterSha256)throw Error('Router source differs from its installed compatibility record.');
+  if(current!==item.beforeSha256&&current!==item.afterSha256&&current!==predecessor?.files[item.path])throw Error('Router source differs from the supported compatibility version; no files were changed.');
   if(!record&&current!==item.beforeSha256)throw Error('Router contains an unowned compatibility change; automatic adoption refused.');
   let original=bytes;
   if(record){
@@ -60,6 +69,7 @@ export function ensureRouterCompatibility(root,{spec=shipped,afterWrite=()=>{}}=
  }
  // A durable intent precedes all source edits. Repeat safely finishes a partial
  // application only when every file is still exactly its before/after snapshot.
+ if(record.specHash!==specHash){record={kind:'bridge-router-compatibility',specHash,id:spec.id,status:'applying',fromSpecHash:record.specHash};}
  record.status='applying';save(recordFile,record);
  for(const file of files){
   regular(file.file);

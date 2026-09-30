@@ -10,7 +10,7 @@ function fixture(t){
  const record={kind:'bridge-desktop-install',status:'installed',phase:'awaiting-client-verification',release:first.directory,binary:process.execPath,prepared:path.join(root,'prepared'),plan:path.join(root,'router-plan'),routerRoot:path.join(root,'router'),models:['opencode/big-pickle']};
  const file=path.join(root,'desktop-install.json');fs.writeFileSync(file,JSON.stringify(record));
  let service={cli:first.cli,binary:process.execPath,node:process.execPath};const calls=[];
- const deps={verifyRelease,stageRelease:base=>stageRelease(base,{source}),installRuntime:async()=>({binary:process.execPath}),serviceConfiguration:()=>({...service}),
+ const deps={ensureRouterCompatibility:()=>({reused:true}),refreshRouter:async()=>{},verifyRelease,stageRelease:base=>stageRelease(base,{source}),installRuntime:async()=>({binary:process.execPath}),serviceConfiguration:()=>({...service}),
  checkIdle:async()=>calls.push('idle'),waitStopped:async()=>calls.push('stopped'),
  removeService:()=>{calls.push('remove');service=null;},installService:async(dir,options)=>{calls.push('start');service={...options};},checkBridge:async()=>calls.push('health')};
  return {root,file,first,record,deps,calls,get service(){return service;}};
@@ -57,9 +57,25 @@ test('A process killed after stopping leaves a recoverable durable upgrade journ
  import {upgradeDesktop} from ${JSON.stringify(new URL('../src/desktop-upgrade.mjs',import.meta.url).href)};
  import {stageRelease} from ${JSON.stringify(new URL('../src/releases.mjs',import.meta.url).href)};
  const root=process.env.UPGRADE_TEST_ROOT,record=JSON.parse(fs.readFileSync(path.join(root,'desktop-install.json')));
- await upgradeDesktop({directory:root},{stageRelease:base=>stageRelease(base,{source:path.join(root,'candidate')}),installRuntime:async()=>({binary:process.execPath}),serviceConfiguration:()=>({cli:path.join(record.release,'bin/bridge.mjs'),binary:record.binary,node:process.execPath}),checkIdle:async()=>{},removeService:()=>process.kill(process.pid,'SIGKILL')});`;
+ await upgradeDesktop({directory:root},{ensureRouterCompatibility:()=>({reused:true}),refreshRouter:async()=>{},stageRelease:base=>stageRelease(base,{source:path.join(root,'candidate')}),installRuntime:async()=>({binary:process.execPath}),serviceConfiguration:()=>({cli:path.join(record.release,'bin/bridge.mjs'),binary:record.binary,node:process.execPath}),checkIdle:async()=>{},removeService:()=>process.kill(process.pid,'SIGKILL')});`;
  const child=spawnSync(process.execPath,['--input-type=module','-e',program],{env:{...process.env,UPGRADE_TEST_ROOT:f.root},timeout:10000,encoding:'utf8'});
  assert.equal(child.signal,'SIGKILL',child.stderr);assert.ok(JSON.parse(fs.readFileSync(f.file)).upgrade);
  assert.equal((await recoverDesktopUpgrade({directory:f.root},f.deps)).restored,true);
  assert.deepEqual(JSON.parse(fs.readFileSync(f.file)),f.record);
+});
+
+test('Upgrade checks compatibility before stopping and refreshes Router after a healthy start',async t=>{
+ const f=fixture(t);f.deps.ensureRouterCompatibility=()=>{f.calls.push('compatibility');return {reused:false};};f.deps.refreshRouter=async()=>f.calls.push('router-refreshed');
+ await upgradeDesktop({directory:f.root},f.deps);assert.ok(f.calls.indexOf('compatibility')<f.calls.indexOf('remove'));assert.ok(f.calls.indexOf('router-refreshed')>f.calls.indexOf('health'));
+});
+test('Compatibility conflicts leave the running bridge untouched',async t=>{
+ const f=fixture(t);f.deps.ensureRouterCompatibility=()=>{throw Error('compatibility conflict');};await assert.rejects(upgradeDesktop({directory:f.root},f.deps),/compatibility conflict/);assert.ok(!f.calls.includes('remove'));assert.deepEqual(JSON.parse(fs.readFileSync(f.file)),f.record);
+});
+test('An already-current bridge still installs and republishes dependency compatibility',async t=>{
+ const f=fixture(t);f.deps.stageRelease=()=>f.first;f.deps.ensureRouterCompatibility=()=>{f.calls.push('compatibility');return {reused:false};};f.deps.refreshRouter=async()=>f.calls.push('republish');
+ assert.equal((await upgradeDesktop({directory:f.root},f.deps)).alreadyCurrent,true);assert.ok(f.calls.includes('republish'));assert.ok(!f.calls.includes('remove'));assert.deepEqual(JSON.parse(fs.readFileSync(f.file)),f.record);
+});
+test('Failed Router refresh restores the previous healthy bridge and retries publication',async t=>{
+ const f=fixture(t);let attempts=0;f.deps.refreshRouter=async()=>{if(++attempts===1)throw Error('injected publication failure');};
+ await assert.rejects(upgradeDesktop({directory:f.root},f.deps),/previous version was restored/);assert.equal(attempts,2);assert.deepEqual(JSON.parse(fs.readFileSync(f.file)),f.record);assert.equal(f.service.cli,f.first.cli);
 });

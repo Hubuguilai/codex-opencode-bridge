@@ -208,3 +208,7 @@ Release blockers include a clean supported-machine install from this README,
 actual Desktop picker and signed-in GPT preservation, full current-source model
 workflows, reboot/upgrade/lifecycle checks, and default-branch consistency. The
 repository remains private until its owner authorizes publication.
+
+Upgrades also install the shipped Router terminal-error repair and republish the
+owned routes. Bridge rollback retains this additive shared-dependency repair and
+its backups; it does not downgrade Router source.

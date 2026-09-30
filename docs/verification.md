@@ -751,3 +751,22 @@ tests it on a disposable Router copy, including actual Codex rate-limit/timeout
 classification. The [prototype receipt](receipts/gateway-terminal-error-prototype.json)
 passed both categories and confirms the source Router was preserved. This is a prototype integration, not an installed compatibility
 upgrade: shipping and migrating the version-bound Router change remain pending.
+
+
+## Managed terminal-error compatibility v2
+
+The [managed migration receipt](receipts/gateway-terminal-error-managed.json)
+supersedes the prototype installation boundary: a disposable copy of a verified
+v1 dependency was upgraded by ensureRouterCompatibility, with no absolute
+project import or manual source injection. Both fault categories survived the
+full Router path and were recognized by the real Codex client. Original source
+was preserved. No model inference occurred in this fault test.
+
+The [actual macOS lifecycle receipt](receipts/gateway-v2-managed-lifecycle.json)
+passed install/repeat, owned-profile refresh, upgrade/rollback, injected failures,
+recovery, model changes and uninstall using v2. It used real LaunchAgents and
+catalog publication in isolated state, with Router service restarts suppressed
+to avoid affecting the live user. Thus it does not certify a live shared Router
+restart or the Desktop picker. Unit coverage checks compatibility preflight,
+interrupted migration, publication after healthy startup, same-code dependency
+refresh and restoring the previous bridge after publication fails.

@@ -1,7 +1,7 @@
 # Managed Router compatibility
 
 The bridge requires the pinned Router revision in `runtime/router.json` plus the
-shipped strict-image change in `runtime/router-compatibility.json`. The change is
+shipped strict-image and terminal-error change in `runtime/router-compatibility.json`. The change is
 part of this repository and package; no developer-machine patch is required.
 
 Only models registered with `bridgeStrictImages: true` receive the new behavior:
@@ -41,3 +41,32 @@ setup recovery remains distinct from this source-change recovery.
 卸载桥接时保留共享 Router、兼容改动和备份。旧版受管理安装可用当前版本的
 `models` 命令重新指定同一组模型来刷新配置；之前手工配置的服务仍需要单独迁移。
 这项恢复能力不代表首次 Router 安装的所有失败阶段、任意 Router 升降级都已覆盖。
+
+
+## Terminal-error compatibility and upgrading v1
+
+The current compatibility ID is `strict-images-terminal-errors-v2`. On the
+`opencode-native-bridge` provider route, a bounded SSE transform converts the
+gateway’s untyped error objects back into Responses failure events. Recognized
+401/403/429, cancellation/deadline and context messages receive fixed safe
+categories; unknown failures receive a generic gateway error. Raw upstream error
+content is not copied into client responses. Each parsed frame is limited to
+1 MiB; an oversized frame fails explicitly. Other providers are unchanged.
+
+The installer recognizes the exact completed `strict-image-input-v1` record. It
+validates every old file and original backup before recording migration intent,
+then applies v2. An interrupted v2 migration accepts only the recorded old/new
+hashes and resumes; unknown changes stop before mutation. An already interrupted
+v1 installation must first be recovered with its matching version.
+
+`upgrade` applies dependency compatibility before stopping the bridge, then
+republishes/restarts the registered Router after the new bridge is healthy. An
+already-current bridge still performs compatibility checking and publication.
+A later upgrade failure restores the earlier bridge and republishes its model
+registration. The additive Router compatibility change and original backups
+remain: bridge rollback/uninstall does not downgrade shared Router source.
+
+中文版：v2 同时包含严格图片检查和错误事件修复。安装/升级会校验已完成的 v1
+记录，保留原始备份后迁移；迁移中断可继续，未知改动不会被覆盖。升级会重新发布
+并重启 Router，使源码修复生效。桥接代码回退或卸载时保留共享 Router 的兼容修复，
+不会把旧 Router 源码覆盖回去。它不修复模型本身的图片识别能力。

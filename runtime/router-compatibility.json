@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "id": "strict-image-input-v1",
+  "id": "strict-images-terminal-errors-v2",
   "upstreamRevision": "b90aa60e257bbcc33855aad7d43954c1a09b1311",
   "files": [
     {
       "path": "src/router.mjs",
       "beforeSha256": "155ab693b3e147ecc450c0057a3af81941f4c0b504f088dc5f47978ec2df3f54",
-      "afterSha256": "c34644c1ef8503ea40de7ecbb5049566e90b3b21ee0f3d8e745041a65e7da408",
+      "afterSha256": "983a6ba9dfbc8be6e82dc225b09e055c80d50bef86957112d59a4ffb7ad24207",
       "edits": [
         {
           "before": "  if (supportsImageInput(route)) return input;\n  if (route.visionBridge === false) {",
@@ -15,6 +15,14 @@
         {
           "before": "    if (error?.code === \"model_search_not_supported\" && !response.headersSent) {",
           "after": "    if ([\"model_search_not_supported\", \"bridge_image_input_unsupported\"].includes(error?.code) && !response.headersSent) {"
+        },
+        {
+          "before": "import { readFileSync } from \"node:fs\";",
+          "after": "import {Transform} from 'node:stream';\n// Scoped by the caller to owned bridge routes. The gateway loses Responses\n// terminal errors; recover only known safe categories, never relay raw details.\nfunction gatewayFailure(error){\n const message=typeof error?.message==='string'?error.message:'';\n const status=/provider returned HTTP (401|403|429)\\b/i.exec(message)?.[1];\n if(status)return {code:'upstream_access_or_quota',message:`OpenCode provider returned HTTP ${status}: ${status==='401'?'authentication rejected':status==='403'?'model access rejected':'rate or quota limit reached'}.`};\n if(/Request cancelled or deadline exceeded\\./.test(message))return {code:'request_cancelled',message:'Request cancelled or deadline exceeded.'};\n if(/provider explicitly reported that the input exceeds its context limit/i.test(message))return {code:'context_length_exceeded',message:'The provider explicitly reported that the input exceeds its context limit. Compact the conversation in Codex.'};\n return {code:'gateway_upstream_error',message:'The gateway reported an upstream failure. Inspect protected bridge service diagnostics for the safe failure code.'};\n}\nfunction bridgeGatewayErrorTransform(contentType,{maxFrameBytes=1024*1024}={}){\n if(!String(contentType).includes('text/event-stream'))return undefined;\n let pending=Buffer.alloc(0),sequence=0,failed=false;\n function frame(bytes){\n  if(failed)return;\n  let value;\n  try{const text=new TextDecoder('utf-8',{fatal:true}).decode(bytes);const data=text.split(/\\r?\\n/).filter(x=>x.startsWith('data:')).map(x=>x.slice(5).trimStart()).join('\\n');value=JSON.parse(data);}catch{this.push(bytes);return;}\n  if(Number.isSafeInteger(value.sequence_number))sequence=Math.max(sequence,value.sequence_number+1);\n  if(!value.type&&value.error&&typeof value.error==='object'){\n   failed=true;\n   const event={type:'response.failed',sequence_number:sequence,response:{status:'failed',error:gatewayFailure(value.error)}};\n   this.push('event: response.failed\\ndata: '+JSON.stringify(event)+'\\n\\n');return;\n  }\n  this.push(bytes);\n }\n return new Transform({transform(chunk,encoding,done){\n  try{\n   if(failed){done();return;}\n   pending=Buffer.concat([pending,chunk]);\n   while(pending.length){\n    const a=pending.indexOf('\\n\\n'),b=pending.indexOf('\\r\\n\\r\\n');\n    const index=b!==-1&&(a===-1||b<a)?b:a,sep=index===b?4:2;\n    if(index===-1){if(pending.length>maxFrameBytes)throw Error('Gateway SSE frame exceeds its bounded parser limit.');break;}\n    if(index+sep>maxFrameBytes)throw Error('Gateway SSE frame exceeds its bounded parser limit.');\n    frame.call(this,pending.subarray(0,index+sep));pending=pending.subarray(index+sep);\n    if(failed){pending=Buffer.alloc(0);break;}\n   }\n   done();\n  }catch(error){done(error);}\n },flush(done){try{if(pending.length&&!failed)frame.call(this,pending);done();}catch(error){done(error);}}});\n}\n\nimport { readFileSync } from \"node:fs\";"
+        },
+        {
+          "before": "      const transforms = [usageObserver];",
+          "after": "      const transforms = [usageObserver];\n      if (route?.provider === \"opencode-native-bridge\") {\n        const repair = bridgeGatewayErrorTransform(contentType);\n        if (repair) transforms.unshift(repair);\n      }"
         }
       ]
     },
@@ -32,6 +40,16 @@
           "after": "        error: (error?.code === \"bridge_image_input_unsupported\"\n          ? {type: error.code, code: error.code, message: error.message}\n          : transport) || {"
         }
       ]
+    }
+  ],
+  "predecessors": [
+    {
+      "specHash": "cfd09803d44e45f7e0666d38046d28cb5f1a1d61c1624d63f17452ea15bc5e5c",
+      "id": "strict-image-input-v1",
+      "files": {
+        "src/router.mjs": "c34644c1ef8503ea40de7ecbb5049566e90b3b21ee0f3d8e745041a65e7da408",
+        "src/api-forwarder.mjs": "43f26d36ce4c52f7f2e94d47552370ed7a96fb215b1b917d92f2402a6efbe967"
+      }
     }
   ]
 }
