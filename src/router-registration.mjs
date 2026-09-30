@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import {modelProfile,modelCatalogEntry} from './model-profiles.mjs';
 import {routerModelsFromCatalog} from './router-plan.mjs';
+import {inspectLegacyRouterRoute,regularToken} from './legacy-router-route.mjs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash,randomUUID} from 'node:crypto';
@@ -59,9 +60,14 @@ export function checkedPublication(api,{present=[],absent=[]}={}){
  publish.restoring=()=>{forward=false;};
  return publish;
 }
-export async function registerRouter(directory,{api,restart=true}={}){
+export async function registerRouter(directory,options={}){return registerRouterRoute(directory,options,false);}
+// Internal route transaction only. A desktop migration coordinator must first
+// validate source compatibility and new-service health, and retain the old service.
+export async function adoptLegacyRouterRoute(directory,options={}){return registerRouterRoute(directory,options,true);}
+async function registerRouterRoute(directory,{api,restart=true}={},adopt){
  const root=path.resolve(directory),plan=readPlan(root),record=path.join(root,'registration.json');
  if(path.resolve(api.paths.STATE_DIR)!==path.resolve(plan.routerState))fail('Selected Router uses a different state directory than this plan.');
+ if((adopt&&!plan.legacyAdoption)||(!adopt&&plan.legacyAdoption&&!fs.existsSync(record)))fail('Use the explicit legacy route adoption operation for an adoption plan.');
  let reused=false;
  const tokenPath=api.secrets.genericProviderCredentialPath(plan.provider.id);
  const publication=checkedPublication(api,{present:plan.models.map(x=>x.slug)});
@@ -82,21 +88,27 @@ export async function registerRouter(directory,{api,restart=true}={}){
    for(const source of Object.values(plan.sources)){
     if(hash(fs.readFileSync(source.path))!==source.sha256)fail('Router settings changed since preparation; regenerate the integration plan.');
    }
-   if(api.providers.readGenericProviders().some(x=>x.id===plan.provider.id)||fs.existsSync(tokenPath))fail('Provider or credential already exists; leaving it unchanged.');
-   const users=api.users.readUserModels();
+   if(adopt){
+    const observed=inspectLegacyRouterRoute(api,{legacyTokenPath:plan.legacyAdoption.legacyTokenPath});
+    if(fingerprint(observed)!==fingerprint(plan.legacyAdoption))fail('Legacy route or credential changed; inspect it again before adoption.');
+    if(regularToken(plan.credentialSource.path).token!==regularToken(tokenPath).token)fail('Prepared service must preserve the legacy local credential.');
+   }
+   if(!adopt&&(api.providers.readGenericProviders().some(x=>x.id===plan.provider.id)||fs.existsSync(tokenPath)))fail('Provider or credential already exists; leaving it unchanged.');
+   const allUsers=api.users.readUserModels(),users=adopt?allUsers.filter(x=>x.provider!==plan.provider.id):allUsers;
    if(plan.models.some(x=>users.some(y=>x.slug===y.slug||x.gatewayModel===y.gatewayModel)))fail('Model identity already exists.');
    const token=fs.readFileSync(plan.credentialSource.path,'utf8').trim();
    if(token.length<24||/\s/.test(token))fail('Invalid local bridge credential.');
-   api.secrets.writeGenericProviderCredential(plan.provider.id,token);
-   const credential=api.credentials.addGenericProviderCredentialReference({providerId:plan.provider.id,kind:'api_key',secretRef:{type:'provider-file',providerId:plan.provider.id},label:'Local OpenCode bridge'});
-   api.providers.addGenericProvider({...plan.provider,credentialRef:credential.id});
+   if(!adopt)api.secrets.writeGenericProviderCredential(plan.provider.id,token);
+   const credential=adopt?api.credentials.readProviderCredentialStore().credentials.find(x=>x.id===plan.legacyAdoption.credentialId):api.credentials.addGenericProviderCredentialReference({providerId:plan.provider.id,kind:'api_key',secretRef:{type:'provider-file',providerId:plan.provider.id},label:'Local OpenCode bridge'});
+   if(adopt)api.providers.updateGenericProvider(plan.provider.id,{baseUrl:plan.provider.baseUrl});
+   else api.providers.addGenericProvider({...plan.provider,credentialRef:credential.id});
    api.users.writeUserModels([...users,...plan.models]);
    api.picker.setModelsVisible(plan.models.map(x=>x.slug),true);
    save(record,{kind:'bridge-router-registration',planHash:fingerprint(plan),providerId:plan.provider.id,
     providerHash:fingerprint(api.providers.getGenericProvider(plan.provider.id)),credentialId:credential.id,credentialHash:fingerprint(credential),
     tokenPath,tokenHash:hash(fs.readFileSync(tokenPath)),artifactHashes:artifactHashes(root),modelHashes:Object.fromEntries(plan.models.map(x=>[x.slug,fingerprint(x)]))});
   }});
- return {registered:true,reused,models:plan.models.map(x=>x.displayName),restartCodexRequired:true};
+ return {registered:true,reused,...(adopt?{legacyRouteAdopted:true,serviceMigrationComplete:false}:{}),models:plan.models.map(x=>x.displayName),restartCodexRequired:true};
 }
 export async function unregisterRouter(directory,{api,restart=true}={}){
  const root=path.resolve(directory),plan=readPlan(root),record=path.join(root,'registration.json');

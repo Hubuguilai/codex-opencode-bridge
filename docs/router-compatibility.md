@@ -87,3 +87,32 @@ unowned source. This command is not a force-install bypass.
 中文版：`migration-preflight` 只读检查旧 Router 的源码合并条件。检测到冲突时
 不会向原文件写入冲突标记；检查通过也不代表已迁移。现有安装器仍不会直接接管
 有修改但没有归属记录的手工安装。
+
+
+## Legacy route transaction (internal component)
+
+`inspectLegacyRouterRoute` checks the existing loopback Responses provider, its
+explicit local credential reference, equality with the old bridge's local token,
+the complete model set and each context preference. Its snapshot contains hashes,
+not credential contents. Preparation requires the same model set and preferences.
+Normal registration still refuses an unowned provider; the separate internal
+`adoptLegacyRouterRoute` operation rechecks the snapshot under Router's transaction
+lock, preserves the existing credential, updates the endpoint and strict-image
+profiles, and creates a managed ownership record. Private pre-mutation snapshots
+remain available. A failed publication restores the old state and republishes it.
+A successful adoption can be revalidated by normal managed registration.
+
+The [isolated rehearsal](receipts/legacy-route-adoption.json) uses the real Router
+publication and transaction code; only the native signed-in status probe is a
+synthetic fixture. It performs no inference and restarts no services. Native
+catalog preservation here is not actual account-login or Desktop acceptance.
+
+This component is not exposed as a complete migration CLI. Old-service ownership,
+source reconciliation application, new-service health before cutover, durable
+process-crash recovery, service rollback and eventual old-service retirement must
+be coordinated before using it on a manual installation. Transaction exception
+recovery does not by itself certify recovery from process termination.
+
+中文版：已实现并隔离验证旧路由接管组件，保留凭据和上下文偏好，发布失败可恢复。
+完整旧服务迁移仍未接入安装命令；本组件测试不代表当前电脑已完成迁移，也不代表
+进程意外终止、真实登录状态或桌面菜单验收通过。

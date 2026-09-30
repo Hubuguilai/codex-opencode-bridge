@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 161 tests. This does not replace the pending
+The latest completed local unit suite has 197 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -829,3 +829,18 @@ explicit 1M / 891289 preference. Published Router metadata and prepared catalog
 retained the values and text-only capability. Native catalog and credential
 preservation passed; the service was removed afterwards. No inference or
 long-context capacity measurement occurred in this test.
+
+
+## Legacy route adoption component — 2026-09-30
+
+The route transaction passed an isolated rehearsal using actual Router APIs:
+endpoint replacement, managed-repeat validation, original credential and 1M /
+891289 preferences preserved, strict-image profiles published, and restoration
+after an injected publication failure. Unit tests additionally cover unrelated
+entries, token mismatch, symlinks, source drift and changed model preferences.
+The initial rehearsal's native-catalog assertion failed because its isolated
+Codex home was signed out; the corrected test explicitly uses a synthetic login
+status probe to exercise signed-in catalog publication without account secrets.
+This is not evidence of real signed-in GPT or Desktop picker preservation.
+[Scoped receipt](receipts/legacy-route-adoption.json). Full service migration and
+process-crash recovery remain pending.
