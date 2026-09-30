@@ -17,6 +17,7 @@ test('Router plan preserves every existing catalog entry, exports exact routes, 
  assert.equal(plan.provider.adapter,'openai-responses');assert.equal(plan.provider.baseUrl,'http://127.0.0.1:4396/v1');
  assert.deepEqual(plan.models.map(x=>x.upstreamModel),['opencode/space-bunny-free','opencode/nemotron-3-ultra-free']);
  assert.equal(plan.models[0].slug,'opencode-native-bridge/opencode/space-bunny-free');assert.equal(plan.models[0].defaultEffort,'default');
+ assert.ok(plan.models.every(model=>model.visionBridge===false));
  const token=fs.readFileSync(path.join(prepared,'state/local-token'),'utf8');
  for(const name of fs.readdirSync(out)){assert.equal(fs.readFileSync(path.join(out,name),'utf8').includes(token),false);assert.equal(fs.statSync(path.join(out,name)).mode&0o777,0o600);}
  for(const [name,bytes]of Object.entries(before))assert.equal(fs.readFileSync(path.join(routerState,name),'utf8'),bytes);

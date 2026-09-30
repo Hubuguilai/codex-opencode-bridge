@@ -16,7 +16,8 @@ export function classifyVerificationError(message=''){
  if(/stream.*closed|disconnected|response.completed/i.test(message))return 'stream_interrupted';
  return 'client_or_service_error';
 }
-export async function verifyClientRoute({model,baseUrl,token,catalogEntry,images=false,timeoutMs=300000,onProgress=()=>{},codex='codex'}){
+export async function verifyClientRoute({model,baseUrl,token,catalogEntry,images=false,imageTrials=1,timeoutMs=300000,route='installed_bridge_direct_real_codex_client',onProgress=()=>{},onSyntheticImageResult=()=>{},codex='codex'}){
+ if(!Number.isInteger(imageTrials)||imageTrials<1||imageTrials>5)throw Error('Image verification trials must be between one and five.');
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-client-verify-')),work=path.join(root,'workspace');fs.mkdirSync(work);
  const catalog=path.join(root,'catalog.json');fs.writeFileSync(catalog,JSON.stringify({models:[catalogEntry]}),{mode:0o600});
  const config={model_provider:'installed_bridge_check',model,model_catalog_json:catalog,
@@ -24,7 +25,7 @@ export async function verifyClientRoute({model,baseUrl,token,catalogEntry,images
  'model_providers.installed_bridge_check.wire_api':'responses','model_providers.installed_bridge_check.env_key':'BRIDGE_VERIFY_TOKEN',
  'model_providers.installed_bridge_check.requires_openai_auth':false,'model_providers.installed_bridge_check.request_max_retries':0,'model_providers.installed_bridge_check.stream_max_retries':0,
  model_reasoning_effort:'default',model_reasoning_summary:'none',web_search:'disabled','features.apps':false,'features.multi_agent':false,'features.memories':false};
- const receipt={model,route:'installed_bridge_direct_real_codex_client',checks:[],desktopPickerVerified:false};
+ const receipt={model,route,checks:[],desktopPickerVerified:false};
  let child,sequence=0,exited=false;const pending=new Map(),events=[];
  const send=x=>child.stdin.write(JSON.stringify(x)+'\n');
  const rpc=(method,params)=>new Promise((resolve,reject)=>{
@@ -66,11 +67,12 @@ export async function verifyClientRoute({model,baseUrl,token,catalogEntry,images
   result=await turn(thread.id,[{type:'text',text:'Use Codex tools to read input.json in the workspace. Create output.json containing its exact marker and sum of values, as JSON with keys marker and sum. Verify the file using a tool. Do not read other directories.'}]);
   let output;try{output=JSON.parse(fs.readFileSync(path.join(work,'output.json'),'utf8'));}catch{}
   record('client_file_tools',result,result.tools>0&&output?.marker===secret&&output?.sum===a+b);
-  if(images){
+  for(let trial=0;images&&trial<imageTrials;trial++){
    const code=String(randomInt(100000,1000000)),file=path.join(root,'challenge.png');fs.writeFileSync(file,verificationImage(code));
    result=await turn(thread.id,[{type:'text',text:'Read the six digits in the attached image. Reply only with those digits. Do not use tools.'},{type:'localImage',path:file}]);
-   receipt.imageDiagnostics={finalTextLength:result.text.length,agentMessages:result.agentMessages,exactDigitMatch:result.text.trim()===code,containsExpectedDigitGroup:(result.text.match(/\b\d{6}\b/g)||[]).includes(code)};
-   record('uploaded_image',result,result.tools===0&&result.text.trim()===code);
+   onSyntheticImageResult({model,trial:trial+1,expected:code,answer:result.text});
+   receipt.imageDiagnostics={finalTextLength:result.text.length,agentMessages:result.agentMessages,exactDigitMatch:result.text.trim()===code,containsExpectedDigitGroup:(result.text.match(/\b\d{6}\b/g)||[]).includes(code),sixDigitGroups:(result.text.match(/\b\d{6}\b/g)||[]).length,claimsMissingImage:/cannot|can't|unable|not.*(?:see|view)|no image|无法|看不到|没有.*图/i.test(result.text)};
+   record(trial?'uploaded_image_'+(trial+1):'uploaded_image',result,result.tools===0&&result.text.trim()===code);
   }
   receipt.passed=true;
  }catch(error){receipt.passed=false;receipt.errorCategory=classifyVerificationError(error.message);onProgress({model,errorCategory:receipt.errorCategory});}

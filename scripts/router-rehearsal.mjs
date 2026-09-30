@@ -9,6 +9,7 @@ import {spawn,spawnSync} from 'node:child_process';
 import {randomBytes,createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {makeWriter} from '../src/protocol.mjs';
+import {verificationImage} from '../src/verification-image.mjs';
 const flag=process.argv.indexOf('--router-root');
 if(flag<0||!process.argv[flag+1])throw new Error('Usage: node scripts/router-rehearsal.mjs --router-root /absolute/installed/codex-router');
 const router=path.resolve(process.argv[flag+1]);
@@ -90,6 +91,23 @@ try{
  const call=events.find(event=>event.type==='response.completed')?.response.output.find(item=>item.type==='function_call');
  assert.equal(call?.name,'probe');assert.equal(call?.namespace,'client');assert.equal(call?.call_id,'call_mock');assert.deepEqual(JSON.parse(call.arguments),{value:17});
  receipt.routes.push({model:model.slug,modelMapped:received.model===model.upstreamModel,toolNamespacePreserved:true,reasoningPreserved:true,callIdReturned:true});
+ if(model.inputModalities?.includes('image')){
+  const image='data:image/png;base64,'+verificationImage('123456').toString('base64');
+  const part={type:'input_image',image_url:image,detail:'original'};
+  const samples={uploaded_image:[{role:'user',content:[{type:'input_text',text:'Read this image.'},part]}],
+   tool_image:[{type:'function_call',call_id:'image_probe',name:'view_image',arguments:'{}'},
+    {type:'function_call_output',call_id:'image_probe',output:[part]}]};
+  for(const [name,input]of Object.entries(samples)){
+   received=undefined;
+   const response=await fetch('http://127.0.0.1:4696/v1/responses',{method:'POST',headers:{authorization:'Bearer '+caller,'content-type':'application/json'},body:JSON.stringify({...body,input}),signal:AbortSignal.timeout(30000)});
+   const wire=await response.text();
+   assert.equal(response.status,200);assert.ok(wire.includes('response.completed'));
+   assert.equal(received?.model,model.upstreamModel);
+   assert.ok(JSON.stringify(received.input).includes(image),name+' image bytes missing at bridge ingress');
+   if(name==='tool_image')assert.ok(JSON.stringify(received.input).includes('image_probe'));
+   receipt.routes.at(-1)[name+'BytesPreserved']=true;
+  }
+ }
  }
  Object.assign(receipt.checks,{modelMapped:true,toolNamespacePreserved:true,reasoningPreserved:true,callIdReturned:true});
 }catch(error){receipt.error=error.message.replaceAll(state,'<temporary-state>');process.exitCode=1;}

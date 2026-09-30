@@ -31,6 +31,8 @@
     "bridge_upgrade_rollback_recovery": "verified_real_launchd_health_lifecycle_post_upgrade_model_workflows_pending",
     "model_selection_router_component": "verified_real_publication_preservation_and_rollback",
     "installed_model_selection": "verified_real_service_inventory_publication_and_recovery_live_model_workflows_pending",
-    "installed_client_verification": "passed_real_codex_text_file_tools_both_models_and_muse_uploaded_image_direct_bridge_router_gui_pending"
+    "installed_client_verification": "passed_real_codex_text_file_tools_both_models_and_muse_uploaded_image_direct_bridge_router_gui_pending",
+    "router_client_verification": "passed_real_codex_both_text_file_tools_muse_three_consecutive_images_and_lifecycle_after_two_prior_failures_cause_unproven",
+    "strict_unsupported_media_through_router": "pending_upstream_router_can_replace_text_model_images_with_explanatory_text"
   }
 }

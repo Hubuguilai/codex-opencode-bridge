@@ -47,6 +47,9 @@ export function routerModelsFromCatalog(models,preparedCatalog){
   const displayName=source.display_name.replace(/ \(OpenCode Bridge\)$/,'')+' (OpenCode Native Bridge)';
   const description=source.description+'; official OpenCode bridge. Provider access and quotas apply.';
   const entry={slug,gatewayModel,compHash:gatewayModel+'-user-v1',upstreamModel:id,provider:providerId,listed:true,displayName,description,priority:100+index,contextWindow:source.context_window,autoCompact:source.auto_compact_token_limit??26000,inputModalities:source.input_modalities??['text'],defaultEffort:'default',reasoningLevels:[{effort:'default',description:'Upstream default'}],supportsReasoningSummaries:false,supportedEndpoints:['/responses']};
+  // Keep capability claims tied to this model; do not spend a second model's
+  // access to synthesize vision for text-only bridge routes.
+  entry.visionBridge=false;
   return {entry,catalog:{...source,slug,display_name:displayName,description,priority:100+index}};
  });
 }

@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-30T03:26:04.388Z",
+  "route": "codex_router_gateway_forwarder_installed_bridge",
+  "actualPublishedGatewayConfig": true,
+  "pinnedRouterUnmodified": true,
+  "desktopPickerVerified": false,
+  "models": [
+    {
+      "model": "opencode-native-bridge/opencode/big-pickle",
+      "route": "codex_router_gateway_forwarder_installed_bridge",
+      "checks": [
+        {
+          "name": "text",
+          "passed": true,
+          "durationMs": 5397,
+          "clientToolEvents": 0
+        },
+        {
+          "name": "client_file_tools",
+          "passed": true,
+          "durationMs": 18317,
+          "clientToolEvents": 3
+        },
+        {
+          "name": "uploaded_image",
+          "passed": true,
+          "durationMs": 27259,
+          "clientToolEvents": 0
+        }
+      ],
+      "desktopPickerVerified": false,
+      "imageDiagnostics": {
+        "finalTextLength": 6,
+        "agentMessages": 1,
+        "exactDigitMatch": true,
+        "containsExpectedDigitGroup": true
+      },
+      "passed": true
+    },
+    {
+      "model": "opencode-native-bridge/opencode/muse-spark-1.3-contributor-free",
+      "route": "codex_router_gateway_forwarder_installed_bridge",
+      "checks": [
+        {
+          "name": "text",
+          "passed": true,
+          "durationMs": 2544,
+          "clientToolEvents": 0
+        },
+        {
+          "name": "client_file_tools",
+          "passed": true,
+          "durationMs": 37858,
+          "clientToolEvents": 3
+        },
+        {
+          "name": "uploaded_image",
+          "passed": false,
+          "durationMs": 52573,
+          "clientToolEvents": 0
+        }
+      ],
+      "desktopPickerVerified": false,
+      "imageDiagnostics": {
+        "finalTextLength": 91,
+        "agentMessages": 1,
+        "exactDigitMatch": false,
+        "containsExpectedDigitGroup": false
+      },
+      "passed": false,
+      "errorCategory": "verification_assertion"
+    }
+  ],
+  "codeReleaseSha256": "4bf4dc44bc0b8906c1b8a857a9d8cb3efae1a9943cebdcc51b685977804dc0ed",
+  "passed": false
+}

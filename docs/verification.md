@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 143 tests. This does not replace the pending
+The latest completed local unit suite has 147 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -510,7 +510,7 @@ quality. Actual Desktop selection and post-change model workflows remain require
 
 ## Installed-client verification command
 
-`verify --live` uses the installed bridge service and its model catalog with a real
+`verify --live --route bridge` uses the installed bridge service and its model catalog with a real
 Codex app-server, ephemeral threads and temporary workspace files. Per model it
 checks a random exact text response and independently verifies a tool-created JSON
 file against data read from an input file. For a vision model it additionally sends
@@ -541,3 +541,54 @@ The image answer matched all six random digits with zero tool events. The associ
 completed its service/configuration tests and cleaned up its temporary service.
 These are direct installed-bridge client results; Router forwarding and GUI selection
 remain explicitly unverified. The earlier image failure is retained.
+
+
+## Full installed Router path and image capability checks
+
+`verify --live` now defaults to the registered Router route, using the protected
+caller credential and the actually published model catalog. `--route bridge`
+retains the direct diagnostic path. The optional test harness starts a separate
+Router frontend, pinned LiteLLM gateway and API forwarder with isolated state and
+ports, and uses the actual published gateway configuration. It does not restart
+the user's Router or Codex app.
+
+Two real Router runs passed both models' text/file checks but failed Muse's image
+check: [first failure](receipts/router-client-verification-2026-09-30-failed.json)
+and [repeated failure](receipts/router-client-verification-2026-09-30-repeated-failure.json).
+The repeated failure contained no six-digit answer and indicated that the model
+could not see the image. The earlier raw answers were not retained, so these
+receipts do not establish where image loss or refusal occurred.
+
+The first run also exposed upstream Router's virtual vision advertisement:
+Big Pickle's catalog entry gained image input through a separate vision model.
+That passing check is **not evidence of native Big Pickle vision**. Newly generated
+bridge entries set `visionBridge: false`; the verifier independently uses the
+installation plan's declared modalities and records any extra Router capability.
+Existing installations are not silently modified by this source change.
+
+A [subsequent real run](receipts/router-client-verification-2026-09-30-single-pass.json)
+passed all text/file checks and Muse's uploaded image. A private inspection saw one
+media part in the bridge's native message manifest for that image turn. Its
+[service lifecycle](receipts/router-client-single-pass-lifecycle.json) passed too.
+This single pass does not erase the previous failures or establish their cause.
+
+A separate [mock-upstream protocol test](receipts/router-image-protocol-2026-09-30.json)
+confirmed exact image bytes and model identity survive the Router for uploaded
+images and image tool results. That older rehearsal generates a minimal gateway
+configuration; it is protocol evidence, not real model/actual-publication acceptance.
+Its Router dirty flag reflects an untracked installation marker; tracked source
+was unchanged. The new full lifecycle test uses the actual published gateway file.
+
+A remaining release blocker is strict unsupported-media handling: pinned upstream
+Router can replace images for a text-only route with explanatory text even when
+virtual vision is disabled. The bridge itself rejects unsupported media, but this
+upstream behavior must be resolved before claiming lossless rejection through the
+whole Desktop path. No shared user Router source was patched by these tests.
+
+The [three-image continuation](receipts/router-client-verification-2026-09-30-three-images.json)
+then passed both models' text/file checks and three successive independent random
+image challenges in the same Muse client thread. Every image final answer exactly
+matched six digits with no client tool events. Its [lifecycle receipt](receipts/router-client-three-images-lifecycle.json)
+also passed. This validates the isolated complete route with virtual vision disabled
+for these entries; it is not a causal proof for the earlier failures, a success-rate
+estimate, a test of the user's existing Desktop thread, or a clean-user certification.

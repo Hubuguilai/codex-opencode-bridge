@@ -25,7 +25,7 @@ test('Installed verification requires opt-in and stops after an access denial',a
  await assert.rejects(verifyInstalled({directory:'/does-not-exist'}),/verify --live/);
  const directory=root(t),prepared=path.join(directory,'prepared'),models=['opencode/big-pickle','opencode/muse-spark-1.3-contributor-free'];prepareDirectory(prepared,{models});
  const code=stageRelease(path.join(directory,'releases'));fs.writeFileSync(path.join(directory,'desktop-install.json'),JSON.stringify({kind:'bridge-desktop-install',status:'installed',prepared,plan:path.join(directory,'router-plan'),routerRoot:path.join(directory,'router'),release:code.directory,models}));
- let count=0;const result=await verifyInstalled({directory,live:true},{checkBridge:async()=>{},checkIdle:async()=>{},verifyClientRoute:async({model})=>{count++;return {model,passed:false,errorCategory:'model_access'};}});
+ let count=0;const result=await verifyInstalled({directory,live:true,route:'bridge'},{checkBridge:async()=>{},checkIdle:async()=>{},verifyClientRoute:async({model})=>{count++;return {model,passed:false,errorCategory:'model_access'};}});
  assert.equal(count,1);assert.equal(result.passed,false);assert.deepEqual(result.skippedModels,[models[1]]);assert.equal(fs.statSync(result.receipt).mode&0o777,0o600);assert.equal(result.routerForwardingVerified,false);
  assert.ok(!fs.existsSync(path.join(directory,'.installation-lock')));
 });
@@ -34,4 +34,12 @@ test('Verification reads the final answer rather than concatenating commentary i
  assert.equal(finalClientText([{type:'agentMessage',phase:'commentary',text:'Checking image'},{type:'agentMessage',phase:'final_answer',text:'123456'}]),'123456');
  assert.equal(finalClientText([{type:'agentMessage',text:'123456'}]),'123456');
  assert.equal(finalClientText([{type:'agentMessage',phase:'commentary',text:'123456'}]),'');
+});
+test('Default installed verification follows Router while retaining declared native capabilities',async t=>{
+ const directory=root(t),prepared=path.join(directory,'prepared'),models=['opencode/big-pickle','opencode/muse-spark-1.3-contributor-free'];prepareDirectory(prepared,{models});
+ const code=stageRelease(path.join(directory,'releases'));fs.writeFileSync(path.join(directory,'desktop-install.json'),JSON.stringify({kind:'bridge-desktop-install',status:'installed',prepared,plan:path.join(directory,'router-plan'),routerRoot:path.join(directory,'router'),release:code.directory,models}));
+ const calls=[];
+ const result=await verifyInstalled({directory,live:true},{checkBridge:async()=>{},checkIdle:async()=>{},routerVerificationRoute:async()=>({name:'test_router',baseUrl:'http://127.0.0.1:1234/v1',token:'LOCAL_SECRET',models:models.map((id,index)=>({id,model:'registered/'+id,entry:{slug:'registered/'+id,input_modalities:['text','image']},images:index===1,routerAdvertisesImages:true}))}),verifyClientRoute:async options=>{calls.push(options);return {model:options.model,passed:true};}});
+ assert.equal(result.routerForwardingVerified,true);assert.deepEqual(calls.map(x=>x.images),[false,true]);assert.ok(calls.every(x=>x.baseUrl==='http://127.0.0.1:1234/v1'&&x.route==='test_router'));
+ assert.equal(result.models[0].routerAddsImageCapability,true);assert.ok(!JSON.stringify(result).includes('LOCAL_SECRET'));
 });

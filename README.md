@@ -42,10 +42,14 @@ Existing provider identities are not silently replaced. It does not restart Code
 See [the precise installer behavior and remaining gaps](docs/desktop-install.md).
 
 `verify --live` uses your OpenCode access and can consume paid quota if applicable.
-It starts an ephemeral Codex client, connects to the installed bridge, checks a
+It starts an ephemeral Codex client, connects through the installed Router, checks a
 random text reply and a temporary file task for each model, then an uploaded image
 for Muse. It leaves private receipts in the installation's `verification` directory.
-It does not certify Router forwarding, the Desktop picker, image tool results,
+Use `verify --live --route bridge` to isolate the bridge from Router when diagnosing
+failures. Image checks use the installed model's declared capability, not a Router
+vision fallback. The full Router path passed three consecutive Muse image checks after two earlier
+failures; their cause is still unproven. This is a bounded acceptance check.
+This does not certify the Desktop picker, image tool results,
 permissions, full workflows or long context. Access/quota failure stops remaining
 model checks. `doctor` and `status` remain read-only without model inference.
 
