@@ -98,3 +98,19 @@ catalog file. It did not restart a service, inspect a Desktop picker, or exercis
 a signed-in GPT session. Fresh Router setup uses `--no-provider` without
 `--no-discovery`: the latter disables all configured routes and prevents the
 new bridge models from being published.
+
+
+## Reproduce the tested lifecycle
+
+```sh
+node scripts/desktop-lifecycle-check.mjs --live /absolute/router-directory
+```
+
+This opt-in check creates an actual macOS bridge service with isolated Router and
+Codex configuration, publishes real model catalog entries, tests repeat install,
+uninstall, reinstall and an injected post-health failure followed by resume. It
+then stops its service and checks that both ports are released. It uses the
+pinned OpenCode runtime and makes no model requests. The existing Router service
+is not restarted, and no Desktop picker or signed-in GPT session is exercised.
+The successful 2026-09-30 [receipt](receipts/desktop-lifecycle.json) is narrower
+than full clean-machine acceptance.

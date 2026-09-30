@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-30T02:16:46.804Z",
+  "isolatedClientState": true,
+  "realLaunchd": true,
+  "realPublication": true,
+  "routerServiceRestart": false,
+  "modelRequests": 0,
+  "checks": {
+    "installHealthyAndPublished": true,
+    "repeat": true,
+    "uninstall": true,
+    "reinstall": true,
+    "healthFailureResume": true,
+    "tokenPreserved": true,
+    "nativeSourcePreserved": true
+  },
+  "passed": true,
+  "cleanup": true
+}

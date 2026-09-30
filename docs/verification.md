@@ -9,8 +9,16 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The current local unit suite has 100 tests. This does not replace the pending
+The latest completed local unit suite has 116 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
+
+On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
+real Router catalog lifecycle in isolated client state: install, repeat, uninstall,
+reinstall and recovery after an injected post-health failure. The local token and
+adopted native source file survived. [Receipt](receipts/desktop-lifecycle.json).
+No model inference, Router service restart, signed-in GPT or actual Desktop picker
+was tested in that lifecycle run. It reuses a downloaded pinned Router; it does
+not certify the full first-time Router setup or a clean operating system.
 
 Muse's [near-capacity test](muse-capacity.md) and [image test](images.md) apply
 to the described exact routes and source revisions. Big Pickle's new installer
