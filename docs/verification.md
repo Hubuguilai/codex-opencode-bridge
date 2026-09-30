@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 138 tests. This does not replace the pending
+The latest completed local unit suite has 143 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -506,3 +506,38 @@ The commands require independent managed code releases and owned registration
 artifacts; older installation migration remains separate unfinished work. A model
 inventory match verifies routing configuration, not account entitlement or task
 quality. Actual Desktop selection and post-change model workflows remain required.
+
+
+## Installed-client verification command
+
+`verify --live` uses the installed bridge service and its model catalog with a real
+Codex app-server, ephemeral threads and temporary workspace files. Per model it
+checks a random exact text response and independently verifies a tool-created JSON
+file against data read from an input file. For a vision model it additionally sends
+a locally generated PNG whose random six digits are absent from the prompt and file
+name. Image understanding requires the correct final answer with no tool execution.
+
+The command records no raw model output, prompts or credentials. It writes private
+receipts identifying the selected installed code release, per-check outcomes and
+redacted error categories. Account/permission/quota denial stops remaining model
+checks. It does not modify the existing Desktop login or select a GUI model.
+
+The [initial real run](receipts/installed-verification-initial-image-failure.json)
+passed text and client file tasks for both primary models but failed Muse's image
+assertion, so the overall result remains failed. That runner concatenated all agent
+messages; the updated runner uses the protocol's final-answer phase, with legacy
+unknown-phase fallback. The historical failure does not establish that commentary
+concatenation caused that specific failure; no raw answer was retained.
+
+This command checks the installed bridge directly, not the shared Router forwarding
+path or actual Desktop picker. It does not substitute for full ten-scenario model
+acceptance, image tool-result validation, permissions or long-context tests.
+
+
+The [subsequent installed-client run](receipts/installed-client-verification.json)
+passed both models' text and client-file checks and Muse's uploaded-image check.
+The image answer matched all six random digits with zero tool events. The associated
+[installation lifecycle run](receipts/installed-verification-lifecycle.json) also
+completed its service/configuration tests and cleaned up its temporary service.
+These are direct installed-bridge client results; Router forwarding and GUI selection
+remain explicitly unverified. The earlier image failure is retained.

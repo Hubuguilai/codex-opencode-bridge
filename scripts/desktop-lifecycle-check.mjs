@@ -5,12 +5,13 @@ import {createHash} from 'node:crypto';
 if(!process.env.BRIDGE_LIFECYCLE_CHILD){
  if(process.argv[2]!=='--live'||!process.argv[3])throw Error('Usage: node scripts/desktop-lifecycle-check.mjs --live ROUTER_DIR');
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-desktop-lifecycle-'));
- const result=spawnSync(process.execPath,[process.argv[1],path.resolve(process.argv[3])],{env:{...process.env,BRIDGE_LIFECYCLE_CHILD:'1',BRIDGE_LIFECYCLE_ROOT:root,CODEX_HOME:path.join(root,'codex'),MODEL_ROUTER_STATE_DIR:path.join(root,'state'),MODEL_ROUTER_USER_MODELS:path.join(root,'state/user-models.json'),CODEX_ROUTER_NO_DISCOVERY:'0'},encoding:'utf8',timeout:240000});
+ const result=spawnSync(process.execPath,[process.argv[1],path.resolve(process.argv[3])],{env:{...process.env,BRIDGE_LIFECYCLE_CHILD:'1',BRIDGE_LIFECYCLE_ROOT:root,CODEX_HOME:path.join(root,'codex'),MODEL_ROUTER_STATE_DIR:path.join(root,'state'),MODEL_ROUTER_USER_MODELS:path.join(root,'state/user-models.json'),CODEX_ROUTER_NO_DISCOVERY:'0'},encoding:'utf8',timeout:1500000});
  console.log(result.stdout);console.error(result.stderr.slice(-1500));
  if(result.status===0)fs.rmSync(root,{recursive:true,force:true});
  process.exit(result.status??1);
 }
 const {installDesktop,uninstallDesktop,checkBridge}=await import('../src/desktop-install.mjs');
+const {verifyInstalled}=await import('../src/installed-verification.mjs');
 const {setDesktopModels,recoverDesktopModels}=await import('../src/desktop-models.mjs');
 const {updateRouterModels}=await import('../src/router-registration.mjs');
 const {upgradeDesktop,recoverDesktopUpgrade}=await import('../src/desktop-upgrade.mjs');
@@ -51,6 +52,7 @@ try{
  const first=await installDesktop(options,deps);assert.equal(first.installed,true);
  assert.ok(catalogSlugs().includes('opencode-native-bridge/opencode/big-pickle'));assert.ok(catalogSlugs().includes('opencode-native-bridge/opencode/muse-spark-1.3-contributor-free'));
  receipt.checks.installHealthyAndPublished=true;
+ if(process.env.BRIDGE_VERIFY_INSTALLED==='1'){receipt.modelRequests='live_client_verification';const verified=await verifyInstalled({directory:options.directory,live:true,onProgress:event=>console.log(JSON.stringify(event))});fs.writeFileSync('generated/installed-client-verification.json',JSON.stringify({...verified,receipt:undefined},null,2)+'\n');assert.equal(verified.passed,true);receipt.modelRequests='live_client_verification';receipt.checks.installedClientVerification=true;}
  const installed=JSON.parse(fs.readFileSync(path.join(options.directory,'desktop-install.json')));
  const code=verifyRelease(installed.release);
  const serviceId=createHash('sha256').update(prepared).digest('hex').slice(0,16);

@@ -1,0 +1,60 @@
+{
+  "date": "2026-09-30T03:14:12.551Z",
+  "kind": "installed-client-verification",
+  "codeReleaseSha256": "bb2d88285fba833435ea15748fa3589dceb4c85bc6ef517807a5a1496c51d726",
+  "route": "installed_bridge_direct_real_codex_client",
+  "desktopPickerVerified": false,
+  "routerForwardingVerified": false,
+  "models": [
+    {
+      "model": "opencode/big-pickle",
+      "route": "installed_bridge_direct_real_codex_client",
+      "checks": [
+        {
+          "name": "text",
+          "passed": true,
+          "durationMs": 4286,
+          "clientToolEvents": 0
+        },
+        {
+          "name": "client_file_tools",
+          "passed": true,
+          "durationMs": 22906,
+          "clientToolEvents": 3
+        }
+      ],
+      "desktopPickerVerified": false,
+      "passed": true
+    },
+    {
+      "model": "opencode/muse-spark-1.3-contributor-free",
+      "route": "installed_bridge_direct_real_codex_client",
+      "checks": [
+        {
+          "name": "text",
+          "passed": true,
+          "durationMs": 2955,
+          "clientToolEvents": 0
+        },
+        {
+          "name": "client_file_tools",
+          "passed": true,
+          "durationMs": 24620,
+          "clientToolEvents": 3
+        },
+        {
+          "name": "uploaded_image",
+          "passed": false,
+          "durationMs": 54718,
+          "clientToolEvents": 0
+        }
+      ],
+      "desktopPickerVerified": false,
+      "passed": false,
+      "errorCategory": "client_or_service_error"
+    }
+  ],
+  "passed": false,
+  "skippedModels": [],
+  "next": "Inspect failed check categories. Do not repeatedly retry permission or quota failures."
+}

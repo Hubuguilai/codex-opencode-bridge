@@ -1,7 +1,7 @@
 import {parseArgs} from 'node:util';
 
 const commands = {
-  'models': ['directory','models'], 'recover-models': ['directory'], 'upgrade': ['directory'], 'rollback': ['directory'], 'recover-upgrade': ['directory'], 'status': ['directory'], 'install': ['directory','router-root','models'], 'uninstall': ['directory'], 'register-router': ['router-root'], 'unregister-router': ['router-root'], 'install-service': ['binary'], 'service-status': [], 'remove-service': [], 'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
+  'verify': ['directory','live'], 'models': ['directory','models'], 'recover-models': ['directory'], 'upgrade': ['directory'], 'rollback': ['directory'], 'recover-upgrade': ['directory'], 'status': ['directory'], 'install': ['directory','router-root','models'], 'uninstall': ['directory'], 'register-router': ['router-root'], 'unregister-router': ['router-root'], 'install-service': ['binary'], 'service-status': [], 'remove-service': [], 'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
   prepare: ['models', 'model', 'catalog'],
   'prepare-router': ['prepared', 'router-state'],
 };
@@ -19,7 +19,7 @@ export function parseCommand(args) {
   const {values, positionals, tokens} = parseArgs({
     args: args.slice(1), strict: true, allowPositionals: true, tokens: true,
     options: {help: {type: 'boolean', short: 'h'},
-      ...Object.fromEntries(commands[command].map(name => [name, {type: 'string'}]))},
+      ...Object.fromEntries(commands[command].map(name => [name, {type: name==='live'?'boolean':'string'}]))},
   });
   const seen = new Set();
   for (const token of tokens.filter(token => token.kind === 'option')) {

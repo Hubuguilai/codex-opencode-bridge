@@ -99,3 +99,18 @@ Recovery can restore a mix of old/new generated files after interruption, but it
 refuses additional user edits or changed credentials. Finish model tasks before
 changing selection; checking active requests is not an atomic block on new tasks.
 Legacy installations need migration before these managed commands can be used.
+
+
+### Installed model verification
+
+`verify --live` makes real model requests and can consume your account's quota.
+Read its per-model checks: a completed service startup or model listing is not an
+inference result. `authentication`, `model_access` and `rate_limit` stop subsequent
+model checks; use your local provider login/access page and do not loop retries.
+A `verification_assertion` means the client turn completed but did not meet the
+expected test outcome. Image diagnostics report final-text length and whether the
+expected digit group appeared, without saving raw model output. Earlier successful
+image tests do not turn a failed new image check into a pass.
+
+A direct installed-bridge pass does not establish Router forwarding or actual
+Desktop selection. Follow with those UI checks and full workflows as documented.

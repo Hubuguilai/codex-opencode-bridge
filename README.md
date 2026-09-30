@@ -9,8 +9,8 @@ runtime and your own model access.
 
 **Private development candidate: 0.2.0-rc.1.** The installer is implemented, but a
 complete clean-machine desktop installation has not passed acceptance. There is
-no public release yet. Current-source full model workflows, upgrades, model-set
-changes and some first-install recovery remain open. Do not interpret an install
+no public release yet. Upgrade and model-selection lifecycle checks have passed;
+clean-client acceptance, current-release full model workflows and some first-install recovery remain open. Do not interpret an install
 success message as certification of the model picker or every Codex feature.
 
 ## Start here
@@ -32,6 +32,7 @@ not implemented.
 git clone https://github.com/Hubuguilai/codex-opencode-bridge.git
 cd codex-opencode-bridge
 node bin/bridge.mjs install
+node bin/bridge.mjs verify --live
 ```
 
 The installer reuses a compatible Router or downloads its pinned upstream source,
@@ -39,6 +40,14 @@ installs a private OpenCode 2.0.18 runtime, prepares the two default models, sta
 a local service, checks its health, and registers the models through Router.
 Existing provider identities are not silently replaced. It does not restart Codex.
 See [the precise installer behavior and remaining gaps](docs/desktop-install.md).
+
+`verify --live` uses your OpenCode access and can consume paid quota if applicable.
+It starts an ephemeral Codex client, connects to the installed bridge, checks a
+random text reply and a temporary file task for each model, then an uploaded image
+for Muse. It leaves private receipts in the installation's `verification` directory.
+It does not certify Router forwarding, the Desktop picker, image tool results,
+permissions, full workflows or long context. Access/quota failure stops remaining
+model checks. `doctor` and `status` remain read-only without model inference.
 
 After successful installation, fully quit and reopen Codex. Look for:
 
@@ -62,7 +71,8 @@ login. Do not ask me to paste credentials into chat; use local login flows.
 Run the repository's install command. Use its existing backup and ownership
 checks; do not bypass conflicts or erase incomplete installation records.
 If human login or a Codex restart is necessary, explain that exact action.
-After installation, verify the actual model menu and independently test text,
+After installation, run verify --live using my model access, report each result,
+and then verify the actual model menu and independently test text,
 file reading, file creation/modification, a follow-up turn and an applicable
 permission denial. For Muse, test both an uploaded image and a view_image result
 with image-only details unknown from the prompt. Record actual outcomes and
