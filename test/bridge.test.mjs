@@ -215,6 +215,23 @@ for (const status of [401,403,429]) test(`Upstream HTTP ${status} is explicit in
   assert.equal(calls.filter(call=>call.path==='/api/session').length,2);
 });
 
+for(const scenario of [
+ {type:'provider.invalid-request',status:400,message:'Maximum context length exceeded. PRIVATE_SENTINEL',code:'context_length_exceeded',http:400},
+ {type:'provider.invalid-request',status:422,message:'Invalid schema for function example. PRIVATE_SENTINEL',code:'upstream_tool_schema',http:422},
+ {type:'provider.invalid-request',status:400,message:'Unrecognized setting PRIVATE_SENTINEL',code:'generation_failed',http:502},
+ {type:'unknown',status:500,message:'context_length_exceeded PRIVATE_SENTINEL',code:'generation_failed',http:502},
+])test(`Provider error ${scenario.code}/${scenario.status} has a safe JSON/SSE outcome`,async t=>{
+ const {request,calls}=await fixture(t,(req,res)=>{
+  if(!req.url.endsWith('/message?limit=100&order=asc'))return false;
+  res.end(JSON.stringify({data:[{type:'assistant',finish:'error',error:{type:scenario.type,status:scenario.status,message:scenario.message}}]}));return true;
+ });
+ const response=await request('/v1/responses',{model,input:'test'});assert.equal(response.status,scenario.http);
+ const error=(await response.json()).error;assert.equal(error.code,scenario.code);assert.ok(!JSON.stringify(error).includes('PRIVATE_SENTINEL'));
+ const stream=await request('/v1/responses',{model,input:'test',stream:true}),wire=await stream.text();
+ assert.ok(wire.includes('response.failed'));assert.ok(wire.includes(scenario.code));assert.ok(!wire.includes('response.completed'));assert.ok(!wire.includes('PRIVATE_SENTINEL'));
+ assert.equal(calls.filter(x=>x.path==='/api/session').length,2);
+});
+
 test('Changed upstream text fails instead of silently corrupting a streamed answer', async t => {
   let n = 0;
   const { request } = await fixture(t, (req, res) => {

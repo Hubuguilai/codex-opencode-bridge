@@ -20,9 +20,9 @@ function checkOwnership(directory, absent) {
 const generatedFiles = new Set([
   '.bridge-runtime.json', '.bridge-recovery.lock', 'opencode.json',
   'bridge-request.json', 'bridge-call.json', 'bridge-plugin-ready',
-  '.opencode/plugins/codex-relay/index.js',
+  '.opencode/plugins/codex-relay/index.js', '.opencode/plugins/bridge-policy/index.js',
 ]);
-const generatedDirectories = new Set(['.bridge-sessions', '.opencode', '.opencode/plugins', '.opencode/plugins/codex-relay']);
+const generatedDirectories = new Set(['.bridge-sessions', '.opencode', '.opencode/plugins', '.opencode/plugins/codex-relay', '.opencode/plugins/bridge-policy']);
 function onlyGeneratedFiles(root, relative = '') {
   for (const name of fs.readdirSync(path.join(root, relative))) {
     const child = relative ? `${relative}/${name}` : name;

@@ -34,7 +34,11 @@ export async function verifyInstalled({directory=path.join(os.homedir(),'.local/
    result.nativeImageInput=nativeImages===true;
    if(routerAdvertisesImages&&!nativeImages)result.routerAddsImageCapability=true;
    report.models.push(result);save(receipt,report);
-   if(['authentication','model_access','rate_limit'].includes(result.errorCategory)){report.stoppedOnAccessFailure=true;break;}
+   if(['authentication','model_access','rate_limit','local_authentication','runtime_configuration','bridge_busy'].includes(result.errorCategory)){
+    report.stoppedEarly=true;report.stopReason=result.errorCategory;
+    if(['authentication','model_access','rate_limit'].includes(result.errorCategory))report.stoppedOnAccessFailure=true;
+    break;
+   }
   }
   report.passed=report.models.length===record.models.length&&report.models.every(x=>x.passed);
   report.routerForwardingVerified=route==='router'&&report.passed;

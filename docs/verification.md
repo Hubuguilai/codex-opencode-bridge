@@ -649,3 +649,25 @@ suite includes concurrent-driver exclusion, worker preservation, source-edit
 refusal, dependency/compatibility continuation and the retryable setup exit.
 Node preflight, installer gating and package metadata now share the documented
 22.19 minimum; unsupported Node stops before dependency/configuration mutation.
+
+
+## Provider error boundaries and runtime policy
+
+An official OpenCode 2.0.18 runtime was exercised against a local HTTP fault
+provider in both [text](receipts/provider-errors-text.json) and
+[native-tools](receipts/provider-errors-native-tools.json) modes. Each covered
+context overflow, rejected tool schema, unknown invalid request, authentication,
+access and rate limit errors, with both JSON and Responses streaming requests.
+All 24 requests preserved the expected safe category, omitted private fixture
+text, and never sent response.completed for a failure. Each request reached the
+local provider exactly once; no hidden retry or context compaction occurred.
+These are real-runtime protocol tests, not real-provider inference or capacity
+certification. The original [failed text-mode run](receipts/provider-errors-before.json)
+is retained: it timed out at 429 because the legacy path lacked the retry hook
+already present in native-tools mode.
+
+Both modes now explicitly disable runtime auto-compaction; Codex retains control
+of its conversation. Output exhaustion is classified separately from input
+overflow. Unknown runtime errors remain broad and do not imply quota exhaustion.
+The unit suite passed 168 tests. Desktop reconnect behavior, full context overflow
+and current-release model workflows remain separate acceptance gates.

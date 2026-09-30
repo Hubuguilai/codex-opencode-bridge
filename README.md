@@ -131,7 +131,8 @@ managed installation record, then check prerequisites, the recorded runtime,
 service-status, local bridge health, model registration and provider access.
 Do not print tokens, authentication files, raw conversation payloads or private
 backups. Distinguish local authentication, upstream 401/403, local bridge_busy,
-provider 429, unsupported content/tools, timeout and stream interruption.
+provider 429, input context overflow, output limits, tool schema errors,
+unsupported content/tools, timeout and stream interruption.
 Use the installed model and actual failing input mode; do not substitute a text
 hello for an image or tool-result failure. Preserve evidence and existing models.
 Use maintained recovery commands for reversible repairs. Stop on ownership

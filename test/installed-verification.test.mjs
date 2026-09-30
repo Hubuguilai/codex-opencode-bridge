@@ -18,15 +18,25 @@ test('Client errors are categorized without publishing provider payloads',async 
  assert.equal(result.errorCategory,'authentication');assert.ok(!JSON.stringify(result).includes('PRIVATE_TOKEN'));
  assert.equal(classifyVerificationError('stream closed before response.completed'),'stream_interrupted');
 });
+test('Local busy/auth, provider denial, context and byte limits stay distinct',()=>{
+ const cases=[
+  ['HTTP 429 bridge_busy','bridge_busy'],['OpenCode runtime is busy.','bridge_busy'],
+  ['OpenCode returned HTTP 401.','runtime_configuration'],['A valid local bridge Bearer token is required.','local_authentication'],
+  ['HTTP 403: access was rejected; this does not establish quota exhaustion.','model_access'],
+  ['HTTP 429: rate or quota limit','rate_limit'],['context_length_exceeded','context_limit'],
+  ['Request exceeds the byte limit; nothing was truncated.','input_size'],['upstream_tool_schema','tool_parameters'],
+  ['generation_failed: do not assume quota exhaustion','generation_failed'],['output_limit_exceeded','output_limit'],
+ ];for(const [message,category]of cases)assert.equal(classifyVerificationError(message),category);
+});
 test('Visual challenge is a metadata-free PNG and rejects non-digit challenges',()=>{
  const png=verificationImage('123456');assert.equal(png.subarray(1,4).toString(),'PNG');assert.ok(!png.includes(Buffer.from('123456')));assert.throws(()=>verificationImage('abc'),/digits/);
 });
-test('Installed verification requires opt-in and stops after an access denial',async t=>{
+for(const category of ['model_access','bridge_busy','runtime_configuration'])test(`Installed verification requires opt-in and stops after ${category}`,async t=>{
  await assert.rejects(verifyInstalled({directory:'/does-not-exist'}),/verify --live/);
  const directory=root(t),prepared=path.join(directory,'prepared'),models=['opencode/big-pickle','opencode/muse-spark-1.3-contributor-free'];prepareDirectory(prepared,{models});
  const code=stageRelease(path.join(directory,'releases'));fs.writeFileSync(path.join(directory,'desktop-install.json'),JSON.stringify({kind:'bridge-desktop-install',status:'installed',prepared,plan:path.join(directory,'router-plan'),routerRoot:path.join(directory,'router'),release:code.directory,models}));
- let count=0;const result=await verifyInstalled({directory,live:true,route:'bridge'},{checkBridge:async()=>{},checkIdle:async()=>{},verifyClientRoute:async({model})=>{count++;return {model,passed:false,errorCategory:'model_access'};}});
- assert.equal(count,1);assert.equal(result.passed,false);assert.deepEqual(result.skippedModels,[models[1]]);assert.equal(fs.statSync(result.receipt).mode&0o777,0o600);assert.equal(result.routerForwardingVerified,false);
+ let count=0;const result=await verifyInstalled({directory,live:true,route:'bridge'},{checkBridge:async()=>{},checkIdle:async()=>{},verifyClientRoute:async({model})=>{count++;return {model,passed:false,errorCategory:category};}});
+ assert.equal(count,1);assert.equal(result.passed,false);assert.equal(result.stopReason,category);assert.equal(result.stoppedEarly,true);assert.deepEqual(result.skippedModels,[models[1]]);assert.equal(fs.statSync(result.receipt).mode&0o777,0o600);assert.equal(result.routerForwardingVerified,false);
  assert.ok(!fs.existsSync(path.join(directory,'.installation-lock')));
 });
 

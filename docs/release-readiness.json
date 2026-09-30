@@ -16,7 +16,7 @@
     "uploaded_images": "verified_live_muse",
     "image_tool_results": "verified_live_muse_codex_view_image",
     "installed_lifecycle_restart_upgrade_uninstall": "pending",
-    "actionable_error_categories_and_stream_failures": "pending",
+    "actionable_error_categories_and_stream_failures": "verified_24_local_fault_requests_real_runtime_both_modes_client_reconnect_and_real_context_overflow_pending",
     "docs_support_matrix_default_branch_consistency": "pending",
     "pinned_managed_opencode_dependency": "verified_macos_arm64_new_directory_and_repeat",
     "managed_launchd_service_component": "verified_live_install_repeat_remove_macos_arm64",

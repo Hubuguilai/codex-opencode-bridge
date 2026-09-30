@@ -8,12 +8,20 @@ export function finalClientText(items){
 }
 export function classifyVerificationError(message=''){
  if(/Verification assertion/.test(message))return 'verification_assertion';
- if(/429|quota|rate.?limit/i.test(message))return 'rate_limit';
+ if(/bridge_busy|local bridge concurrency limit|OpenCode runtime is busy/i.test(message))return 'bridge_busy';
+ if(/opencode_http_error|OpenCode returned HTTP|relay_plugin_unavailable|unsupported_opencode_version/i.test(message))return 'runtime_configuration';
+ if(/valid local bridge Bearer token|local bridge.*unauthorized/i.test(message))return 'local_authentication';
+ if(/output_limit_exceeded|provider stopped at its output limit/i.test(message))return 'output_limit';
+ if(/context_length_exceeded|provider explicitly reported.*context limit/i.test(message))return 'context_limit';
+ if(/input_too_large|configured byte limit|request exceeds the byte limit/i.test(message))return 'input_size';
+ if(/upstream_tool_schema|invalid_tool_arguments|provider rejected the supplied tool schema/i.test(message))return 'tool_parameters';
+ if(/generation_failed|without a recognized safe error category/i.test(message))return 'generation_failed';
  if(/403|access denied|permission.*model/i.test(message))return 'model_access';
  if(/401|authentication/i.test(message))return 'authentication';
- if(/unsupported|schema|invalid.*tool/i.test(message))return 'unsupported_input_or_tool';
+ if(/429|quota|rate.?limit/i.test(message))return 'rate_limit';
+ if(/unsupported|not supported|schema|invalid.*tool/i.test(message))return 'unsupported_input_or_tool';
  if(/timeout|deadline/i.test(message))return 'timeout';
- if(/stream.*closed|disconnected|response.completed/i.test(message))return 'stream_interrupted';
+ if(/stream.*closed|disconnected|response.completed|event_stream_gap|non_append_output/i.test(message))return 'stream_interrupted';
  return 'client_or_service_error';
 }
 export async function verifyClientRoute({model,baseUrl,token,catalogEntry,images=false,imageTrials=1,timeoutMs=300000,route='installed_bridge_direct_real_codex_client',onProgress=()=>{},onSyntheticImageResult=()=>{},codex='codex'}){

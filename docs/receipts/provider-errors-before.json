@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-30T04:20:21.754Z",
+  "kind": "official-runtime-local-provider-errors",
+  "realProviderInference": false,
+  "modelsTested": [],
+  "checks": [
+    {
+      "name": "context",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    },
+    {
+      "name": "tool-schema",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    },
+    {
+      "name": "unknown",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    },
+    {
+      "name": "authentication",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    },
+    {
+      "name": "access",
+      "jsonAndStreamPassed": true,
+      "localProviderRequests": 2
+    }
+  ],
+  "sourceSha256": "5789b64934a54dac82a0ac240ff6ebd929ba4273b28acb639efaec09268dfd96",
+  "runtime": "2.0.18",
+  "passed": false,
+  "error": "The operation was aborted due to timeout",
+  "cleaned": true,
+  "mode": "text",
+  "failureScope": "Legacy text route retried provider 429; native-tools route already had a retry guard."
+}

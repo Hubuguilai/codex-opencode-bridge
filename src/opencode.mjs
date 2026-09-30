@@ -10,12 +10,7 @@ import { NativeTextStream } from './native-text-stream.mjs';
 import { createSessionID } from './session-id.mjs';
 import { SessionJournal } from './session-journal.mjs';
 import { RuntimeOwnership } from './runtime-ownership.mjs';
-
-const providerDenialMessages = {
-  401: 'OpenCode provider returned HTTP 401: authentication was rejected. Check the provider authentication configured in OpenCode.',
-  403: 'OpenCode provider returned HTTP 403: access was rejected. Check model entitlement or provider access restrictions in OpenCode; this does not establish quota exhaustion.',
-  429: 'OpenCode provider returned HTTP 429: a rate or quota limit was reached. Check the provider allowance or retry timing; the bridge will not retry automatically.',
-};
+import {providerGenerationError} from './provider-errors.mjs';
 
 export class OpenCodeBackend {
   constructor({ url, password, directory, pollMs = 250, maxOutputBytes = 8000000, mode = 'text', toolTransport = 'direct', internalTools = 'guarded', journal, warn = () => {} }) {
@@ -140,10 +135,7 @@ export class OpenCodeBackend {
         }
         const assistant = assistants.at(-1);
         if (assistant) {
-          if ([401, 403, 429].includes(assistant.error?.status)) {
-            throw new BridgeError(assistant.error.status, 'upstream_access_or_quota', providerDenialMessages[assistant.error.status]);
-          }
-          if (assistant.finish === 'error' || assistant.error) throw new BridgeError(502, 'generation_failed', 'OpenCode generation failed.');
+          if (assistant.finish === 'error' || assistant.error) throw providerGenerationError(assistant.error);
           if (!native && (assistant.content || []).some(x => x.type === 'tool' || x.type === 'tool-call')) {
             throw new BridgeError(502, 'unexpected_tool_call', 'OpenCode attempted a tool call in text-only mode.');
           }
@@ -154,7 +146,8 @@ export class OpenCodeBackend {
           if (native && !live) await nativeText.update(assistants, onDelta);
           previous = text;
           if (assistant.time?.completed && !(native && assistant.finish === 'tool-calls')) {
-            if (assistant.finish === 'tool-calls' || assistant.finish === 'length') {
+            if(assistant.finish==='length')throw new BridgeError(502,'output_limit_exceeded','The provider stopped at its output limit before completing the answer. This is not an input context-limit error.');
+            if (assistant.finish === 'tool-calls') {
               throw new BridgeError(502, 'incomplete_generation', 'OpenCode did not complete a plain text answer.');
             }
             if (!text) throw new BridgeError(502, 'empty_generation', 'OpenCode returned no text.');
@@ -197,12 +190,19 @@ export async function startOpenCode(config, env = process.env) {
   const directory = fs.realpathSync(fs.mkdtempSync(path.join(config.stateDir, 'work-')));
   const journal = new SessionJournal(directory);
   const ownership = new RuntimeOwnership(directory, journal.runID);
+  const runtimeConfig={share:'disabled',snapshots:false,lsp:false,formatter:false,update:'disable',compaction:{auto:false}};
   if (config.mode === 'native-tools') {
     const pluginDir = path.join(directory, '.opencode/plugins/codex-relay');
     fs.mkdirSync(pluginDir, { recursive: true });
     fs.writeFileSync(path.join(pluginDir, 'index.js'), `export { default } from ${JSON.stringify(new URL('./runtime-plugin.mjs', import.meta.url).href)};\n`);
-    fs.writeFileSync(path.join(directory, 'opencode.json'), JSON.stringify({ plugins: [pluginDir], share: 'disabled', snapshots: false, lsp: false, formatter: false, update: 'disable' }));
+    runtimeConfig.plugins=[pluginDir];
+  } else {
+    const pluginDir = path.join(directory, '.opencode/plugins/bridge-policy');
+    fs.mkdirSync(pluginDir, { recursive: true });
+    fs.writeFileSync(path.join(pluginDir, 'index.js'), `export { default } from ${JSON.stringify(new URL('./runtime-policy.mjs', import.meta.url).href)};\n`);
+    runtimeConfig.plugins=[pluginDir];
   }
+  fs.writeFileSync(path.join(directory,'opencode.json'),JSON.stringify(runtimeConfig),{mode:0o600});
   const password = randomBytes(32).toString('base64url');
   const childEnv = { ...env, OPENCODE_SERVER_PASSWORD: password };
   delete childEnv.BRIDGE_TOKEN;

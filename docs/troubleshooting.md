@@ -16,7 +16,10 @@ errors; some upstream generation failures still use a broad category.
 | Text-only error after `view_image` | Wrong model/profile, old runtime, or missing tool-image conversion | Muse's uploaded-image and tool-result paths are separately tested; Big Pickle remains text-only |
 | `recursive_tool_schema_relaxed` warning | Muse's recursive JSON schema was relaxed for upstream compatibility | This is a compatibility warning, not a task success claim; client argument validation remains |
 | `input_too_large` / HTTP 413 | Request exceeded the configured byte limit | Check attachment/request size; this is not a token-context measurement |
-| `generation_failed` | OpenCode reported a generation error | Inspect private local runtime diagnostics for schema/context/provider details; this category is not yet fully specific |
+| `context_length_exceeded` | Provider explicitly reported input context overflow | Compact or reduce the conversation in Codex; the bridge does not truncate it |
+| `output_limit_exceeded` | Provider stopped at its output limit | Reduce the requested answer size; this is distinct from input overflow |
+| `upstream_tool_schema` | Provider explicitly rejected tool schema/arguments | Check model/tool compatibility and preserve the failing case |
+| `generation_failed` | No recognized safe category was available | Inspect private diagnostics; do not infer quota or context overflow |
 | `request_cancelled` / HTTP 504 | Cancellation or deadline | Check whether the client cancelled, whether the model was slow, and whether the session cleaned up |
 | Stream closes without completion | No completed answer was received | Record the final stream event and matching runtime error; do not treat partial text as success |
 | `relay_plugin_unavailable` | Client-tool guard did not load | Verify the pinned runtime, installed bridge package and plugin setup before sending another task |
@@ -114,3 +117,11 @@ image tests do not turn a failed new image check into a pass.
 
 A direct installed-bridge pass does not establish Router forwarding or actual
 Desktop selection. Follow with those UI checks and full workflows as documented.
+
+Both runtime modes disable automatic OpenCode compaction; Codex owns conversation
+compaction. Provider failures are not retried by the runtime retry hook. The Codex
+client may still apply its own reconnection policy. Explicit context/tool errors
+are recognized from the pinned runtime’s structured error type, status and limited
+message patterns; unrecognized providers/languages remain `generation_failed`.
+Local busy, local authentication and runtime configuration failures also stop
+subsequent installed verification model checks.
