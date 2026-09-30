@@ -3,7 +3,7 @@
 The unified command reuses an existing compatible Codex Router. When absent, it
 downloads the source revision pinned in `runtime/router.json`, installs its locked
 Node dependencies and invokes its own installer. Managed upgrades, model-set
-changes and interrupted-install recovery are still pending. This is a development
+changes and recovery of a failed first-time Router setup are still pending. This is a development
 candidate, not the complete README installation promised for the release.
 
 From the bridge checkout/package, on macOS:
@@ -28,9 +28,13 @@ not equate a health response with a working model or restart Codex automatically
 Repeat installation with the same options rechecks the service and registration
 without adding duplicates. On failure, the installation phase is saved in
 `desktop-install.json`, the new service is stopped where possible, and local
-preparation and rollback evidence remain. An incomplete record currently requires
-diagnosis rather than automatic resume. Do not delete evidence or edit credentials
-to force a retry.
+preparation and rollback evidence remain. Re-run the same install command to
+resume a bridge-stage failure: it validates prepared files, preserves the old plan
+in history, and regenerates a current plan when no registration exists. Existing
+registrations undergo ownership checks. A verified dead installer lock is
+recoverable; ambiguous locks are retained for diagnosis. Router bootstrap failures
+have a separate record and are not yet automatically resumed. Do not delete
+evidence or edit credentials to force a retry.
 
 To remove this installation's routes and service:
 
@@ -40,8 +44,8 @@ node bin/bridge.mjs uninstall
 
 Use the same `--directory` if a custom location was selected. The existing shared
 Router, other models, provider logins, backups, and bridge preparation remain.
-Removal stops if ownership checks find user edits or dependent models. Runtime
-cleanup, clean reinstall after uninstall and upgrades are not yet integrated.
+Removal stops if ownership checks find user edits or dependent models. Re-running install after uninstall reuses the verified preparation and regenerates
+the integration plan. Runtime cleanup and upgrades are not yet integrated.
 
 ## Installation Prompt for the current candidate
 
@@ -65,7 +69,9 @@ Do not call the installation verified until those client checks actually pass.
 
 当前可用的统一安装命令会串起运行时、模型准备、后台服务和模型注册。它会
 复用已有兼容的 Codex Router；缺失时会下载固定版本并调用上游安装器。首次完整
-桌面安装尚未实测，升级、修改模型集合、失败后自动恢复与卸载后重新安装尚未完成，因此仍是开发候选。
+桌面安装尚未实测，升级、修改模型集合与 Router 首次安装失败的恢复尚未完成，
+因此仍是开发候选。桥接安装阶段失败后可重新执行同一安装命令；程序会校验原文件、
+保留旧计划和备份，并继续配置。卸载后也可用同一命令重新安装。
 
 安装成功返回只代表配置流程完成，还需验证模型权限、重启后的菜单及真实任务。
 卸载保留已有 Router、其他模型、账号登录和备份；遇到用户修改时会停止并说明原因。
