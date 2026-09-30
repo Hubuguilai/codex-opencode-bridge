@@ -50,11 +50,10 @@ random text reply and a temporary file task for each model, then uploaded and to
 for Muse. It leaves private receipts in the installation's `verification` directory.
 Use `verify --live --route bridge` to isolate the bridge from Router when diagnosing
 failures. Image checks use the installed model's declared capability, not a Router
-vision fallback. The full Router path passed three consecutive Muse image checks after two earlier
-failures; their cause is still unproven. A newer owned-profile migration run
-passed both models’ text/file checks but Muse uploaded-image streaming failed
-before the tool-image check. See [the retained failure](docs/receipts/legacy-profile-router-client-failure.json);
-vision reliability remains unresolved.
+vision fallback. The latest full Router check passed both models’ text/file tasks
+and Muse uploaded and actual tool-returned images, with byte integrity checked.
+[Earlier failures and the latest evidence](docs/verification.md#image-byte-integrity-and-task-history-isolation)
+remain recorded; this does not prove every long-history vision task is reliable.
 The verifier requires an actual `view_image` event for the expected file and the
 correct image-only answer; command/OCR fallback does not pass that check.
 This does not certify the Desktop picker,

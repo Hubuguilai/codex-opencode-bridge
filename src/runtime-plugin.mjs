@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import { clientAliases } from './client-aliases.mjs';
 import path from 'node:path';
-import {wireImageCounts} from './wire-media-diagnostics.mjs';
+import {wireImageCounts,wireImageIntegrity} from './wire-media-diagnostics.mjs';
 
 export default {
   id: 'codex-client-tool-relay',
@@ -122,6 +122,8 @@ export default {
         'When all requested work is complete, provide a normal final text response based on the actual results.',
         'Tool mapping: ' + manifest.tools.map(t => `${t.namespace ? t.namespace + '.' : ''}${t.name} = ${t.relayName}`).join(', '),
       ].join('\n') });
+      const hasImages=(manifest.messages||[]).some(message=>Array.isArray(message.content)&&message.content.some(part=>part.type==='media'||(Array.isArray(part.result?.value)&&part.result.value.some(value=>value.type==='file'&&typeof value.mime==='string'&&value.mime.startsWith('image/')))));
+      if(hasImages)event.system.push({type:'text',text:'The supplied conversation contains native image input, including any attached image tool results. Inspect that image content directly. Restrictions on filesystem access or tool use do not prevent examining images already attached to this request. If the pixels are unclear, say so; do not invent details or claim missing visual input merely because no additional tool is allowed.'});
       if (manifest.options) Object.assign(event.options, manifest.options);
     });
     await ctx.session.hook('http.request', async event => {
@@ -138,7 +140,7 @@ export default {
       }
       fs.writeFileSync(path.join(root, 'bridge-wire-surface.json'), JSON.stringify({
         requestId: manifest.requestId, mode: manifest.internalTools || 'guarded', tools: names,
-        media: wireImageCounts(body),
+        media: wireImageCounts(body), imageIntegrity: wireImageIntegrity(body,manifest.messages),
       }), { mode: 0o600 });
     });
     await ctx.session.hook('http.response', event => {

@@ -18,7 +18,7 @@ export function classifyVerificationError(message=''){
  if(/context_length_exceeded|provider explicitly reported.*context limit/i.test(message))return 'context_limit';
  if(/input_too_large|configured byte limit|request exceeds the byte limit/i.test(message))return 'input_size';
  if(/upstream_tool_schema|invalid_tool_arguments|provider rejected the supplied tool schema/i.test(message))return 'tool_parameters';
- if(/generation_failed|without a recognized safe error category/i.test(message))return 'generation_failed';
+ if(/generation_failed|OpenCode generation failed|without a recognized safe error category/i.test(message))return 'generation_failed';
  if(/403|access denied|permission.*model/i.test(message))return 'model_access';
  if(/401|authentication/i.test(message))return 'authentication';
  if(/429|quota|rate.?limit/i.test(message))return 'rate_limit';
@@ -27,7 +27,8 @@ export function classifyVerificationError(message=''){
  if(/stream.*closed|disconnected|response.completed|event_stream_gap|non_append_output/i.test(message))return 'stream_interrupted';
  return 'client_or_service_error';
 }
-export async function verifyClientRoute({model,baseUrl,token,catalogEntry,images=false,imageTrials=1,timeoutMs=300000,route='installed_bridge_direct_real_codex_client',onProgress=()=>{},onSyntheticImageResult=()=>{},onPrivateError=()=>{},codex='codex'}){
+export async function verifyClientRoute({model,baseUrl,token,catalogEntry,images=false,imageTrials=1,diagnosticImageOnly=false,timeoutMs=300000,route='installed_bridge_direct_real_codex_client',onProgress=()=>{},onSyntheticImageResult=()=>{},onPrivateError=()=>{},codex='codex'}){
+ if(diagnosticImageOnly&&!images)throw Error('Image-only diagnostics require an image-capable route.');
  if(!Number.isInteger(imageTrials)||imageTrials<1||imageTrials>5)throw Error('Image verification trials must be between one and five.');
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-client-verify-')),work=path.join(root,'workspace');fs.mkdirSync(work);
  const catalog=path.join(root,'catalog.json');fs.writeFileSync(catalog,JSON.stringify({models:[catalogEntry]}),{mode:0o600});
@@ -36,7 +37,7 @@ export async function verifyClientRoute({model,baseUrl,token,catalogEntry,images
  'model_providers.installed_bridge_check.wire_api':'responses','model_providers.installed_bridge_check.env_key':'BRIDGE_VERIFY_TOKEN',
  'model_providers.installed_bridge_check.requires_openai_auth':false,'model_providers.installed_bridge_check.request_max_retries':0,'model_providers.installed_bridge_check.stream_max_retries':0,
  model_reasoning_effort:'default',model_reasoning_summary:'none',web_search:'disabled','features.apps':false,'features.multi_agent':false,'features.memories':false};
- const receipt={model,route,checks:[],desktopPickerVerified:false};
+ const receipt={model,route,checks:[],desktopPickerVerified:false,...(diagnosticImageOnly?{diagnosticOnly:true,omittedChecks:['text','client_file_tools']}: {})};
  let child,sequence=0,exited=false;const pending=new Map(),events=[];
  const send=x=>child.stdin.write(JSON.stringify(x)+'\n');
  const rpc=(method,params)=>new Promise((resolve,reject)=>{
@@ -73,11 +74,14 @@ export async function verifyClientRoute({model,baseUrl,token,catalogEntry,images
   });
   await rpc('initialize',{clientInfo:{name:'bridge_installed_verification',version:'0.2.0'},capabilities:{experimentalApi:true}});send({method:'initialized'});
   const {thread}=await rpc('thread/start',{cwd:work,model,modelProvider:'installed_bridge_check',ephemeral:true,approvalPolicy:'on-request',sandbox:'workspace-write',baseInstructions:'Use supplied Codex tools only for requested tasks. Do not use subagents. Respect permission denials.',config});
-  receipt.activeCheck='text';const marker=randomUUID();let result=await turn(thread.id,[{type:'text',text:'Reply with exactly '+marker+'. No tools.'}]);record('text',result,result.text.trim()===marker);
+  let result;
+  if(!diagnosticImageOnly){
+  receipt.activeCheck='text';const marker=randomUUID();result=await turn(thread.id,[{type:'text',text:'Reply with exactly '+marker+'. No tools.'}]);record('text',result,result.text.trim()===marker);
   const secret=randomUUID(),a=randomInt(100,500),b=randomInt(500,900);fs.writeFileSync(path.join(work,'input.json'),JSON.stringify({marker:secret,values:[a,b]}));
   receipt.activeCheck='client_file_tools';result=await turn(thread.id,[{type:'text',text:'Use Codex tools to read input.json in the workspace. Create output.json containing its exact marker and sum of values, as JSON with keys marker and sum. Verify the file using a tool. Do not read other directories.'}]);
   let output;try{output=JSON.parse(fs.readFileSync(path.join(work,'output.json'),'utf8'));}catch{}
   record('client_file_tools',result,result.tools>0&&output?.marker===secret&&output?.sum===a+b);
+  }
   for(let trial=0;images&&trial<imageTrials;trial++){
    const code=String(randomInt(100000,1000000)),file=path.join(root,'challenge.png');fs.writeFileSync(file,verificationImage(code));
    receipt.activeCheck=trial?'uploaded_image_'+(trial+1):'uploaded_image';

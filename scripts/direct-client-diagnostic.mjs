@@ -19,10 +19,10 @@ try{
  const catalogEntry=JSON.parse(fs.readFileSync(path.join(prepared,'models.json'))).models[0];
  const progress=event=>{
   const file=path.join(runtime.backend.directory,'bridge-wire-surface.json');
-  if(fs.existsSync(file))receipt.media.push({event,counts:JSON.parse(fs.readFileSync(file)).media});
+  if(fs.existsSync(file)){const surface=JSON.parse(fs.readFileSync(file));receipt.media.push({event,counts:surface.media,imageIntegrity:surface.imageIntegrity});}
   console.log(JSON.stringify(event));
  };
- receipt.client=await verifyClientRoute({model,baseUrl:`http://127.0.0.1:${port}/v1`,token:config.token,catalogEntry,images:catalogEntry.input_modalities.includes('image'),route:receipt.route,onProgress:progress,
+ receipt.client=await verifyClientRoute({diagnosticImageOnly:process.env.BRIDGE_DIAGNOSTIC_IMAGE_ONLY==='1',model,baseUrl:`http://127.0.0.1:${port}/v1`,token:config.token,catalogEntry,images:catalogEntry.input_modalities.includes('image'),route:receipt.route,onProgress:progress,
  onPrivateError:value=>fs.appendFileSync('generated/direct-private-errors.jsonl',JSON.stringify(value)+'\n',{mode:0o600})});
  receipt.passed=receipt.client.passed;if(!receipt.passed)process.exitCode=1;
 }catch(error){receipt.passed=false;receipt.error=error.message.replaceAll(root,'<temporary-directory>');process.exitCode=1;}

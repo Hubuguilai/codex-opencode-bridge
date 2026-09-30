@@ -770,3 +770,37 @@ to avoid affecting the live user. Thus it does not certify a live shared Router
 restart or the Desktop picker. Unit coverage checks compatibility preflight,
 interrupted migration, publication after healthy startup, same-code dependency
 refresh and restoring the previous bridge after publication fails.
+
+
+## Image byte integrity and task-history isolation
+
+The [minimal image probes](receipts/minimal-image-path-diagnostic.json) passed
+real Muse inference for uploaded and synthetic tool-result images. These probes
+do not execute Codex tools. An in-memory comparison confirms that the provider
+request contains the same bytes and ordering as bridge input; only counts and
+a boolean are retained, never image hashes or payloads.
+
+A [fresh actual Codex image-only diagnostic](receipts/fresh-codex-image-diagnostic.json)
+also passed an uploaded image and a real imageView event. Its receipt explicitly
+marks omitted text/file checks; this diagnostic mode is not used by installed
+verification and cannot substitute for full acceptance.
+
+The bridge now tells the model, only when native image content is present, that
+filesystem/tool restrictions do not remove access to already attached pixels.
+This preserves all history, tools and images and does not ask the model to invent
+unclear details. The [full direct Codex sequence](receipts/full-codex-image-guidance-direct.json)
+then passed text, file tasks, upload recognition and an actual tool-returned
+image, with image-byte equality. An [earlier attempt](receipts/image-hint-file-stage-failure.json)
+failed during file-task generation before images; it remains recorded. This
+bounded pass does not establish the prompt addition as the root-cause fix or
+prove long-conversation vision reliability.
+
+The subsequent [installed full Router client sequence](receipts/image-guidance-router-client.json)
+passed both models’ text/file tasks and Muse’s uploaded and actual tool-returned
+image. [Integrity metadata](receipts/image-guidance-router-integrity.json) confirms
+that the final provider request retained both historical and new image bytes in
+order. The [real isolated lifecycle](receipts/image-guidance-router-lifecycle.json)
+then passed upgrade/rollback/model changes/removal and cleanup. These results
+cover the tested client path; they do not certify the original manual installation,
+Desktop selection, arbitrary long histories or sustained load. Prior failures
+remain available and the exact cause of their variability is not proven.

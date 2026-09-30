@@ -25,7 +25,7 @@ test('Local busy/auth, provider denial, context and byte limits stay distinct',(
   ['HTTP 403: access was rejected; this does not establish quota exhaustion.','model_access'],
   ['HTTP 429: rate or quota limit','rate_limit'],['context_length_exceeded','context_limit'],
   ['Request exceeds the byte limit; nothing was truncated.','input_size'],['upstream_tool_schema','tool_parameters'],
-  ['generation_failed: do not assume quota exhaustion','generation_failed'],['output_limit_exceeded','output_limit'],
+  ['generation_failed: do not assume quota exhaustion','generation_failed'],['stream disconnected before completion: OpenCode generation failed.','generation_failed'],['output_limit_exceeded','output_limit'],
  ];for(const [message,category]of cases)assert.equal(classifyVerificationError(message),category);
 });
 test('Visual challenge is a metadata-free PNG and rejects non-digit challenges',()=>{
@@ -60,4 +60,9 @@ test('Tool-image verification requires the exact viewed file without command fal
  assert.equal(verifiedToolImage(base,'/test/challenge.png','123456'),true);
  for(const patch of [{imagePaths:[]},{imagePaths:['/test/other.png']},{tools:1},{text:'654321'}])
   assert.equal(verifiedToolImage({...base,...patch},'/test/challenge.png','123456'),false);
+});
+test('Image-only isolation is explicitly diagnostic and cannot stand in for full verification',async t=>{
+ await assert.rejects(verifyClientRoute({diagnosticImageOnly:true,images:false}),/image-capable/);
+ const result=await verifyClientRoute({model:'model',baseUrl:'http://127.0.0.1:1/v1',token:'PRIVATE_TOKEN',catalogEntry:{slug:'model'},codex:mockClient(t),images:true,diagnosticImageOnly:true});
+ assert.equal(result.diagnosticOnly,true);assert.deepEqual(result.omittedChecks,['text','client_file_tools']);assert.deepEqual(result.checks.map(x=>x.name),['uploaded_image']);assert.equal(result.passed,false);
 });

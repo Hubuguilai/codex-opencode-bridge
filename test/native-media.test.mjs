@@ -40,7 +40,10 @@ test('Plugin reuses native media class instances, preserves order and refuses mi
  const media={type:'media',media:new Asset()};
  const context={tools:{},system:[],options:{},messages:[{role:'user',content:[{type:'text',text:'seed'},media]}]};
  hooks.context(context);assert.equal(context.messages[0].content[1],media);assert.equal(context.messages[0].content[1].media.bytes(),'actual image');
+ assert.ok(context.system.some(part=>part.text.includes('Restrictions on filesystem access')));
  await hooks.prompt();assert.throws(()=>hooks.context({tools:{},system:[],options:{},messages:[]}),/NATIVE_IMAGE_ATTACHMENT_MISSING/);
+ fs.writeFileSync(path.join(root,'bridge-request.json'),JSON.stringify({requestId:'text-only',tools:[],messages:[{role:'user',content:[{type:'text',text:'hello'}]}]}));await hooks.prompt();
+ const plain={tools:{},system:[],options:{},messages:[]};hooks.context(plain);assert.ok(!plain.system.some(part=>part.text.includes('Restrictions on filesystem access')));
 });
 test('Tool image results retain call identity, interleaved content and image capability gate',()=>{
  const input=[{role:'user',content:'Inspect the file'},
@@ -68,4 +71,14 @@ test('Wire media diagnostics count native images without copying text, URLs or s
  assert.deepEqual(summary,{imageParts:2,inlineImages:1,remoteImages:1});
  assert.ok(!JSON.stringify(summary).includes('PRIVATE'));
  assert.deepEqual(wireImageCounts({input:[{role:'user',content:[{type:'input_image',image_url:'data:image/png;base64,PRIVATE'}]}]}),{imageParts:1,inlineImages:1,remoteImages:0});
+});
+import {wireImageIntegrity} from '../src/wire-media-diagnostics.mjs';
+test('Image integrity verifies bytes and ordering for both native and tool-result images',()=>{
+ const url='data:image/png;base64,'+data;
+ const source=[{content:[{type:'media',data},{type:'tool-result',result:{type:'content',value:[{type:'file',mime:'image/png',uri:url}]}}]}];
+ const body={messages:[{content:[{type:'image_url',image_url:{url}},{type:'image_url',image_url:{url}}]}]};
+ assert.deepEqual(wireImageIntegrity(body,source),{expectedImages:2,wireImages:2,exactBytesInOrder:true});
+ body.messages[0].content[1].image_url.url='data:image/png;base64,AAAA';assert.equal(wireImageIntegrity(body,source).exactBytesInOrder,false);
+ assert.equal(wireImageIntegrity({messages:[]},source).exactBytesInOrder,false);
+ assert.ok(!JSON.stringify(wireImageIntegrity(body,source)).includes(data));
 });

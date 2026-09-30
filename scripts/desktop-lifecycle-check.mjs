@@ -98,8 +98,8 @@ try{
     for(const name of fs.readdirSync(state).filter(x=>x.startsWith('work-'))){
      const wire=path.join(state,name,'bridge-wire-surface.json');
      if(fs.existsSync(wire)){
-      const {media}=JSON.parse(fs.readFileSync(wire));
-      fs.appendFileSync('generated/private-wire-media.jsonl',JSON.stringify({event,media})+'\n',{mode:0o600});
+      const {media,imageIntegrity}=JSON.parse(fs.readFileSync(wire));
+      fs.appendFileSync('generated/private-wire-media.jsonl',JSON.stringify({event,media,imageIntegrity})+'\n',{mode:0o600});
      }
     }
    }

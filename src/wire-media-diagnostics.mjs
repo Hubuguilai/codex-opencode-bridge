@@ -16,3 +16,22 @@ export function wireImageCounts(body){
  };
  visit(body.messages);visit(body.input);return counts;
 }
+
+// Compare in memory; persist only counts and the equality result, never hashes.
+export function wireImageIntegrity(body,messages){
+ const collect=(roots,native)=>{
+  const images=[];
+  const walk=part=>{
+   if(!part||typeof part!=='object')return;
+   if(Array.isArray(part)){for(const value of part)walk(value);return;}
+   if(native&&part.type==='media'&&typeof part.data==='string'){images.push(Buffer.from(part.data,'base64'));return;}
+   let url;
+   if(['image_url','input_image','image'].includes(part.type))url=part.image_url?.url??part.image_url??part.url;
+   else if(native&&part.type==='file'&&typeof part.mime==='string'&&part.mime.startsWith('image/'))url=part.uri;
+   if(url!==undefined){const match=typeof url==='string'&&/^data:image\/[^;,]+;base64,(.+)$/.exec(url);images.push(match?Buffer.from(match[1],'base64'):null);return;}
+   for(const key of ['content','output','value','result'])walk(part[key]);
+  };walk(roots);return images;
+ };
+ const expected=collect(messages,true),actual=collect(body.messages??body.input,false);
+ return {expectedImages:expected.length,wireImages:actual.length,exactBytesInOrder:expected.length===actual.length&&expected.every((bytes,i)=>bytes&&actual[i]&&bytes.equals(actual[i]))};
+}

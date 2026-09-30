@@ -39,10 +39,9 @@ node bin/bridge.mjs verify --live
 分别检查上传图片和工具返回图片。验证记录保存在安装目录的 `verification` 子目录，权限受保护。
 排障时可用 `verify --live --route bridge` 单独检查桥接服务。图片验证以模型本身的
 声明能力为准，不把 Router 调用其他模型的图片转述算成该模型的视觉能力。
-完整 Router 路径已连续通过三张 Muse 图片检查；之前两次失败仍保留，根因尚未确定，
-最新一次旧配置迁移后的测试中，两款模型文字/文件任务通过，但 Muse 上传图片时流中断，
-尚未运行到工具图片检查。[失败记录](receipts/legacy-profile-router-client-failure.json)已保留，
-目前不能承诺视觉任务稳定通过。
+最新完整 Router 测试中，两款模型的文字/文件任务、Muse 上传图片和实际工具返回
+图片均通过，并核对了图片字节完整性。[此前失败和最新记录](verification.md#image-byte-integrity-and-task-history-isolation)
+均已保留，不能据此承诺所有长对话视觉任务都可靠。
 工具返回图片检查要求实际调用 `view_image` 打开指定文件并准确识别图中内容；
 命令或 OCR 替代不算通过。该检查不代表真实桌面菜单、权限拒绝、完整工作流或
 长上下文已经验收。遇到账号权限或限流错误时，停止后续模型检查。

@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-30T05:02:31.781Z",
+  "model": "opencode/muse-spark-1.3-contributor-free",
+  "scope": "minimal real bridge image inputs; no actual Codex tools or GUI",
+  "checks": [
+    {
+      "name": "uploaded_image",
+      "httpStatus": 200,
+      "durationMs": 28326,
+      "completed": true,
+      "exactDigits": true,
+      "claimsMissingImage": false,
+      "imageIntegrity": {
+        "expectedImages": 1,
+        "wireImages": 1,
+        "exactBytesInOrder": true
+      },
+      "passed": true
+    },
+    {
+      "name": "tool_returned_image",
+      "httpStatus": 200,
+      "durationMs": 12978,
+      "completed": true,
+      "exactDigits": true,
+      "claimsMissingImage": false,
+      "imageIntegrity": {
+        "expectedImages": 1,
+        "wireImages": 1,
+        "exactBytesInOrder": true
+      },
+      "passed": true
+    }
+  ],
+  "warnings": [],
+  "sourceSha256": "4fd0f86cfc7c5953bbbd03b213b2e5e3bb093c1fab59270ce0f951855eb788de",
+  "passed": true,
+  "cleaned": true
+}
