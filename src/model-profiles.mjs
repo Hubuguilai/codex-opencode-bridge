@@ -10,9 +10,20 @@ export const MODEL_PROFILES = Object.freeze({
  'opencode/muse-spark-1.3-contributor-free':{name:'Muse Spark 1.3 Contributor Free',context:1048576,compact:891289,images:true,recursiveTools:'flatten',evidence:'uploaded and tool-result images verified; ten workflow scenarios passed on frozen source 3a096e9; near-1M text input tested'},
 });
 export function modelProfile(id){return MODEL_PROFILES[id];}
-export function modelCatalogEntry(id,template){
+export function validateModelOverrides(overrides={}){
+ if(!overrides||typeof overrides!=='object'||Array.isArray(overrides))throw Error('Invalid model context overrides.');
+ for(const [id,value] of Object.entries(overrides)){
+  if(!modelProfile(id)||!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(key=>!['contextWindow','autoCompact'].includes(key)))throw Error('Invalid model context override.');
+  if(!Number.isSafeInteger(value.contextWindow)||!Number.isSafeInteger(value.autoCompact)||value.contextWindow<2||value.autoCompact<1||value.autoCompact>=value.contextWindow)throw Error('Context override requires positive integer limits with compaction below context.');
+ }
+ return overrides;
+}
+export function modelCatalogEntry(id,template,override){
  const p=modelProfile(id);if(!p)throw new Error('Unknown model profile.');
- return {...template,slug:id,display_name:p.name+' (OpenCode Bridge)',description:p.evidence,
- context_window:p.context,max_context_window:p.context,auto_compact_token_limit:p.compact,
+ if(override)validateModelOverrides({[id]:override});
+ const context=override?.contextWindow??p.context,compact=override?.autoCompact??p.compact;
+ const description=p.evidence+(override?' User-requested context configuration; capacity is not certified.':'');
+ return {...template,slug:id,display_name:p.name+' (OpenCode Bridge)',description,
+ context_window:context,max_context_window:context,auto_compact_token_limit:compact,
  input_modalities:p.images?['text','image']:['text'],supports_reasoning_summaries:false};
 }

@@ -127,7 +127,7 @@ export async function updateRouterModels(directory,{models,api,restart=true,rest
  const receipt=JSON.parse(fs.readFileSync(recordFile));
  if(receipt.kind!=='bridge-router-registration'||receipt.planHash!==fingerprint(plan))fail('Invalid registration record.');
  const template=JSON.parse(fs.readFileSync(new URL('../examples/native-models.json',import.meta.url))).models[0];
- const additions=routerModelsFromCatalog(models,{models:models.map(id=>modelCatalogEntry(id,template))});
+ const additions=routerModelsFromCatalog(models,{models:models.map(id=>modelCatalogEntry(id,template,plan.modelOverrides?.[id]))});
  let entries=additions.map(x=>x.entry);
  if(restoreSelection){
   const oldPlan=JSON.parse(restoreSelection['router-plan.json']),oldReceipt=JSON.parse(restoreSelection['registration.json']);

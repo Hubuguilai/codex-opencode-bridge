@@ -125,3 +125,13 @@ are recognized from the pinned runtime’s structured error type, status and lim
 message patterns; unrecognized providers/languages remain `generation_failed`.
 Local busy, local authentication and runtime configuration failures also stop
 subsequent installed verification model checks.
+
+
+### Existing manual bridge without a managed record
+
+Use `migration-preflight` to check whether local Router source edits can be
+reconciled, and preserve the old service, provider route, credentials and custom
+model settings. Do not create ownership receipts by hand or use install to
+overwrite the old provider. The read-only source preflight and context-preserving
+preparation are migration prerequisites; transactional manual-service adoption
+is not implemented yet.

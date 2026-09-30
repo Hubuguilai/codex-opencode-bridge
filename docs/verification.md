@@ -804,3 +804,28 @@ then passed upgrade/rollback/model changes/removal and cleanup. These results
 cover the tested client path; they do not certify the original manual installation,
 Desktop selection, arbitrary long histories or sustained load. Prior failures
 remain available and the exact cause of their variability is not proven.
+
+
+## Legacy source preflight and context preservation
+
+The [read-only legacy source receipt](receipts/legacy-router-source-preflight.json)
+confirms the current manual Router uses the pinned baseline, and that its
+modified forwarder can be reconciled with the shipped repair without textual
+conflicts. Both source files remained unchanged. No code, service, model route
+or credential was adopted. Textual mergeability does not establish behavioral
+compatibility with unrelated local changes.
+
+Preparation now supports explicit validated context preferences used by migration
+code. They persist through model removal/re-addition and Router plan/publication
+updates, while image capabilities remain tied to the supported model profile.
+The description identifies these as user-requested, uncertified settings. The
+normal Big Pickle default remains 200k context / 160k compaction; preservation of
+an older 1M / 891289 configuration is not a new capacity claim.
+
+The [real isolated context-preservation lifecycle](receipts/legacy-context-managed-lifecycle.json)
+passed installation, repeated installation, profile refresh, upgrade/rollback,
+injected recovery and model removal/re-addition with Big Pickle kept at the
+explicit 1M / 891289 preference. Published Router metadata and prepared catalog
+retained the values and text-only capability. Native catalog and credential
+preservation passed; the service was removed afterwards. No inference or
+long-context capacity measurement occurred in this test.

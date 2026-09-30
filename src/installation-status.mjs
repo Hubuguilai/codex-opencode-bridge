@@ -13,7 +13,7 @@ export async function installationStatus({directory=path.join(os.homedir(),'.loc
  const add=(id,ok,message,next)=>checks.push({id,ok,message,...(!ok?{next}:{})});
  let record;
  try{record=JSON.parse(fs.readFileSync(path.join(root,'desktop-install.json')));}catch{
-  add('record',false,'No readable managed installation record.','Run install, or provide the original --directory.');return result;
+  add('record',false,'No readable managed installation record.','Provide the original --directory. For an existing manual bridge, run migration-preflight and preserve its configuration; otherwise run install.');return result;
  }
  if(record.kind!=='bridge-desktop-install'||record.prepared!==path.join(root,'prepared')||record.plan!==path.join(root,'router-plan')){
   add('record',false,'Installation record is inconsistent.','Preserve the record and diagnose ownership; do not overwrite it.');return result;

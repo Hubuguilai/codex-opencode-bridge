@@ -2,12 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {readConfig} from './config.mjs';
-import {modelProfile,modelCatalogEntry} from './model-profiles.mjs';
+import {modelProfile,modelCatalogEntry,validateModelOverrides} from './model-profiles.mjs';
 const files=['models.json','codex.config.toml','bridge-env.json'];
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 
 
-export function prepareDirectory(directory,{model,models,catalog,port=4396,upstreamPort=4397}={}){
+export function prepareDirectory(directory,{model,models,catalog,modelOverrides={},port=4396,upstreamPort=4397}={}){
+ validateModelOverrides(modelOverrides);
  const root=path.resolve(directory);
  const selected=models??[model??'opencode/space-bunny-free'];
  if(!Array.isArray(selected)||!selected.length||new Set(selected).size!==selected.length||selected.some(id=>!modelProfile(id)))throw new Error('Choose distinct documented models; arbitrary models require separate compatibility validation.');
@@ -19,7 +20,7 @@ export function prepareDirectory(directory,{model,models,catalog,port=4396,upstr
  const original=source?JSON.parse(source):{models:[]};
  if(!Array.isArray(original.models))throw new Error('Input catalog must contain a models array.');
  if(original.models.some(entry=>selected.includes(entry.slug)))throw new Error('Catalog already contains a selected model ID; refusing to replace its metadata.');
- const merged={...original,models:[...original.models,...selected.map(id=>modelCatalogEntry(id,template))]};
+ const merged={...original,models:[...original.models,...selected.map(id=>modelCatalogEntry(id,template,modelOverrides[id]))]};
  fs.mkdirSync(root,{recursive:true,mode:0o700});
  try{
   const bridgeEnv={BRIDGE_STATE_DIR:path.join(root,'state'),BRIDGE_MODE:'native-tools',BRIDGE_INTERNAL_TOOLS:'client-aliases',BRIDGE_TOOL_TRANSPORT:'direct',BRIDGE_MODELS:selected.join(','),BRIDGE_PORT:String(port),OPENCODE_PORT:String(upstreamPort),BRIDGE_IMAGE_MODELS:selected.filter(id=>modelProfile(id).images).join(','),BRIDGE_IMAGE_DETAIL_POLICY:'auto',BRIDGE_REASONING_SUMMARY_POLICY:'omit'};
@@ -30,7 +31,7 @@ export function prepareDirectory(directory,{model,models,catalog,port=4396,upstr
    'codex.config.toml':`# Dedicated configuration fragment; do not overwrite your normal Codex configuration.\nmodel_provider = "opencode_bridge"\nmodel = ${JSON.stringify(model)}\nmodel_catalog_json = ${JSON.stringify(path.join(root,'models.json'))}\nmodel_reasoning_effort = "default"\nmodel_reasoning_summary = "none"\nweb_search = "disabled"\n\n[model_providers.opencode_bridge]\nname = "OpenCode Bridge (experimental)"\nbase_url = "http://127.0.0.1:${port}/v1"\nwire_api = "responses"\nenv_key = "BRIDGE_TOKEN"\nrequires_openai_auth = false\nrequest_max_retries = 0\nstream_max_retries = 0\n\n[features]\napps = false\nmulti_agent = false\n`,
   };
   for(const [name,content]of Object.entries(contents))fs.writeFileSync(path.join(root,name),content,{mode:0o600,flag:'wx'});
-  const manifest={project:'codex-opencode-bridge',version:1,model,models:selected,files:Object.fromEntries(files.map(name=>[name,digest(contents[name])])),sourceCatalogUnchanged:!catalog||fs.readFileSync(catalog).equals(source)};
+  const manifest={project:'codex-opencode-bridge',version:1,model,models:selected,...(Object.keys(modelOverrides).length?{modelOverrides}:{}),files:Object.fromEntries(files.map(name=>[name,digest(contents[name])])),sourceCatalogUnchanged:!catalog||fs.readFileSync(catalog).equals(source)};
   fs.writeFileSync(path.join(root,'install-manifest.json'),JSON.stringify(manifest,null,2)+'\n',{mode:0o600,flag:'wx'});
   return {directory:root,model,models:selected,tokenPath:config.tokenPath,catalogPreserved:manifest.sourceCatalogUnchanged};
  }catch(error){fs.rmSync(root,{recursive:true,force:true});throw error;}

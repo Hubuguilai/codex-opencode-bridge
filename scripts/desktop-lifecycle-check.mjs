@@ -48,7 +48,8 @@ const prepareProfilePlan=(directory,options)=>{
  }
  return result;
 };
-const deps={ensureRouter,installRuntime,prepareDirectory,preparedEnvironment,installService,removeService,prepareRouterPlan:prepareProfilePlan,loadRouter,freePort,checkBridge,
+const prepareWithContext=(directory,options)=>prepareDirectory(directory,{...options,...(process.env.BRIDGE_CONTEXT_OVERRIDE_FIXTURE==='1'?{modelOverrides:{'opencode/big-pickle':{contextWindow:1048576,autoCompact:891289}}}: {})});
+const deps={ensureRouter,installRuntime,prepareDirectory:prepareWithContext,preparedEnvironment,installService,removeService,prepareRouterPlan:prepareProfilePlan,loadRouter,freePort,checkBridge,
  registerRouter:(dir,opts)=>registerRouter(dir,{...opts,restart:false}),
  unregisterRouter:(dir,opts)=>unregisterRouter(dir,{...opts,restart:false})};
 const options={directory:path.join(root,'installation'),routerRoot};
@@ -163,6 +164,12 @@ try{
  await assert.rejects(setDesktopModels({...options,models:['opencode/big-pickle']},{...modelDeps,checkBridge:async()=>{throw Error('Injected model recovery failure');}}),/recover-models/);
  assert.equal((await recoverDesktopModels(options,modelDeps)).restored,true);assert.deepEqual(await installedList(),both);receipt.checks.modelExplicitRecovery=true;
  assert.equal(createHash('sha256').update(fs.readFileSync(tokenPath)).digest('hex'),tokenHash);assert.equal(fs.readFileSync(source,'utf8'),JSON.stringify(native));receipt.checks.modelConfigurationPreserved=true;
+ if(process.env.BRIDGE_CONTEXT_OVERRIDE_FIXTURE==='1'){
+  const installedModel=api.users.readUserModels().find(x=>x.upstreamModel==='opencode/big-pickle');
+  assert.equal(installedModel.contextWindow,1048576);assert.equal(installedModel.autoCompact,891289);assert.deepEqual(installedModel.inputModalities,['text']);
+  const catalog=JSON.parse(fs.readFileSync(path.join(prepared,'models.json'))).models.find(x=>x.slug==='opencode/big-pickle');assert.equal(catalog.context_window,1048576);
+  receipt.checks.explicitContextPreservedAcrossLifecycle=true;
+ }
  receipt.passed=true;
 }catch(error){receipt.passed=false;receipt.error=error.message.replaceAll(root,'<temporary-workspace>');if(error.errors)receipt.causes=error.errors.map(x=>x.message.replaceAll(root,'<temporary-workspace>')); process.exitCode=1;}
 finally{

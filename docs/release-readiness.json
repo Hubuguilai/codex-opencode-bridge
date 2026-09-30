@@ -39,6 +39,8 @@
     "router_preparation_recovery": "verified_real_pinned_download_npm_failure_and_retry_without_client_setup",
     "router_setup_recovery": "incomplete_exit_retry_unit_tested_ambiguous_setup_crash_recovery_pending",
     "gateway_terminal_error_preservation": "managed_v1_to_v2_migration_and_actual_codex_fault_categories_verified",
-    "muse_direct_image_diagnostic": "minimal_fresh_codex_and_full_codex_sequence_passed_byte_integrity_verified_prior_failures_retained"
+    "muse_direct_image_diagnostic": "minimal_fresh_codex_and_full_codex_sequence_passed_byte_integrity_verified_prior_failures_retained",
+    "manual_router_source_preflight": "actual_pinned_modified_source_three_way_mergeable_original_files_unchanged_no_adoption",
+    "legacy_context_preference_preservation": "validated_and_real_isolated_lifecycle_publication_passed_no_capacity_claim"
   }
 }

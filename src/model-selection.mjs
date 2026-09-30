@@ -15,7 +15,7 @@ export function planModelSelection(directory,models){
  const template=JSON.parse(fs.readFileSync(new URL('../examples/native-models.json',import.meta.url))).models[0];
  const old=manifest.models??[manifest.model];
  if(catalog.models.some(x=>!old.includes(x.slug)&&models.includes(x.slug)))throw Error('A requested model already exists outside this managed selection.');
- const nextCatalog={...catalog,models:[...catalog.models.filter(x=>!old.includes(x.slug)),...models.map(id=>modelCatalogEntry(id,template))]};
+ const nextCatalog={...catalog,models:[...catalog.models.filter(x=>!old.includes(x.slug)),...models.map(id=>modelCatalogEntry(id,template,manifest.modelOverrides?.[id]))]};
  const nextEnv={...env,BRIDGE_MODELS:models.join(','),BRIDGE_IMAGE_MODELS:models.filter(id=>modelProfile(id).images).join(',')};
  const after={'models.json':JSON.stringify(nextCatalog,null,2)+'\n','bridge-env.json':JSON.stringify(nextEnv,null,2)+'\n',
  'codex.config.toml':before['codex.config.toml'].replace(/^model = .*$/m,'model = '+JSON.stringify(models[0]))};

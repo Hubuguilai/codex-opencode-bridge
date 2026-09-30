@@ -70,3 +70,20 @@ remain: bridge rollback/uninstall does not downgrade shared Router source.
 记录，保留原始备份后迁移；迁移中断可继续，未知改动不会被覆盖。升级会重新发布
 并重启 Router，使源码修复生效。桥接代码回退或卸载时保留共享 Router 的兼容修复，
 不会把旧 Router 源码覆盖回去。它不修复模型本身的图片识别能力。
+
+
+## Read-only preflight for modified manual installations
+
+`node bin/bridge.mjs migration-preflight --router-root /absolute/router` checks
+the pinned Git baseline and attempts a three-way merge in private temporary
+files. It reports source fingerprints, conflicts and whether original files
+remained unchanged. It never writes to the selected Router, changes its Git
+index, restarts services, reads credentials or adopts model registrations.
+A clean merge is only a source reconciliation result; behavioral compatibility,
+service ownership, credentials, model preferences and transaction recovery
+still require migration work. The current installer continues to refuse edited
+unowned source. This command is not a force-install bypass.
+
+中文版：`migration-preflight` 只读检查旧 Router 的源码合并条件。检测到冲突时
+不会向原文件写入冲突标记；检查通过也不代表已迁移。现有安装器仍不会直接接管
+有修改但没有归属记录的手工安装。
