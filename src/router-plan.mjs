@@ -50,6 +50,7 @@ export function routerModelsFromCatalog(models,preparedCatalog){
   // Keep capability claims tied to this model; do not spend a second model's
   // access to synthesize vision for text-only bridge routes.
   entry.visionBridge=false;
+  entry.bridgeStrictImages=true;
   return {entry,catalog:{...source,slug,display_name:displayName,description,priority:100+index}};
  });
 }

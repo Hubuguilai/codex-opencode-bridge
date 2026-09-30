@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
+import {ensureRouterCompatibility} from './router-compatibility.mjs';
 const pin=JSON.parse(fs.readFileSync(new URL('../runtime/router.json',import.meta.url)));
 const marker='.bridge-router-install.json';
 const save=(file,data)=>fs.writeFileSync(file,JSON.stringify(data,null,2)+'\n',{mode:0o600});
@@ -19,7 +20,7 @@ export function runDependency(command,args,{cwd,env=process.env,timeout=600000}=
  });
 }
 export async function ensureRouter(directory=path.join(os.homedir(),'.local/share/codex-router'),
- {run=runDependency,env=process.env,platform=process.platform}={}){
+ {run=runDependency,env=process.env,platform=process.platform,compatibility=ensureRouterCompatibility}={}){
  if(platform!=='darwin')throw new Error('Automatic Router installation currently targets macOS.');
  const root=path.resolve(directory),record=path.join(root,marker);
  if(fs.existsSync(root)){
@@ -30,7 +31,8 @@ export async function ensureRouter(directory=path.join(os.homedir(),'.local/shar
   }
   const manifest=JSON.parse(fs.readFileSync(path.join(root,'package.json')));
   if(manifest.name!==pin.packageName||!fs.existsSync(path.join(root,'src/model-overlay-publication.mjs')))throw new Error('Existing directory is not a compatible Codex Router; leaving it unchanged.');
-  return {root,reused:true,managed:fs.existsSync(record)};
+  const applied=compatibility(root);
+  return {root,reused:true,managed:fs.existsSync(record),compatibility:applied.id};
  }
  const parent=path.dirname(root);fs.mkdirSync(parent,{recursive:true,mode:0o700});
  const stage=fs.mkdtempSync(path.join(parent,'.bridge-router-download-'));
@@ -53,6 +55,8 @@ export async function ensureRouter(directory=path.join(os.homedir(),'.local/shar
   fs.renameSync(stage,root);moved=true;
   const receipt={kind:'bridge-managed-router',status:'installing',revision:pin.revision,phase:'node-dependencies'};save(record,receipt);
   await execute('npm',['ci','--omit=dev','--no-audit','--no-fund'],root);
+  receipt.phase='router-compatibility';save(record,receipt);
+  receipt.compatibility=compatibility(root).id;
   receipt.phase='router-setup';save(record,receipt);
   // Use the pinned upstream installer. It owns client-config backup/rollback;
   // no extra providers are selected and existing login files are not rewritten.

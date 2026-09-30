@@ -15,7 +15,7 @@ function fixture(t,{failSetup=false,wrongRevision=false}={}){
   if(args[0]==='src/setup.mjs'&&failSetup)return {status:1,stderr:'secret diagnostic'};
   return {status:0,stdout:''};
  };
- return {parent,root,calls,opts:{platform:'darwin',run}};
+ return {parent,root,calls,opts:{platform:'darwin',run,compatibility:()=>({id:'tested-separately'})}};
 }
 test('First-time Router uses pinned source and upstream idle setup, repeat does not overwrite',async t=>{
  const f=fixture(t);assert.equal((await ensureRouter(f.root,f.opts)).reused,false);

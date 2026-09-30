@@ -24,6 +24,7 @@ export async function verifyInstalled({directory=path.join(os.homedir(),'.local/
    target={name:'installed_bridge_direct_real_codex_client',baseUrl:`http://127.0.0.1:${env.BRIDGE_PORT}/v1`,token:fs.readFileSync(path.join(record.prepared,'state/local-token'),'utf8').trim(),models:record.models.map(model=>({id:model,model,entry:catalog.models.find(x=>x.slug===model)}))};
   }
   const report={date:new Date().toISOString(),kind:'installed-client-verification',codeReleaseSha256:code.id,route:target.name,desktopPickerVerified:false,routerForwardingVerified:false,models:[],passed:false};
+  if(target.compatibility)report.routerCompatibility=target.compatibility;
   const folder=path.join(root,'verification');fs.mkdirSync(folder,{recursive:true,mode:0o700});
   const receipt=path.join(folder,report.date.replaceAll(':','-')+'.json');save(receipt,report);
   for(const {model,entry,images,routerAdvertisesImages} of target.models){if(!entry)throw Error('Installed catalog is missing a model.');

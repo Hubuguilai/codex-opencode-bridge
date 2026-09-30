@@ -4,9 +4,10 @@ import path from 'node:path';
 import {preparedEnvironment} from './setup.mjs';
 import {verifyRelease} from './releases.mjs';
 import {serviceStatus} from './service.mjs';
+import {inspectRouterCompatibility} from './router-compatibility.mjs';
 
 // No provider inference, credential display or state mutations.
-export async function installationStatus({directory=path.join(os.homedir(),'.local/share/codex-opencode-bridge/desktop'),fetchImpl=fetch,inspectService=serviceStatus}={}){
+export async function installationStatus({directory=path.join(os.homedir(),'.local/share/codex-opencode-bridge/desktop'),fetchImpl=fetch,inspectService=serviceStatus,inspectCompatibility=inspectRouterCompatibility}={}){
  const root=path.resolve(directory),checks=[];
  const result={kind:'bridge-installation-status',readOnly:true,installed:false,checks,modelAccessVerified:false,desktopPickerVerified:false};
  const add=(id,ok,message,next)=>checks.push({id,ok,message,...(!ok?{next}:{})});
@@ -18,6 +19,8 @@ export async function installationStatus({directory=path.join(os.homedir(),'.loc
   add('record',false,'Installation record is inconsistent.','Preserve the record and diagnose ownership; do not overwrite it.');return result;
  }
  result.status=record.status;result.phase=record.phase;result.installed=record.status==='installed';
+ try{inspectCompatibility(record.routerRoot);add('router_compatibility',true,'Router compatibility source matches its recorded version.');}
+ catch{add('router_compatibility',false,'Required Router compatibility is missing, incomplete or edited.','Complete compatibility setup from the current release; preserve unknown Router edits.');}
  add('record',result.installed,'Installation state: '+record.status,record.modelChange?'Run recover-models before other changes.':record.upgrade?'Run recover-upgrade to restore the previous version before other changes.':record.status==='uninstalled'?'Run install to restore this bridge.':'Re-run install with the same options to resume a bridge-stage failure.');
  result.managedCodeRelease=Boolean(record.release);
  if(record.release){
@@ -44,6 +47,7 @@ export async function installationStatus({directory=path.join(os.homedir(),'.loc
  }catch{add('health',false,'Local bridge health check could not complete.','Check the recorded service and ports; do not start a duplicate service.');}
  try{
   const plan=JSON.parse(fs.readFileSync(path.join(record.plan,'router-plan.json')));
+  add('media_profiles',plan.models.every(x=>x.visionBridge===false&&x.bridgeStrictImages===true),'Registered model profiles require strict image handling.','Run models with the same desired model selection using the current release to refresh owned profiles.');
   const catalog=JSON.parse(fs.readFileSync(path.join(plan.routerState,'merged-models.json')));
   const visible=new Set(catalog.models.filter(x=>x.visibility==='list').map(x=>x.slug));
   const missing=plan.models.filter(x=>!visible.has(x.slug)).map(x=>x.slug);

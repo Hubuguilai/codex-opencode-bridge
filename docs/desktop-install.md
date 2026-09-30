@@ -3,7 +3,7 @@
 The unified command reuses an existing compatible Codex Router. When absent, it
 downloads the source revision pinned in `runtime/router.json`, installs its locked
 Node dependencies and invokes its own installer. Managed upgrades, model-set
-changes and recovery of a failed first-time Router setup are still pending. This is a development
+changes are implemented and isolated-tested; recovery of a failed first-time Router setup remains pending. This is a development
 candidate, not the complete README installation promised for the release.
 
 From the bridge checkout/package, on macOS:
@@ -69,7 +69,7 @@ Do not call the installation verified until those client checks actually pass.
 
 当前可用的统一安装命令会串起运行时、模型准备、后台服务和模型注册。它会
 复用已有兼容的 Codex Router；缺失时会下载固定版本并调用上游安装器。首次完整
-桌面安装尚未实测，升级、修改模型集合与 Router 首次安装失败的恢复尚未完成，
+桌面安装尚未实测。升级和修改模型集合已经通过隔离测试，Router 首次安装失败的恢复尚未完成，
 因此仍是开发候选。桥接安装阶段失败后可重新执行同一安装命令；程序会校验原文件、
 保留旧计划和备份，并继续配置。卸载后也可用同一命令重新安装。
 

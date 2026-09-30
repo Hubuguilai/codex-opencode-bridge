@@ -107,6 +107,16 @@ try{
    if(name==='tool_image')assert.ok(JSON.stringify(received.input).includes('image_probe'));
    receipt.routes.at(-1)[name+'BytesPreserved']=true;
   }
+ }else if(model.bridgeStrictImages===true){
+  const part={type:'input_image',image_url:'data:image/png;base64,'+verificationImage('123456').toString('base64')};
+  const samples={uploaded_image:[{role:'user',content:[part]}],tool_image:[{type:'function_call',call_id:'strict_image_probe',name:'view_image',arguments:'{}'},{type:'function_call_output',call_id:'strict_image_probe',output:[part]}]};
+  for(const [name,input]of Object.entries(samples))for(const endpoint of ['router','forwarder']){
+   received=undefined;
+   const direct=endpoint==='forwarder';
+   const rejected=await fetch(`http://127.0.0.1:${direct?4698:4696}/v1/responses`,{method:'POST',headers:{authorization:'Bearer '+(direct?internal:caller),'content-type':'application/json'},body:JSON.stringify({...body,model:direct?model.gatewayModel:model.slug,input}),signal:AbortSignal.timeout(10000)});
+   const error=await rejected.json();assert.equal(rejected.status,422);assert.equal(error.error.type,'bridge_image_input_unsupported');assert.equal(received,undefined,'Unsupported image reached upstream');
+   receipt.routes.at(-1)[endpoint+'_'+name+'RejectedBeforeUpstream']=true;
+  }
  }
  }
  Object.assign(receipt.checks,{modelMapped:true,toolNamespacePreserved:true,reasoningPreserved:true,callIdReturned:true});

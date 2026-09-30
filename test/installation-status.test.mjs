@@ -12,11 +12,13 @@ test('Status checks service and catalog without exposing tokens or claiming mode
  prepareDirectory(prepared,{models:['opencode/big-pickle']});fs.mkdirSync(plan);fs.mkdirSync(state);
  const code=stageRelease(path.join(directory,'releases'));
  fs.writeFileSync(path.join(directory,'desktop-install.json'),JSON.stringify({kind:'bridge-desktop-install',status:'installed',prepared,plan,release:code.directory}));
- fs.writeFileSync(path.join(plan,'router-plan.json'),JSON.stringify({routerState:state,models:[{slug:'model',displayName:'Big Pickle'}]}));
+ fs.writeFileSync(path.join(plan,'router-plan.json'),JSON.stringify({routerState:state,models:[{slug:'model',displayName:'Big Pickle',visionBridge:false,bridgeStrictImages:true}]}));
  fs.writeFileSync(path.join(state,'merged-models.json'),JSON.stringify({models:[{slug:'model',visibility:'list'}]}));
  const token=fs.readFileSync(path.join(prepared,'state/local-token'),'utf8').trim();
  const opts={directory,inspectService:()=>({installed:true,loaded:true,running:true}),fetchImpl:async(url,options)=>{assert.equal(options.headers.authorization,'Bearer '+token);assert.match(url,/127\.0\.0\.1/);return {ok:true,json:async()=>({ok:true})};}};
+ opts.inspectCompatibility=()=>({verified:true});
  const good=await installationStatus(opts);assert.equal(good.configurationReady,true);assert.equal(good.modelAccessVerified,false);assert.ok(!JSON.stringify(good).includes(token));
+ const missing=await installationStatus({...opts,inspectCompatibility:()=>{throw Error('missing');}});assert.equal(missing.configurationReady,false);assert.equal(missing.checks.find(x=>x.id==='router_compatibility').ok,false);
  fs.appendFileSync(path.join(code.directory,'src/config.mjs'),'edited');
  const corrupt=await installationStatus(opts);assert.equal(corrupt.configurationReady,false);assert.equal(corrupt.checks.find(x=>x.id==='code').ok,false);
  fs.writeFileSync(path.join(state,'merged-models.json'),JSON.stringify({models:[]}));

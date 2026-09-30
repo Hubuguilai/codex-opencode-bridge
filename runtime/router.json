@@ -2,5 +2,5 @@
   "repository": "https://github.com/duolahypercho/codex-router.git",
   "revision": "b90aa60e257bbcc33855aad7d43954c1a09b1311",
   "packageName": "codex-model-router",
-  "note": "Pinned source dependency. Existing installations are reused without checkout updates."
+  "note": "Pinned source dependency with shipped strict-image compatibility. Existing Git revisions are retained; exact supported source files receive a backed-up, recorded compatibility change. Unknown edits are refused."
 }

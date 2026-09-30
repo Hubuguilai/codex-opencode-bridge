@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 147 tests. This does not replace the pending
+The latest completed local unit suite has 155 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -592,3 +592,34 @@ matched six digits with no client tool events. Its [lifecycle receipt](receipts/
 also passed. This validates the isolated complete route with virtual vision disabled
 for these entries; it is not a causal proof for the earlier failures, a success-rate
 estimate, a test of the user's existing Desktop thread, or a clean-user certification.
+
+
+## Recorded strict-image Router compatibility
+
+The installer now applies `runtime/router-compatibility.json` through an exact-file
+hash check, private source backups and a durable partial-application record. Only
+bridge-owned model entries opt in with `bridgeStrictImages: true`; unrelated
+models retain upstream behavior. Unknown source edits are refused before source
+mutation. A changed backup or ownership record also stops automated work.
+
+The [strict-media protocol receipt](receipts/router-strict-media-protocol.json)
+verifies that both the Router frontend and direct API forwarder reject Big Pickle
+uploaded images and image tool results with HTTP 422, without any upstream request.
+Muse's two image representations retain exact bytes through the same components.
+This resolves the previous strict-rejection blocker for the tested newly managed
+routes. It does not update the user's pre-existing manual route or certify all
+unsupported audio/video/file transformations.
+
+A [real-client regression](receipts/router-strict-media-client-verification.json)
+through the actually published gateway configuration passed both models' text/file
+checks and Muse's random uploaded image. It records compatibility ID
+`strict-image-input-v1`, not unmodified upstream source. Its [lifecycle run](receipts/router-strict-media-client-lifecycle.json)
+passed and removed its isolated service. A subsequent [managed lifecycle run](receipts/router-strict-managed-lifecycle.json)
+exercised the additional compatibility preflight in model changes without inference.
+
+The 155-test unit suite includes interrupted source application/resumption,
+modified source/backup preservation, read-only compatibility inspection and
+refreshing older model capability profiles even when the chosen IDs are unchanged.
+The `models` command performs that profile refresh under its existing transaction
+and rollback mechanism. Actual migration of the original manual user service and
+a real older managed registration remain separate pending acceptance work.

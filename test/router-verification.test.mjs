@@ -4,11 +4,11 @@ import {routerVerificationRoute} from '../src/router-verification.mjs';
 function fixture(t){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'router-verify-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const plan=path.join(root,'plan');fs.mkdirSync(plan);const model='opencode/big-pickle',slug='opencode-native-bridge/'+model;
- fs.writeFileSync(path.join(plan,'router-plan.json'),JSON.stringify({models:[{upstreamModel:model,slug}]}));
+ fs.writeFileSync(path.join(plan,'router-plan.json'),JSON.stringify({models:[{upstreamModel:model,slug,bridgeStrictImages:true,visionBridge:false}]}));
  const secret=path.join(root,'caller-secret');fs.writeFileSync(secret,'test-private-caller-key-with-length',{mode:0o600});
  const catalog=path.join(root,'catalog.json');fs.writeFileSync(catalog,JSON.stringify({models:[{slug,visibility:'list',input_modalities:['text']}]}));
  const paths={CALLER_SECRET_PATH:secret,MERGED_CATALOG_PATH:catalog,PORTS:{router:49123}};
- let verified=false;const deps={load:async()=>({paths}),verify:()=>{verified=true;}};
+ let verified=false;const deps={load:async()=>({paths}),verify:()=>{verified=true;},compatibility:()=>({id:'test-compatible'})};
  return {root,secret,catalog,paths,deps,record:{plan,routerRoot:root,models:[model]},slug,get verified(){return verified;}};
 }
 test('Router verification uses the protected caller credential and actual published slug',async t=>{

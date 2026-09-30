@@ -38,6 +38,9 @@ node bin/bridge.mjs verify --live
 The installer reuses a compatible Router or downloads its pinned upstream source,
 installs a private OpenCode 2.0.18 runtime, prepares the two default models, starts
 a local service, checks its health, and registers the models through Router.
+It applies a shipped, version-checked Router compatibility change for strict image
+rejection on these routes, retaining protected original source backups. Unknown
+or edited Router versions are preserved and refused rather than patched blindly.
 Existing provider identities are not silently replaced. It does not restart Codex.
 See [the precise installer behavior and remaining gaps](docs/desktop-install.md).
 

@@ -6,7 +6,8 @@ import {serviceConfiguration,installService,removeService} from './service.mjs';
 import {verifyRelease} from './releases.mjs';
 import {checkIdle,waitStopped} from './desktop-upgrade.mjs';
 import {checkBridge,validateReceipt} from './desktop-install.mjs';
-const real={loadRouter,updateRouterModels,verifyRouterSelection,serviceConfiguration,installService,removeService,checkIdle,waitStopped,checkBridge};
+import {ensureRouterCompatibility} from './router-compatibility.mjs';
+const real={loadRouter,updateRouterModels,verifyRouterSelection,serviceConfiguration,installService,removeService,checkIdle,waitStopped,checkBridge,ensureRouterCompatibility};
 const defaultDirectory=()=>path.join(os.homedir(),'.local/share/codex-opencode-bridge/desktop');
 function read(root){if(fs.lstatSync(root).isSymbolicLink())throw Error('Installation directory must not be a symbolic link.');const r=JSON.parse(fs.readFileSync(path.join(root,'desktop-install.json')));validateReceipt(root,r);return r;}
 function serviceOptions(record,transaction){
@@ -43,10 +44,12 @@ export async function setDesktopModels({directory=defaultDirectory(),models}={},
   const api=await deps.loadRouter(original.routerRoot);deps.verifyRouterSelection(original.plan,{api});
   const router=captureRouterSelection(original.plan);
   if(JSON.stringify(JSON.parse(router['router-plan.json']).models.map(x=>x.upstreamModel))!==JSON.stringify(original.models))throw Error('Router and bridge model selections differ; diagnose before changing them.');
-  if(JSON.stringify(models)===JSON.stringify(original.models)){
+  const profilesCurrent=JSON.parse(router['router-plan.json']).models.every(model=>model.visionBridge===false&&model.bridgeStrictImages===true);
+  if(JSON.stringify(models)===JSON.stringify(original.models)&&profilesCurrent){
    await deps.checkBridge(original.prepared);return {updated:false,alreadyCurrent:true,models,modelAccessVerified:false};
   }
   await deps.checkIdle(original.prepared);
+  deps.ensureRouterCompatibility(original.routerRoot);
   const record={...original,status:'changing-models',phase:'stopping-service',modelChange:{kind:'bridge-model-change',original,files,router,node:service.node,servicePath:service.servicePath}};
   save(path.join(root,'desktop-install.json'),record);
   try{
