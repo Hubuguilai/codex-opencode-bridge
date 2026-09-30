@@ -12,7 +12,7 @@
     "english_chinese_readme_install_diagnostic_prompts": "written_current_commands_checked_clean_user_execution_pending",
     "clean_macos_install_from_readme": "pending",
     "real_desktop_picker_and_model_selection": "pending",
-    "current_source_full_client_workflows_each_primary_model": "pending",
+    "current_source_full_client_workflows_each_primary_model": "both_passed_10_of_10_frozen_commit_3a096e9_release_revision_reconciliation_pending",
     "uploaded_images": "verified_live_muse",
     "image_tool_results": "verified_live_muse_codex_view_image",
     "installed_lifecycle_restart_upgrade_uninstall": "pending",
@@ -25,6 +25,7 @@
     "pinned_router_bootstrap": "implemented_download_and_npm_verified_full_setup_pending",
     "bridge_install_resume_and_reinstall": "verified_live_real_launchd_publication_preservation",
     "muse_frozen_source_full_workflow": "passed_10_of_10_commit_3a096e9",
-    "read_only_installation_status": "implemented_unit_tested_no_inference"
+    "read_only_installation_status": "implemented_unit_tested_no_inference",
+    "big_pickle_frozen_source_full_workflow": "passed_10_of_10_commit_3a096e9"
   }
 }

@@ -77,7 +77,7 @@ compression threshold are not proof of reliable full-capacity reasoning.
 
 | Model | New-install context / auto-compression setting | Images | Evidence |
 | --- | --- | --- | --- |
-| Big Pickle | 200,000 / 160,000 tokens | Text only | Earlier source passed 10 workflow scenarios; current-source full revalidation is pending |
+| Big Pickle | 200,000 / 160,000 tokens | Text only | Ten workflow scenarios passed on frozen commit 3a096e9; see the [receipt](docs/receipts/big-pickle-frozen-workflows-20260930.json) |
 | Muse Spark 1.3 Contributor Free | 1,048,576 / 891,289 tokens | Uploaded images and client tool image results | Real Codex image/tool-result checks passed; ten workflow scenarios passed on frozen commit 3a096e9 |
 
 Muse also completed a single near-capacity marker-retrieval probe using 1,041,600

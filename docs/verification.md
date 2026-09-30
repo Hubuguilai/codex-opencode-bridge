@@ -43,7 +43,7 @@ not a production success-rate estimate or full GPT feature parity.
 | `opencode/ling-3.0-flash-fin-free` | Suite failed; separate short diagnostic reported provider HTTP 400, endpoint unavailable | Unavailable in this run |
 | `opencode/jev-1.13-free` | Absent from default runtime inventory; explicit temporary registration succeeded, but text generation returned provider HTTP 500 | Not verified; upstream failure |
 | `opencode/deepseek-v4-flash-free` | Absent from runtime inventory; repair failed before a client command | Not verified; do not confuse with paid/Go DeepSeek routes |
-| `opencode/muse-spark-1.3-contributor-free` | See newer image/capacity and standalone schema tests above | Partial live verification; complete workflow remains pending |
+| `opencode/muse-spark-1.3-contributor-free` | See newer image/capacity and standalone schema tests above | Ten-scenario frozen-source suite passed; see the newer full receipt below |
 | Attached user images | Muse only; see newer evidence above | Implemented and tested |
 | Image tool results | Muse: actual Codex `view_image` call and completed answer; see [receipt](receipts/muse-tool-image.json) | Verified targeted workflow |
 | Audio/PDF/video, hosted search, adjustable reasoning | Explicitly rejected | Unsupported |
@@ -399,3 +399,20 @@ requests retained the 180-second limit. Creation, follow-up, repair, command and
 patch denials, native patch create/update, cancellation, forced timeout and
 recovery all passed. Image checks are separate receipts. This certifies those
 fixtures on that source, not clean-machine setup or general GPT equivalence.
+
+
+## Big Pickle frozen-source full suite, 2026-09-30
+
+The [full receipt](receipts/big-pickle-frozen-workflows-20260930.json) passed all ten
+scenarios on the same immutable `3a096e9` source and source SHA as the Muse suite.
+There were no source changes during execution. Whole-turn and per-request budgets
+were 300 and 180 seconds respectively. File creation, same-thread continuation,
+repair, denied commands, native patch create/update/denial, cancellation, forced
+timeout and recovery all passed. The earlier exploratory timeout remains recorded.
+
+These two full suites exercise real Codex app-server tools and official OpenCode
+2.0.18, with client aliases enabled. They do not establish a clean Desktop install,
+GUI picker selection, signed-in GPT preservation, reboot, upgrade, long-context
+compression or general model reliability. Later installer and documentation changes
+are not included in this exact source certificate; final release reconciliation
+remains required. Big Pickle remains text-only.
