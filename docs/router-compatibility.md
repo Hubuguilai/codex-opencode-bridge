@@ -116,3 +116,34 @@ recovery does not by itself certify recovery from process termination.
 中文版：已实现并隔离验证旧路由接管组件，保留凭据和上下文偏好，发布失败可恢复。
 完整旧服务迁移仍未接入安装命令；本组件测试不代表当前电脑已完成迁移，也不代表
 进程意外终止、真实登录状态或桌面菜单验收通过。
+
+## Explicit reconciliation of locally modified source
+
+The internal `reconcileRouterSource` component applies a previously inspected
+three-way merge on the pinned Git revision. It stores private original files and
+a durable reconciliation intent before applying the compatibility repair. Normal
+compatibility inspection, repeated installation and same-version upgrade then
+recognize this explicitly adopted source. They reconstruct the expected merge
+from the pinned ancestor, shipped repair and saved original customization, rather
+than trusting an arbitrary replacement-source hash. Git HEAD and index stay intact.
+
+Stale preflight, overlapping edits, changed original evidence, symbolic links,
+subsequent unrecorded source edits and a different compatibility version stop the
+operation. A future repair version requires a deliberate reconciliation upgrade;
+the current implementation does not silently reinterpret old customizations.
+Both exception interruption and a real SIGKILL between source writes are covered
+by recovery tests, including stale-lock recovery. This is process interruption
+coverage, not a power-loss durability claim.
+
+A [rehearsal on a disposable copy](receipts/source-reconciliation.json) of the
+maintainer's actual two compatibility files reproduced the proposed hashes,
+retained original customization and passed syntax/repeat/recovery checks. The
+active source was unchanged and no service restarted. This does not certify
+behavior of every other local modification. Full manual-service migration still
+needs to coordinate source adoption, new-service health, route cutover, Router
+restart, fallback and old-service retirement. No complete migration CLI is yet
+exposed.
+
+中文版：显式源码迁移组件已能保留本地修改并应用兼容修复，普通兼容检查可识别
+迁移后的源码；真实强制终止后的恢复测试也已通过。当前电脑的运行源码仍未修改，
+完整服务迁移和真实桌面验收仍待完成。

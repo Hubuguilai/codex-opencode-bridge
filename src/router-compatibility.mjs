@@ -1,5 +1,6 @@
 import fs from 'node:fs';import path from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
+import {reconciledRouterSpec} from './router-reconciled-spec.mjs';
 import {acquireInstallLock} from './install-state.mjs';
 const shipped=JSON.parse(fs.readFileSync(new URL('../runtime/router-compatibility.json',import.meta.url)));
 const hash=value=>createHash('sha256').update(value).digest('hex');
@@ -9,6 +10,7 @@ function atomic(file,bytes,mode=0o600){const temp=file+'.'+randomUUID()+'.tmp';t
 const save=(file,value)=>atomic(file,JSON.stringify(value,null,2)+'\n');
 export function inspectRouterCompatibility(root,{spec=shipped}={}){
  root=path.resolve(root);directory(root);directory(path.join(root,'src'));
+ spec=reconciledRouterSpec(root,spec);
  const folder=path.join(root,'.bridge-router-compatibility');directory(folder);
  const recordFile=path.join(folder,'record.json');regular(recordFile);
  const record=JSON.parse(fs.readFileSync(recordFile));
@@ -23,6 +25,7 @@ export function inspectRouterCompatibility(root,{spec=shipped}={}){
 // is preserved; no fuzzy patching and no unrecorded developer-machine changes.
 export function ensureRouterCompatibility(root,{spec=shipped,afterWrite=()=>{}}={}){
  root=path.resolve(root);directory(root);directory(path.join(root,'src'));
+ spec=reconciledRouterSpec(root,spec);
  const folder=path.join(root,'.bridge-router-compatibility'),recordFile=path.join(folder,'record.json');
  if(fs.existsSync(folder))directory(folder);
  else fs.mkdirSync(folder,{mode:0o700});

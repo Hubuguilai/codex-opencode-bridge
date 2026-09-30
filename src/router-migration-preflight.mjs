@@ -4,7 +4,7 @@ const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 function git(root,args){return spawnSync('git',['-C',root,...args],{encoding:null,maxBuffer:16*1024*1024,timeout:10000});}
 // Read-only source reconciliation. A clean merge is not authorization to adopt
 // a service or proof that unrelated modifications are behaviorally compatible.
-export function routerMigrationPreflight({routerRoot=path.join(os.homedir(),'.local/share/codex-router')}={}, {spec=shipped}={}){
+export function routerMigrationPreflight({routerRoot=path.join(os.homedir(),'.local/share/codex-router')}={}, {spec=shipped,onMerged=()=>{}}={}){
  const root=path.resolve(routerRoot),report={kind:'bridge-router-migration-preflight',readOnly:true,sourceMergeable:false,migrationImplemented:false,checks:[]};
  if(fs.lstatSync(root).isSymbolicLink()||!fs.lstatSync(root).isDirectory())throw Error('Router checkout must be a real directory.');
  const revision=git(root,['rev-parse','HEAD']);
@@ -27,6 +27,7 @@ export function routerMigrationPreflight({routerRoot=path.join(os.homedir(),'.lo
    report.checks.push({file:item.path,locallyModified:hash(current)!==item.beforeSha256,sourcePreserved:unchanged,
     currentSha256:hash(current),mergeable:merged.status===0,...(merged.status===0?{proposedSha256:hash(merged.stdout)}:{reason:'overlapping_changes_or_merge_error'})});
    if(!unchanged)throw Error('Router source changed during preflight; repeat the read-only check.');
+   if(merged.status===0)onMerged({path:item.path,original:current,patched:merged.stdout});
   }
   report.sourceMergeable=report.checks.every(x=>x.mergeable&&x.sourcePreserved);
   report.next=report.sourceMergeable?'Source changes can be reconciled. Service ownership, credentials, model overrides, behavioral tests and transactional migration are still required.':'Preserve the installation and resolve source conflicts before migration.';

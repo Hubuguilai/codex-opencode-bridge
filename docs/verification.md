@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 197 tests. This does not replace the pending
+The latest completed local unit suite has 203 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -844,3 +844,14 @@ status probe to exercise signed-in catalog publication without account secrets.
 This is not evidence of real signed-in GPT or Desktop picker preservation.
 [Scoped receipt](receipts/legacy-route-adoption.json). Full service migration and
 process-crash recovery remain pending.
+
+## Modified-source reconciliation — 2026-09-30
+
+Six additional tests cover explicit merge application, preservation of local edits
+and Git index/HEAD, same-version recognition, conflict/stale-preflight refusal,
+corrupted evidence, unsupported future compatibility, interrupted writes, and
+recovery after a child process is killed with SIGKILL. A disposable checkout with
+the actual current compatibility-file customizations also passed merge, syntax,
+interruption/resume and repeated compatibility inspection.
+[Scoped receipt](receipts/source-reconciliation.json). These tests do not restart
+the active Router or certify actual service migration or all local customizations.

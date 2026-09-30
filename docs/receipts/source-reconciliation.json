@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-30T05:38:09.194Z",
+  "baseRevision": "b90aa60e257bbcc33855aad7d43954c1a09b1311",
+  "sourceIsolated": true,
+  "activeSourceUnchanged": true,
+  "servicesRestarted": false,
+  "modelRequests": 0,
+  "checks": {
+    "reconciliationApplied": true,
+    "originalCustomizationBackedUp": true,
+    "interruptedWriteResumed": true,
+    "ordinaryCompatibilityRepeat": true,
+    "patchedSyntaxValid": true
+  },
+  "files": [
+    {
+      "file": "src/router.mjs",
+      "locallyModified": false,
+      "sourcePreserved": true,
+      "currentSha256": "155ab693b3e147ecc450c0057a3af81941f4c0b504f088dc5f47978ec2df3f54",
+      "mergeable": true,
+      "proposedSha256": "983a6ba9dfbc8be6e82dc225b09e055c80d50bef86957112d59a4ffb7ad24207"
+    },
+    {
+      "file": "src/api-forwarder.mjs",
+      "locallyModified": true,
+      "sourcePreserved": true,
+      "currentSha256": "c83688aa24b77e210260ccb6296646b8637c85c8ec8bdc23f42e6f03cd99859e",
+      "mergeable": true,
+      "proposedSha256": "f92a709feb0aef1f7dc2372d5148c8a3b66bad12e7f12db64715278d9e615d72"
+    }
+  ],
+  "scope": "Disposable copy of the current two compatibility source files. No service cutover, actual client or behavioral certification of all customizations."
+}
