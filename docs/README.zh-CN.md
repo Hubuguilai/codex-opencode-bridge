@@ -61,7 +61,7 @@ OpenCode 模型访问权限。保留原有 GPT、其他供应商和登录状态�
 | 模型 | 新安装的上下文 / 自动压缩阈值 | 图片 | 当前证据 |
 | --- | --- | --- | --- |
 | Big Pickle | 200,000 / 160,000 tokens | 仅文本 | 较早源码通过十项工作流；当前源码整套复验待完成 |
-| Muse Spark 1.3 Contributor Free | 1,048,576 / 891,289 tokens | 上传图片、工具返回图片 | 真实 Codex 图片检查通过；当前源码整套工作流待完成 |
+| Muse Spark 1.3 Contributor Free | 1,048,576 / 891,289 tokens | 上传图片、工具返回图片 | 真实 Codex 图片检查通过；固定提交 3a096e9 的十项工作流全部通过 |
 
 Muse 完成过一次总计 1,041,600 tokens 的近容量标记检索测试。它不代表持续负载、
 并发、复杂长文推理或精确溢出边界已经通过验证。见[容量记录](muse-capacity.md)和
@@ -77,9 +77,11 @@ Muse 完成过一次总计 1,041,600 tokens 的近容量标记检索测试。它
 
 ```sh
 node bin/bridge.mjs doctor
+node bin/bridge.mjs status
 ```
 
-这是只读依赖检查，不是完整安装验收。它通过 PATH/OPENCODE_BIN 查找 OpenCode；
+`doctor` 是只读依赖检查，`status` 汇总受管理安装的记录、服务健康和模型目录。
+它们不调用模型，也不等于完整安装验收。找不到新安装器的记录不代表旧版手动配置已损坏。它通过 PATH/OPENCODE_BIN 查找 OpenCode；
 如果使用独立管理的运行时，需要结合安装记录里的路径判断，不能把“PATH 中未找到”
 直接当作模型不可用。见[故障说明](troubleshooting.md)。
 

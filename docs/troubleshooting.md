@@ -24,6 +24,17 @@ errors; some upstream generation failures still use a broad category.
 
 ## Inspect an installed bridge
 
+```sh
+node bin/bridge.mjs status
+```
+
+Add the original `--directory` for a custom installation. This reads the managed
+record and summarizes preparation integrity, service state, local health and
+published models without displaying credentials or performing inference. It does
+not adopt older manual installations; a missing record means that managed state
+was not found, not that every bridge on the computer is unavailable.
+
+
 The installation record is `desktop-install.json` under the selected installation
 directory. It contains paths and phase information, not the bridge token. Use its
 `prepared` path with:

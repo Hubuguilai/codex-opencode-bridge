@@ -78,7 +78,7 @@ compression threshold are not proof of reliable full-capacity reasoning.
 | Model | New-install context / auto-compression setting | Images | Evidence |
 | --- | --- | --- | --- |
 | Big Pickle | 200,000 / 160,000 tokens | Text only | Earlier source passed 10 workflow scenarios; current-source full revalidation is pending |
-| Muse Spark 1.3 Contributor Free | 1,048,576 / 891,289 tokens | Uploaded images and client tool image results | Real Codex image/tool-result checks passed; full current-source workflow suite remains pending |
+| Muse Spark 1.3 Contributor Free | 1,048,576 / 891,289 tokens | Uploaded images and client tool image results | Real Codex image/tool-result checks passed; ten workflow scenarios passed on frozen commit 3a096e9 |
 
 Muse also completed a single near-capacity marker-retrieval probe using 1,041,600
 total tokens. That does not certify sustained load, concurrent use, complex
@@ -96,9 +96,13 @@ See [security boundaries](docs/security.md) and [tool semantics](docs/client-ali
 
 ```sh
 node bin/bridge.mjs doctor
+node bin/bridge.mjs status
 ```
 
-This read-only command checks prerequisites, not the complete installation. Its
+These commands are read-only. `doctor` checks prerequisites; `status` checks a
+managed installation record, service health and published model entries. Neither
+performs model inference. A missing managed record does not prove an older manual
+installation is broken. Its
 OpenCode lookup uses PATH/OPENCODE_BIN; it may not find a separately managed runtime
 unless given its recorded path. The diagnostic Prompt below covers that distinction.
 See [error meanings and recovery](docs/troubleshooting.md).

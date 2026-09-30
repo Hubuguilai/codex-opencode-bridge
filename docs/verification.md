@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 116 tests. This does not replace the pending
+The latest completed local unit suite has 121 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -388,3 +388,14 @@ both per-request and whole-turn deadlines; an explicit
 `BRIDGE_ACCEPTANCE_TURN_TIMEOUT_MS=300000` may allow a multi-request tool turn five
 minutes without changing the production per-request timeout. The old failure is
 retained; increasing a deadline does not retroactively make it pass.
+
+
+## Muse frozen-source full suite, 2026-09-30
+
+The [full receipt](receipts/muse-frozen-workflows-20260930.json) passed all ten
+scenarios against the exported source at `3a096e9e011c6ba59dd760c7de036833f20b9d94`.
+Source remained unchanged. Whole-turn budget was 300 seconds; individual model
+requests retained the 180-second limit. Creation, follow-up, repair, command and
+patch denials, native patch create/update, cancellation, forced timeout and
+recovery all passed. Image checks are separate receipts. This certifies those
+fixtures on that source, not clean-machine setup or general GPT equivalence.

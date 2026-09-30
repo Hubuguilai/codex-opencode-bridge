@@ -23,6 +23,8 @@
     "router_registration_component": "real_isolated_catalog_publication_verified_pinned_upstream",
     "unified_installer_existing_router": "verified_real_service_publication_in_isolated_client_state",
     "pinned_router_bootstrap": "implemented_download_and_npm_verified_full_setup_pending",
-    "bridge_install_resume_and_reinstall": "verified_live_real_launchd_publication_preservation"
+    "bridge_install_resume_and_reinstall": "verified_live_real_launchd_publication_preservation",
+    "muse_frozen_source_full_workflow": "passed_10_of_10_commit_3a096e9",
+    "read_only_installation_status": "implemented_unit_tested_no_inference"
   }
 }

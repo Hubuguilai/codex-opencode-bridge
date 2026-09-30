@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "node bin/bridge.mjs serve",
-    "test": "node --test",
+    "test": "node --test test/*.test.mjs",
     "test:package": "node scripts/package-check.mjs",
     "check": "node scripts/check.mjs",
     "smoke": "node scripts/smoke.mjs",
