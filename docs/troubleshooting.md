@@ -73,3 +73,18 @@ credentials or private conversations are not needed in an issue report.
 
 图片故障必须按图片输入方式复现。直接上传图片能用，不代表 `view_image` 返回的
 图片也能用；反之亦然。完成错误定位后应重试原失败方式，而不是只测试一句问候。
+
+
+### Upgrade stopped or failed
+
+Finish model tasks before `upgrade` or `rollback`; an active request blocks switching.
+A failed new service health check normally restores the previous version. If recovery
+also fails or the upgrade process was interrupted, use `recover-upgrade` with the
+original installation directory before install/uninstall. Its durable record retains
+the original version selection. Do not delete that record or overwrite release files.
+Inspect private service logs if restoration still cannot start the old service.
+
+`status` distinguishes an unfinished upgrade and code-integrity failure from model
+access failure. A healthy restored service still needs an actual model task check.
+Legacy installations without an independent managed release currently require
+migration; the upgrade command refuses them rather than inferring an old code copy.

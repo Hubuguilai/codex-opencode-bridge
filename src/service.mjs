@@ -19,6 +19,18 @@ function context(directory,{home=os.homedir(),platform=process.platform,uid=proc
  return {prepared,label,root,plist,receipt:path.join(root,'service.json'),target:`gui/${uid}/${label}`,domain:`gui/${uid}`,run};
 }
 function command(c,args){return c.run('launchctl',args,{encoding:'utf8',timeout:15000});}
+
+async function bootstrap(c){
+ // launchd can acknowledge bootout before it permits the same label to be
+ // bootstrapped again. Retry only its transient EIO response, never provider calls.
+ for(let attempt=0;attempt<20;attempt++){
+  const result=command(c,['bootstrap',c.domain,c.plist]);
+  if(result.status===0)return;
+  if(result.status!==5||attempt===19)throw Error('macOS could not load the bridge service (launchctl status '+result.status+').');
+  await new Promise(resolve=>setTimeout(resolve,250));
+ }
+}
+
 function owned(c){
  let receipt;try{receipt=JSON.parse(fs.readFileSync(c.receipt));}catch{fail('No managed service record; refusing to change this service.');}
  if(receipt.kind!=='codex-opencode-bridge-service'||receipt.prepared!==c.prepared||receipt.plist!==c.plist)fail('Invalid service ownership record.');
@@ -43,7 +55,7 @@ export async function installService(directory,{binary,node=process.execPath,cli
   const receipt=owned(c);
   if(receipt.binary!==binary||receipt.node!==node||receipt.cli!==entrypoint)fail('Service paths changed; stop and remove the managed service before reinstalling.');
   const status=serviceStatus(directory,options);
-  if(!status.loaded&&command(c,['bootstrap',c.domain,c.plist]).status!==0)fail('Could not start the existing managed service.');
+  if(!status.loaded)await bootstrap(c);
   return {...serviceStatus(directory,options),reused:true};
  }
  if(fs.existsSync(c.plist))fail('A service file already exists without ownership; leaving it unchanged.');
@@ -54,10 +66,10 @@ export async function installService(directory,{binary,node=process.execPath,cli
  const environment={PATH:env.PATH||'/usr/bin:/bin:/usr/sbin:/sbin',OPENCODE_BIN:binary};
  const content=`<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>Label</key><string>${xml(c.label)}</string><key>ProgramArguments</key><array>${args.map(x=>`<string>${xml(x)}</string>`).join('')}</array><key>EnvironmentVariables</key><dict>${Object.entries(environment).map(([k,v])=>`<key>${k}</key><string>${xml(v)}</string>`).join('')}</dict><key>RunAtLoad</key><true/><key>KeepAlive</key><dict><key>SuccessfulExit</key><false/></dict><key>ThrottleInterval</key><integer>10</integer><key>StandardOutPath</key><string>${xml(path.join(c.root,'service.log'))}</string><key>StandardErrorPath</key><string>${xml(path.join(c.root,'error.log'))}</string></dict></plist>\n`;
  fs.writeFileSync(c.plist,content,{flag:'wx',mode:0o600});
- const receipt={kind:'codex-opencode-bridge-service',prepared:c.prepared,plist:c.plist,binary,node,cli:entrypoint,sha256:digest(content)};
+ const receipt={kind:'codex-opencode-bridge-service',prepared:c.prepared,plist:c.plist,binary,node,cli:entrypoint,servicePath:environment.PATH,sha256:digest(content)};
  try{
   fs.writeFileSync(c.receipt,JSON.stringify(receipt,null,2)+'\n',{flag:'wx',mode:0o600});
-  if(command(c,['bootstrap',c.domain,c.plist]).status!==0)fail('macOS could not load the bridge service. Check the diagnostic logs; client configuration is unchanged.');
+  await bootstrap(c);
  }catch(error){
   // No pre-existing service is touched. Preserve logs for diagnosis.
   command(c,['bootout',c.target]);fs.rmSync(c.plist,{force:true});fs.rmSync(c.receipt,{force:true});throw error;
@@ -71,3 +83,5 @@ export function removeService(directory,options={}){
  fs.unlinkSync(c.plist);fs.unlinkSync(c.receipt);
  return {removed:true,logsPreserved:true,preparationPreserved:true};
 }
+
+export function serviceConfiguration(directory,options={}){return {...owned(context(directory,options))};}

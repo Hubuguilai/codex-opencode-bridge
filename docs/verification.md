@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 125 tests. This does not replace the pending
+The latest completed local unit suite has 132 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -425,8 +425,7 @@ release directory. The service entrypoint points there rather than at the mutabl
 checkout. Repeat installation verifies and retains the chosen release. Edited or
 symlinked release files fail verification without being overwritten; older receipts
 retain their legacy service paths pending explicit migration. Status checks verify
-release integrity separately from service health. This is a foundation for upgrades,
-not yet an upgrade/rollback command.
+release integrity separately from service health. This provides the version-selection foundation for the upgrade commands described below.
 
 [The real lifecycle receipt](receipts/desktop-release-lifecycle.json) verifies the
 recorded service entrypoint uses the independent release, then repeats installation,
@@ -435,3 +434,33 @@ the local token and adopted catalog source, and cleans up its test service. This
 uses isolated client state and real macOS launchd; it does not restart the shared
 Router, call models, verify a GUI picker or certify clean-machine installation.
 The receipt identifies the captured code copy by its content hash.
+
+
+## Health-checked upgrade, rollback and interrupted-upgrade recovery
+
+`upgrade`, `rollback` and `recover-upgrade` now journal the original installation
+before stopping its service. Upgrade selects a separately verified code release
+and pinned OpenCode runtime; rollback retains both versions. New startup failure
+restores the previous installation and checks its health. Recovery failure keeps
+the journal for an explicit retry. Active requests block a normal upgrade. Finish
+client tasks first: the health check is not an atomic ban on new requests.
+
+The [real lifecycle test](receipts/desktop-upgrade-lifecycle.json) passed upgrade,
+rollback, injected startup-check failure with automatic restoration, and injected
+recovery-check failure followed by explicit recovery. Tokens, model configuration
+and adopted native catalog source remained intact. The candidate differs by a
+harmless source marker; this verifies service/version lifecycle, not new model
+behavior or arbitrary future schema migrations. The test did not call providers
+or restart the shared Router service.
+
+The [initial negative receipt](receipts/desktop-upgrade-launchd-failure.json) records
+a rapid rollback failing during macOS service bootstrap. Explicit recovery later
+succeeded. The service installer now retries only launchctl's transient status 5
+for a bounded interval; it never retries model generation. The later full real
+lifecycle passed. A separate subprocess test kills the upgrade driver with SIGKILL
+after the stopping callback and verifies journal recovery with simulated services;
+it is not a real launchd crash-timing certificate.
+
+Legacy service migration, shared Router upgrade and configuration-format migrations
+remain pending. Clean-machine installation, actual Desktop selection, reboot and
+post-upgrade model workflows still require their own acceptance evidence.

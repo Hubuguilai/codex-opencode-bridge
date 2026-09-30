@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-30T02:48:41.500Z",
+  "isolatedClientState": true,
+  "realLaunchd": true,
+  "realPublication": true,
+  "routerServiceRestart": false,
+  "modelRequests": 0,
+  "checks": {
+    "installHealthyAndPublished": true,
+    "independentCodeRelease": true,
+    "repeat": true,
+    "uninstall": true,
+    "reinstall": true,
+    "healthFailureResume": true,
+    "tokenPreserved": true,
+    "nativeSourcePreserved": true,
+    "upgrade": true
+  },
+  "codeReleaseSha256": "c78fbfda2577aad4e3d223f60c5871c18d5b5bebc049e92a75632dd424fd140f",
+  "passed": false,
+  "error": "Upgrade failed and automatic recovery did not complete. Preserve installation records; run recover-upgrade.",
+  "causes": [
+    "macOS could not load the bridge service. Check the diagnostic logs; client configuration is unchanged.",
+    "macOS could not load the bridge service. Check the diagnostic logs; client configuration is unchanged."
+  ],
+  "cleanup": false
+}

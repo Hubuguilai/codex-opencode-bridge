@@ -11,7 +11,8 @@ if(!process.env.BRIDGE_LIFECYCLE_CHILD){
  process.exit(result.status??1);
 }
 const {installDesktop,uninstallDesktop,checkBridge}=await import('../src/desktop-install.mjs');
-const {verifyRelease}=await import('../src/releases.mjs');
+const {upgradeDesktop,recoverDesktopUpgrade}=await import('../src/desktop-upgrade.mjs');
+const {stageRelease,verifyRelease}=await import('../src/releases.mjs');
 const {installRuntime}=await import('../src/runtime-install.mjs');
 const {ensureRouter}=await import('../src/router-install.mjs');
 const {prepareDirectory,preparedEnvironment}=await import('../src/setup.mjs');
@@ -64,8 +65,27 @@ try{
  assert.equal((await installDesktop(options,deps)).resumed,true);receipt.checks.healthFailureResume=true;
  assert.equal(createHash('sha256').update(fs.readFileSync(tokenPath)).digest('hex'),tokenHash);receipt.checks.tokenPreserved=true;
  assert.equal(fs.readFileSync(source,'utf8'),JSON.stringify(native));receipt.checks.nativeSourcePreserved=true;
+ // Real service version switch: candidate differs only by a harmless source marker.
+ const current=JSON.parse(fs.readFileSync(path.join(options.directory,'desktop-install.json')));
+ const candidate=path.join(root,'candidate');fs.cpSync(current.release,candidate,{recursive:true});
+ fs.appendFileSync(path.join(candidate,'src/config.mjs'),'\n// lifecycle upgrade candidate\n');
+ const upgradeDeps={stageRelease:base=>stageRelease(base,{source:candidate})};
+ assert.equal((await upgradeDesktop(options,upgradeDeps)).upgraded,true);
+ const newer=JSON.parse(fs.readFileSync(path.join(options.directory,'desktop-install.json')));
+ assert.notEqual(newer.release,current.release);await checkBridge(prepared);receipt.checks.upgrade=true;
+ assert.equal((await upgradeDesktop({...options,rollback:true})).rolledBack,true);await checkBridge(prepared);
+ assert.equal(JSON.parse(fs.readFileSync(path.join(options.directory,'desktop-install.json'))).release,current.release);receipt.checks.rollback=true;
+ const beforeFailure=fs.readFileSync(path.join(options.directory,'desktop-install.json'),'utf8');
+ let failOnce=true;
+ await assert.rejects(upgradeDesktop(options,{...upgradeDeps,checkBridge:async dir=>{await checkBridge(dir);if(failOnce){failOnce=false;throw Error('Injected upgrade health failure');}}}),/previous version was restored/);
+ assert.equal(fs.readFileSync(path.join(options.directory,'desktop-install.json'),'utf8'),beforeFailure);await checkBridge(prepared);receipt.checks.failedUpgradeRestored=true;
+ await assert.rejects(upgradeDesktop(options,{...upgradeDeps,checkBridge:async dir=>{await checkBridge(dir);throw Error('Injected recovery health failure');}}),/recover-upgrade/);
+ assert.equal((await recoverDesktopUpgrade(options)).restored,true);await checkBridge(prepared);
+ assert.equal(fs.readFileSync(path.join(options.directory,'desktop-install.json'),'utf8'),beforeFailure);receipt.checks.explicitUpgradeRecovery=true;
+ assert.equal(createHash('sha256').update(fs.readFileSync(tokenPath)).digest('hex'),tokenHash);
+ assert.equal(fs.readFileSync(source,'utf8'),JSON.stringify(native));receipt.checks.upgradeConfigurationPreserved=true;
  receipt.passed=true;
-}catch(error){receipt.passed=false;receipt.error=error.message.replaceAll(root,'<temporary-workspace>');process.exitCode=1;}
+}catch(error){receipt.passed=false;receipt.error=error.message.replaceAll(root,'<temporary-workspace>');if(error.errors)receipt.causes=error.errors.map(x=>x.message.replaceAll(root,'<temporary-workspace>')); process.exitCode=1;}
 finally{
  try{await uninstallDesktop(options,deps);await stopped();receipt.cleanup=true;}catch{receipt.cleanup=false;receipt.passed=false;process.exitCode=1;}
  fs.mkdirSync('generated',{recursive:true});fs.writeFileSync('generated/desktop-lifecycle-receipt.json',JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt));

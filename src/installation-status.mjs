@@ -18,7 +18,7 @@ export async function installationStatus({directory=path.join(os.homedir(),'.loc
   add('record',false,'Installation record is inconsistent.','Preserve the record and diagnose ownership; do not overwrite it.');return result;
  }
  result.status=record.status;result.phase=record.phase;result.installed=record.status==='installed';
- add('record',result.installed,'Installation state: '+record.status,record.status==='uninstalled'?'Run install to restore this bridge.':'Re-run install with the same options to resume a bridge-stage failure.');
+ add('record',result.installed,'Installation state: '+record.status,record.upgrade?'Run recover-upgrade to restore the previous version before other changes.':record.status==='uninstalled'?'Run install to restore this bridge.':'Re-run install with the same options to resume a bridge-stage failure.');
  result.managedCodeRelease=Boolean(record.release);
  if(record.release){
   try{

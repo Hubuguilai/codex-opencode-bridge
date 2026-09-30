@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-30T02:49:38.198Z",
+  "isolatedClientState": true,
+  "realLaunchd": true,
+  "realPublication": true,
+  "routerServiceRestart": false,
+  "modelRequests": 0,
+  "checks": {
+    "installHealthyAndPublished": true,
+    "independentCodeRelease": true,
+    "repeat": true,
+    "uninstall": true,
+    "reinstall": true,
+    "healthFailureResume": true,
+    "tokenPreserved": true,
+    "nativeSourcePreserved": true,
+    "upgrade": true,
+    "rollback": true,
+    "failedUpgradeRestored": true,
+    "explicitUpgradeRecovery": true,
+    "upgradeConfigurationPreserved": true
+  },
+  "codeReleaseSha256": "8641b5b57d4e06fe24d984c76c2cfa88beb0ddfd63f0652dcc4659a69e54905d",
+  "passed": true,
+  "cleanup": true
+}

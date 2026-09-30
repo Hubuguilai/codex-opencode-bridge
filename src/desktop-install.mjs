@@ -43,6 +43,7 @@ export async function installDesktop({directory=path.join(os.homedir(),'.local/s
    receipt=JSON.parse(fs.readFileSync(receiptPath));
    if(receipt.kind!=='bridge-desktop-install'||receipt.routerRoot!==path.resolve(routerRoot)||JSON.stringify(receipt.models)!==JSON.stringify(models))throw new Error('Existing installation settings differ; keep its record and use its original settings. Model updates are pending in this candidate.');
    validateReceipt(root,receipt);
+   if(receipt.upgrade)throw new Error('An interrupted upgrade needs recover-upgrade before installation.');
    if(receipt.status==='installed'){
    const code=receipt.release?verifyRelease(receipt.release):undefined;
    await deps.installService(receipt.prepared,{binary:receipt.binary,cli:code?.cli});await deps.checkBridge(receipt.prepared);
@@ -85,10 +86,10 @@ export async function installDesktop({directory=path.join(os.homedir(),'.local/s
 }
 export async function uninstallDesktop({directory=path.join(os.homedir(),'.local/share/codex-opencode-bridge/desktop')}={},deps=real){
  const root=path.resolve(directory),file=path.join(root,'desktop-install.json');
- const receipt=JSON.parse(fs.readFileSync(file));
- validateReceipt(root,receipt);
  const release=acquireInstallLock(root);
  try{
+  const receipt=JSON.parse(fs.readFileSync(file));validateReceipt(root,receipt);
+  if(receipt.upgrade)throw new Error('An interrupted upgrade needs recover-upgrade before uninstall.');
   const api=await deps.loadRouter(receipt.routerRoot);
   // Remove model routes first, keeping a working service if ownership checks fail.
   if(fs.existsSync(path.join(receipt.plan,'registration.json')))await deps.unregisterRouter(receipt.plan,{api});
@@ -98,7 +99,7 @@ export async function uninstallDesktop({directory=path.join(os.homedir(),'.local
  }finally{release();}
 }
 
-function validateReceipt(root,receipt){
+export function validateReceipt(root,receipt){
  if(receipt.kind!=='bridge-desktop-install'||receipt.prepared!==path.join(root,'prepared')||receipt.plan!==path.join(root,'router-plan')||!path.isAbsolute(receipt.routerRoot))throw new Error('Invalid managed desktop installation record.');
  if(receipt.release&&(path.dirname(receipt.release)!==path.join(root,'releases')||!/^[a-f0-9]{64}$/.test(path.basename(receipt.release))))throw new Error('Invalid managed code release path.');
  for(const candidate of [receipt.prepared,receipt.plan])if(fs.existsSync(candidate)&&fs.lstatSync(candidate).isSymbolicLink())throw new Error('Managed installation paths must not be symbolic links.');

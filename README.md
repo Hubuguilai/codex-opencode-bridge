@@ -122,7 +122,7 @@ conflicts and explain the specific conflict. Never retry quota failures in a loo
 Report what was reproduced, changed, verified and still unknown.
 ```
 
-New managed installations run a content-verified code copy under their installation directory. Updating the checkout does not silently update that service; repeat installation retains the selected copy. Older installations retain their existing service paths. An explicit upgrade/rollback command is still pending.
+New managed installations run a content-verified code copy under their installation directory. Updating the checkout does not silently update that service; repeat installation retains the selected copy. Older installations retain their existing service paths. Use the explicit upgrade commands below to switch versions.
 
 ## Repeat, change, update or remove
 
@@ -133,10 +133,22 @@ New managed installations run a content-verified code copy under their installat
   preparation. Reinstall with the same `install` command.
 - **Choose models on the first install:** use `--models` with documented exact IDs.
   Changing an existing installation's model set is not implemented yet.
-- **Upgrade:** an automated upgrade/rollback command is not implemented yet. Do
-  not replace a live checkout and assume the running service has upgraded.
+- **Upgrade:** finish active model tasks, then run `node bin/bridge.mjs upgrade`
+  from the desired checked-out project version. It saves that code, installs its
+  pinned OpenCode runtime if needed, switches only this bridge service and checks
+  health. Model registration, credentials and prepared configuration stay intact.
+  Startup failure triggers restoration and a health check of the old version.
+- **Rollback:** `node bin/bridge.mjs rollback` switches to the previously selected
+  managed code/runtime pair. Both copies are retained.
+- **Interrupted upgrade:** `node bin/bridge.mjs recover-upgrade` restores the
+  recorded pre-upgrade version. Use this before install/uninstall when an upgrade
+  journal remains. Recovery refuses edited ownership records or code files.
+  Legacy installations without independent code releases require migration;
+  these commands currently explain that limitation instead of guessing paths.
 - **Router bootstrap failure:** its separate incomplete record currently requires
   diagnosis. Bridge-stage resume does not claim to repair every Router setup phase.
+
+These commands verify startup health, not model workflows. Recheck actual model tasks after upgrading. Upgrading the shared Router or migrating configuration formats is not yet automated.
 
 The default state directory is `~/.local/share/codex-opencode-bridge/desktop`.
 Use the same `--directory` on later operations if you chose a custom location.

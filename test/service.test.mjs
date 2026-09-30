@@ -49,3 +49,10 @@ test('Service uses the selected release entrypoint and refuses an implicit versi
  await assert.rejects(installService(f.directory,f.opts),/Service paths changed/);
  removeService(f.directory,f.opts);
 });
+
+test('Transient launchd EIO during same-label replacement is retried without deleting ownership',async t=>{
+ const f=fixture(t);const original=f.opts.run;let attempts=0;
+ f.opts.run=(cmd,args)=>args[0]==='bootstrap'&&++attempts===1?{status:5}:original(cmd,args);
+ assert.equal((await installService(f.directory,f.opts)).running,true);assert.equal(attempts,2);
+ removeService(f.directory,f.opts);
+});
