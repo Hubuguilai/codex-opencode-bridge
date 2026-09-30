@@ -375,3 +375,16 @@ Latest results: Big Pickle 10/10, MiMo V2.6 Flash Free 10/10, LongCat 9/10 (patc
 The earlier acceptance harness explicitly set reasoning summary to none, missing the actual Desktop global detailed preference. A real user request therefore failed with 422 before inference despite earlier passing fixtures. Added strict-by-default, explicit summary-omission policy; enabled only on the local Big Pickle service, preserving global GPT settings. 88 offline tests and syntax checks passed. Real Codex CLI through the installed Router with the existing detailed preference returned the expected greeting marker without errors. This is a real-client check, not proof of a successful user GUI turn.
 
 The same real-client route also executed one command to read a temporary random-marker file and returned its exact contents, with no client errors. Receipt: `receipts/desktop-summary-client.json`.
+
+
+## 2026-09-30 exploratory Big Pickle rerun
+
+The [receipt](receipts/big-pickle-exploratory-20260930.json) records nine passing
+scenarios and one repair-turn timeout. The repaired Python tests passed, but the
+turn did not complete within the historical 180-second whole-turn budget. Source
+files also changed during that run, so it does not certify a frozen release.
+Later acceptance runs must use an immutable source copy. The harness now records
+both per-request and whole-turn deadlines; an explicit
+`BRIDGE_ACCEPTANCE_TURN_TIMEOUT_MS=300000` may allow a multi-request tool turn five
+minutes without changing the production per-request timeout. The old failure is
+retained; increasing a deadline does not retroactively make it pass.

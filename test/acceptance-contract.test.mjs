@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {acceptanceOptions,acceptancePassed,acceptanceScenarios,matrixPassed} from '../src/acceptance-contract.mjs';
+import {acceptanceTurnTimeout,acceptanceOptions,acceptancePassed,acceptanceScenarios,matrixPassed} from '../src/acceptance-contract.mjs';
 
 function patchReceipt() {
   return {mode:'patch-only',passed:true,sourceSha256:'a'.repeat(64),sourceChangedDuringRun:false,scenarios:[
@@ -47,4 +47,10 @@ test('Native diff, denial, exact contents and provenance checks cannot be replac
     r=>r.sourceSha256='missing',
     r=>r.accessDenial={status:429},
   ]) {const value=patchReceipt();mutate(value);assert.equal(acceptancePassed(value,'patch-only'),false);}
+});
+
+test('Whole-turn deadline is explicit, bounded and independent of request timeout',()=>{
+ assert.equal(acceptanceTurnTimeout({}),180000);
+ assert.equal(acceptanceTurnTimeout({BRIDGE_ACCEPTANCE_TURN_TIMEOUT_MS:'300000'}),300000);
+ for(const value of ['bad','0','999','900001','1500.5'])assert.throws(()=>acceptanceTurnTimeout({BRIDGE_ACCEPTANCE_TURN_TIMEOUT_MS:value}));
 });

@@ -9,8 +9,9 @@ import {randomUUID,createHash} from 'node:crypto';
 import {readConfig} from '../src/config.mjs';
 import {startOpenCode} from '../src/opencode.mjs';
 import {createBridge} from '../src/server.mjs';
-import {acceptanceOptions,acceptancePassed} from '../src/acceptance-contract.mjs';
+import {acceptanceOptions,acceptancePassed,acceptanceTurnTimeout} from '../src/acceptance-contract.mjs';
 
+const turnTimeoutMs=acceptanceTurnTimeout();
 const {mode}=acceptanceOptions(process.argv.slice(2));
 const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-acceptance-'));
 const work=path.join(root,'client');fs.mkdirSync(work);
@@ -39,7 +40,7 @@ function sourceDigest(){
  for(const name of fs.readdirSync(new URL('../src/',import.meta.url)).filter(x=>x.endsWith('.mjs')).sort()){hash.update(name);hash.update(fs.readFileSync(new URL('../src/'+name,import.meta.url)));}
  return hash.digest('hex');
 }
-const receipt={mode,sourceSha256:sourceDigest(),gitHead:spawnSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).stdout.trim(),date:new Date().toISOString(),model:overrides.model,toolTransport:config.toolTransport,internalTools:config.internalTools,node:process.version,codex:spawnSync('codex',['--version'],{encoding:'utf8'}).stdout.trim(),scenarios:[]};
+const receipt={mode,turnTimeoutMs,requestTimeoutMs:config.timeoutMs,sourceSha256:sourceDigest(),gitHead:spawnSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).stdout.trim(),date:new Date().toISOString(),model:overrides.model,toolTransport:config.toolTransport,internalTools:config.internalTools,node:process.version,codex:spawnSync('codex',['--version'],{encoding:'utf8'}).stdout.trim(),scenarios:[]};
 let runtime,bridge,child,sequence=0,approvalCount=0,stderr='';
 const pending=new Map(),events=[];
 const send=value=>child.stdin.write(JSON.stringify(value)+'\n');
@@ -57,7 +58,7 @@ async function startThread(denial=false){return (await rpc('thread/start',{
 async function turn(threadId,text){
  const start=events.length,started=Date.now();
  const {turn}=await rpc('turn/start',{threadId,input:[{type:'text',text}]});
- while(Date.now()-started<180000){
+ while(Date.now()-started<turnTimeoutMs){
   const end=events.slice(start).find(e=>e.method==='turn/completed'&&e.params.turn.id===turn.id);
   if(end)return {status:end.params.turn.status,...(end.params.turn.error?{error:end.params.turn.error.message.replaceAll(root,'<temporary-workspace>')}:{}),commands:events.slice(start).filter(e=>e.method==='item/completed'&&e.params.item.type==='commandExecution').length,fileChanges:events.slice(start).filter(e=>e.method==='item/completed'&&e.params.item.type==='fileChange').length,patchDiffs:events.slice(start).filter(e=>e.method==='item/completed'&&e.params.item.type==='fileChange'&&e.params.item.changes?.some(change=>typeof change.diff==='string'&&change.diff.length>0)).length,durationMs:Date.now()-started};
   await new Promise(resolve=>setTimeout(resolve,100));

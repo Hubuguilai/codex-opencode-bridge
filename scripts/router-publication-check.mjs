@@ -18,10 +18,19 @@ fs.writeFileSync(api.paths.NATIVE_CATALOG_SOURCE_PATH,JSON.stringify({version:1,
 fs.writeFileSync(path.join(state,'native-models.json'),JSON.stringify(native));
 const prepared=path.join(path.dirname(state),'prepared'),plan=path.join(path.dirname(state),'plan');
 prepareDirectory(prepared,{models:['opencode/big-pickle','opencode/muse-spark-1.3-contributor-free']});prepareRouterPlan(plan,{prepared,routerState:state});
+const overlay=api.overlay;let omitOnce=true;
+api.overlay={...overlay,applyModelOverlayPublication:async options=>{
+ const result=await overlay.applyModelOverlayPublication(options);
+ if(omitOnce){omitOnce=false;fs.writeFileSync(path.join(state,'merged-models.json'),JSON.stringify({models:[]}));}
+ return result;
+}};
+await assert.rejects(registerRouter(plan,{api,restart:false}),/omitted/);
+assert.equal(api.providers.readGenericProviders().length,0);assert.deepEqual(api.users.readUserModels(),[]);
+fs.renameSync(plan,plan+'-failed-publication');prepareRouterPlan(plan,{prepared,routerState:state});
 await registerRouter(plan,{api,restart:false});
 const catalog=JSON.parse(fs.readFileSync(path.join(state,'merged-models.json')));
 const slugs=catalog.models.map(x=>x.slug);assert.ok(slugs.includes('opencode-native-bridge/opencode/big-pickle'));assert.ok(slugs.includes('opencode-native-bridge/opencode/muse-spark-1.3-contributor-free'));assert.equal(JSON.parse(fs.readFileSync(originalCatalog)).models[0].slug,'gpt-native-sentinel');
 await unregisterRouter(plan,{api,restart:false});
 const after=JSON.parse(fs.readFileSync(path.join(state,'merged-models.json'))).models.map(x=>x.slug);assert.equal(JSON.parse(fs.readFileSync(originalCatalog)).models[0].slug,'gpt-native-sentinel');assert.ok(!after.includes('opencode-native-bridge/opencode/big-pickle'));
-const receipt={passed:true,upstreamPinnedUnmodified:true,realCatalogPublication:true,nativeSourcePreserved:true,nativeSignedInPickerUntested:true,registrationRemoval:true,serviceRestartTested:false,desktopPickerTested:false};
+const receipt={passed:true,upstreamPinnedUnmodified:true,realCatalogPublication:true,missingModelRollback:true,nativeSourcePreserved:true,nativeSignedInPickerUntested:true,registrationRemoval:true,serviceRestartTested:false,desktopPickerTested:false};
 fs.mkdirSync('generated',{recursive:true});fs.writeFileSync('generated/router-publication-receipt.json',JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt));

@@ -45,3 +45,11 @@ export function acceptancePassed(receipt, mode) {
   if(!Array.isArray(scenarios)||scenarios.some(item=>!item||typeof item!=='object')||scenarios.length!==required.length||new Set(scenarios.map(item=>item.name)).size!==required.length)return false;
   return scenarios.every(item=>required.includes(item.name)&&item.status==='completed'&&item.passed===true&&item.checks&&typeof item.checks==='object'&&!Array.isArray(item.checks)&&requiredChecks[item.name].every(check=>item.checks[check]===true)&&Object.values(item.checks).every(value=>value===true));
 }
+
+// A whole tool turn can contain multiple individually bounded model requests.
+// Keep the historical default while recording any explicitly chosen budget.
+export function acceptanceTurnTimeout(env=process.env){
+ const value=Number(env.BRIDGE_ACCEPTANCE_TURN_TIMEOUT_MS??180000);
+ if(!Number.isInteger(value)||value<1000||value>900000)throw new Error('Acceptance turn timeout must be 1000..900000 milliseconds.');
+ return value;
+}

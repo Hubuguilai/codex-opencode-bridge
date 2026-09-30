@@ -34,12 +34,31 @@ function validateOwned(api,receipt){
  if(hash(fs.readFileSync(receipt.tokenPath))!==receipt.tokenHash)fail('Managed credential changed; automatic removal stopped.');
  return users;
 }
+// Verify the forward publication while still inside Router's rollback boundary.
+// A rollback publication restores the old catalog and must not be checked against
+// the failed new model set.
+export function checkedPublication(api,{present=[],absent=[]}={}){
+ let forward=true;
+ return async options=>{
+  const verify=forward;forward=false;
+  const result=await api.overlay.applyModelOverlayPublication(options);
+  if(verify){
+   const catalog=JSON.parse(fs.readFileSync(api.paths.MERGED_CATALOG_PATH));
+   if(!Array.isArray(catalog.models))fail('Published model catalog is invalid.');
+   const visible=new Set(catalog.models.filter(x=>x.visibility==='list').map(x=>x.slug));
+   if(present.some(slug=>!visible.has(slug)))fail('Router publication omitted a requested model. Check provider readiness, discovery mode and picker visibility; registration was not accepted.');
+   const all=new Set(catalog.models.map(x=>x.slug));
+   if(absent.some(slug=>all.has(slug)))fail('Removed models remain in the published catalog; removal was not accepted.');
+  }
+  return result;
+ };
+}
 export async function registerRouter(directory,{api,restart=true}={}){
  const root=path.resolve(directory),plan=readPlan(root),record=path.join(root,'registration.json');
  if(path.resolve(api.paths.STATE_DIR)!==path.resolve(plan.routerState))fail('Selected Router uses a different state directory than this plan.');
  let reused=false;
  const tokenPath=api.secrets.genericProviderCredentialPath(plan.provider.id);
- await api.overlay.transactModelOverlayMutation({restart,
+ await api.overlay.transactModelOverlayMutation({restart,applyPublication:checkedPublication(api,{present:plan.models.map(x=>x.slug)}),
   capture:()=>{
    const snapshots=api.overlay.captureModelOverlayFiles(files(api,tokenPath,record));
    // Durable private pre-mutation backup; never printed or committed.
@@ -78,7 +97,7 @@ export async function unregisterRouter(directory,{api,restart=true}={}){
  if(!fs.existsSync(record))return {removed:true,alreadyAbsent:true};
  const receipt=JSON.parse(fs.readFileSync(record));
  if(receipt.kind!=='bridge-router-registration'||receipt.planHash!==fingerprint(plan))fail('Invalid registration record.');
- await api.overlay.transactModelOverlayMutation({restart,files:files(api,receipt.tokenPath,record),mutate:()=>{
+ await api.overlay.transactModelOverlayMutation({restart,applyPublication:checkedPublication(api,{absent:Object.keys(receipt.modelHashes)}),files:files(api,receipt.tokenPath,record),mutate:()=>{
   const users=validateOwned(api,receipt),slugs=Object.keys(receipt.modelHashes);
   api.users.writeUserModels(users.filter(x=>!slugs.includes(x.slug)));
   api.picker.forgetModelVisibility(slugs);

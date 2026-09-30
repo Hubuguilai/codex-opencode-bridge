@@ -62,3 +62,12 @@ Run `node scripts/router-publication-check.mjs /absolute/router-directory` from
 this repository. This uses temporary Codex and Router state and does not restart
 services. Signed-in native GPT behavior and the actual Desktop picker are still
 unverified by this check.
+
+
+Publication now verifies that every requested model is present and visible before
+accepting registration, and verifies absence after removal. The check is inside
+the Router transaction: an injected missing-model publication was rejected and
+restored the original provider/model state in the real publication test. This
+catches disabled discovery or hidden/ineligible routes rather than reporting a
+successful write as a successful menu configuration. It still does not replace
+inspection of the running Desktop picker.

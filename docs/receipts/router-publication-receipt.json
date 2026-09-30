@@ -2,6 +2,7 @@
   "passed": true,
   "upstreamPinnedUnmodified": true,
   "realCatalogPublication": true,
+  "missingModelRollback": true,
   "nativeSourcePreserved": true,
   "nativeSignedInPickerUntested": true,
   "registrationRemoval": true,
