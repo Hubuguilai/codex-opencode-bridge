@@ -1,6 +1,7 @@
 import {spawnSync} from 'node:child_process';
 import {findOpenCode} from './config.mjs';
 import {MODEL_PROFILES} from './model-profiles.mjs';
+import {supportedNode} from './prerequisites.mjs';
 
 // Read-only preflight: do not create tokens, install packages, read credentials,
 // start services or send model requests. Runtime entitlement is a separate gate.
@@ -9,7 +10,7 @@ export function doctor({env=process.env,platform=process.platform,node=process.v
  const checks=[];
  const add=(id,ok,message,next)=>checks.push({id,ok,message,...(!ok&&next?{next}:{})});
  add('platform',platform==='darwin',platform==='darwin'?'macOS target detected.':'Desktop installation is currently targeting macOS.','Other platforms are not yet certified for desktop installation.');
- add('node',Number(node.split('.')[0])>=22,'Node '+node,'Install Node.js 22 or later.');
+ add('node',supportedNode(node),'Node '+node,'Install Node.js 22.19 or later.');
  let binary;
  try{binary=locate(env);}catch{}
  if(!binary)add('opencode',false,'OpenCode executable not found.','Install the documented official OpenCode v2 runtime, or set OPENCODE_BIN.');

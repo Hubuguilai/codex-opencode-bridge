@@ -35,6 +35,8 @@
     "router_client_verification": "passed_real_codex_both_text_file_tools_muse_three_consecutive_images_and_lifecycle_after_two_prior_failures_cause_unproven",
     "strict_unsupported_media_through_router": "verified_isolated_frontend_and_forwarder_422_before_upstream_uploaded_and_tool_images",
     "router_compatibility_installation": "implemented_version_bound_backups_partial_resume_and_readonly_checks_isolated_live_verified",
-    "legacy_managed_model_profile_refresh": "same_selection_refresh_unit_tested_real_legacy_migration_pending"
+    "legacy_managed_model_profile_refresh": "same_selection_refresh_unit_tested_real_legacy_migration_pending",
+    "router_preparation_recovery": "verified_real_pinned_download_npm_failure_and_retry_without_client_setup",
+    "router_setup_recovery": "incomplete_exit_retry_unit_tested_ambiguous_setup_crash_recovery_pending"
   }
 }

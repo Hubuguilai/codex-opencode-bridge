@@ -172,8 +172,11 @@ New managed installations run a content-verified code copy under their installat
   journal remains. Recovery refuses edited ownership records or code files.
   Legacy installations without independent code releases require migration;
   these commands currently explain that limitation instead of guessing paths.
-- **Router bootstrap failure:** its separate incomplete record currently requires
-  diagnosis. Bridge-stage resume does not claim to repair every Router setup phase.
+- **Router bootstrap failure:** re-run `install` after a download or dependency
+  failure. The installer checks recorded source and worker processes before
+  resuming preparation. A pinned-upstream “configuration incomplete” exit can also
+  retry. A crash or ordinary failure during client setup still requires state
+  recovery; it is not assumed to have rolled back.
 
 These commands verify startup health, not model workflows. Recheck actual model tasks after upgrading. Upgrading the shared Router or migrating configuration formats is not yet automated.
 

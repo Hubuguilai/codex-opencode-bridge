@@ -3,7 +3,7 @@
 The unified command reuses an existing compatible Codex Router. When absent, it
 downloads the source revision pinned in `runtime/router.json`, installs its locked
 Node dependencies and invokes its own installer. Managed upgrades, model-set
-changes are implemented and isolated-tested; recovery of a failed first-time Router setup remains pending. This is a development
+changes are implemented and isolated-tested; dependency-preparation recovery is implemented; recovery of ambiguous client-setup failures remains pending. This is a development
 candidate, not the complete README installation promised for the release.
 
 From the bridge checkout/package, on macOS:
@@ -32,9 +32,11 @@ preparation and rollback evidence remain. Re-run the same install command to
 resume a bridge-stage failure: it validates prepared files, preserves the old plan
 in history, and regenerates a current plan when no registration exists. Existing
 registrations undergo ownership checks. A verified dead installer lock is
-recoverable; ambiguous locks are retained for diagnosis. Router bootstrap failures
-have a separate record and are not yet automatically resumed. Do not delete
-evidence or edit credentials to force a retry.
+recoverable; ambiguous locks are retained for diagnosis. Router bootstrap has a separate source/phase/worker record. Download and dependency
+preparation can be retried without recloning a completed download. Changed source
+or a possibly live dependency worker stops the retry. The pinned upstream setup
+incomplete exit (2) is retryable; ordinary setup failures and crashes remain
+blocked for state recovery. Do not delete evidence or edit credentials to force a retry.
 
 To remove this installation's routes and service:
 

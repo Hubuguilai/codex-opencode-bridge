@@ -5,6 +5,7 @@ import os from 'node:os';
 import net from 'node:net';
 import {writeInstallState,acquireInstallLock} from './install-state.mjs';
 import {ensureRouter} from './router-install.mjs';
+import {supportedNode} from './prerequisites.mjs';
 import {modelProfile} from './model-profiles.mjs';
 import {installRuntime} from './runtime-install.mjs';
 import {prepareDirectory,preparedEnvironment} from './setup.mjs';
@@ -26,8 +27,9 @@ export async function checkBridge(prepared,{fetchImpl=fetch}={}){
 }
 const real={preparedEnvironment,ensureRouter,installRuntime,prepareDirectory,installService,removeService,prepareRouterPlan,loadRouter,registerRouter,unregisterRouter,checkBridge,freePort};
 export async function installDesktop({directory=path.join(os.homedir(),'.local/share/codex-opencode-bridge/desktop'),
- routerRoot=path.join(os.homedir(),'.local/share/codex-router'),models,platform=process.platform}={},deps=real){
+ routerRoot=path.join(os.homedir(),'.local/share/codex-router'),models,platform=process.platform,nodeVersion=process.versions.node}={},deps=real){
  if(platform!=='darwin')throw new Error('Desktop installation currently targets macOS only.');
+ if(!supportedNode(nodeVersion))throw new Error('Install Node.js 22.19 or later before desktop installation.');
  const root=path.resolve(directory),receiptPath=path.join(root,'desktop-install.json');
  if(fs.existsSync(root)&&fs.lstatSync(root).isSymbolicLink())throw new Error('Installation directory must not be a symbolic link.');
  if(models===undefined)models=fs.existsSync(receiptPath)?JSON.parse(fs.readFileSync(receiptPath)).models:defaults;

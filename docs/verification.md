@@ -9,7 +9,7 @@ The simple desktop installer remains incomplete. See [release-readiness.json](re
 The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
 and recursive tool-schema repair inside the native bridge. Direct official-runtime
 Muse image plus recursive namespace-tool input passed, without Router code.
-The latest completed local unit suite has 155 tests. This does not replace the pending
+The latest completed local unit suite has 161 tests. This does not replace the pending
 clean-machine desktop and full workflow acceptance gates.
 
 On 2026-09-30, the unified installer completed a real macOS LaunchAgent and
@@ -623,3 +623,29 @@ refreshing older model capability profiles even when the chosen IDs are unchange
 The `models` command performs that profile refresh under its existing transaction
 and rollback mechanism. Actual migration of the original manual user service and
 a real older managed registration remain separate pending acceptance work.
+
+
+## Router dependency preparation recovery
+
+The installer now serializes operations for a Router destination, publishes a
+protected source receipt with the downloaded checkout, and tracks dependency
+worker PIDs/process groups. Preparation retries require unchanged source (or the
+exact shipped compatibility change) and an absent worker. A crash cannot turn an
+unknown checkout into an implicitly accepted existing installation.
+
+The [real preparation recovery test](receipts/router-preparation-recovery.json)
+downloaded the pinned source, caused an actual npm failure with a new empty cache
+in offline mode, then successfully retried npm and applied compatibility without
+repeating Git fetch. It deliberately intercepted desktop setup before execution,
+then verified that an ordinary setup failure remained blocked. It changed no
+client configuration, started no LaunchAgent and made no model request. This is
+not a clean-machine or complete first-time setup certificate.
+
+Later unit coverage also checks the pinned setup contract: exit 2 means unfinished
+preflight/configuration and may retry after source/worker validation; ordinary
+failure, timeout or a missing completion result does not prove rollback. Actual
+setup crash recovery and final clean-user installation remain open. The 161-test
+suite includes concurrent-driver exclusion, worker preservation, source-edit
+refusal, dependency/compatibility continuation and the retryable setup exit.
+Node preflight, installer gating and package metadata now share the documented
+22.19 minimum; unsupported Node stops before dependency/configuration mutation.
