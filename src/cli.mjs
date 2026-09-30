@@ -1,6 +1,7 @@
 import {parseArgs} from 'node:util';
 
 const commands = {
+  setup: ['directory','router-root','models','live'], login: [],
   'migration-preflight':['router-root'],
   'verify': ['directory','live','route'], 'models': ['directory','models'], 'recover-models': ['directory'], 'upgrade': ['directory'], 'rollback': ['directory'], 'recover-upgrade': ['directory'], 'status': ['directory'], 'install': ['directory','router-root','models'], 'uninstall': ['directory'], 'register-router': ['router-root'], 'unregister-router': ['router-root'], 'install-service': ['binary'], 'service-status': [], 'remove-service': [], 'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
   prepare: ['models', 'model', 'catalog'],

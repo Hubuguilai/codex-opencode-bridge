@@ -6,4 +6,5 @@ for (const dir of ['src', 'bin', 'scripts', 'test']) {
     if (result.status !== 0) process.exit(result.status || 1);
   }
 }
+if (spawnSync('bash', ['-n', 'scripts/start.sh'], {stdio:'inherit'}).status !== 0) process.exit(1);
 console.log('Syntax checks passed.');

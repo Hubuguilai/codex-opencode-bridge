@@ -1,79 +1,85 @@
-# Get access to OpenCode models
+# 先在 OpenCode 取得模型 / Get model access
 
-Checked against official documentation on 2026-09-30. Provider availability,
-limits and billing can change independently of this bridge.
+核对日期：2026-09-30。先选下面一条路径；不用三条都做。
 
-## Accounts and model access
+## A. 先免费试用 Big Pickle（推荐）
 
-OpenCode supports multiple providers. Follow the [official introduction](https://opencode.ai/docs/)
-to install its interface and use `/connect`. For OpenCode services, sign in at
-[OpenCode authentication](https://opencode.ai/auth). Enter a key only in the
-provider's local login flow; never paste it into a Codex chat or this repository.
-Other providers can be connected using their own credentials.
+1. 不必先订阅。回到[中文首页第二步](README.zh-CN.md#第二步把这一整段复制给-codex)，
+   把完整 Prompt 发给 Codex，它会准备官方 OpenCode 运行时并试用 Big Pickle。
+2. 如果验证通过，你已经取得当前可用的访问，不需要再生成 Key。
+3. 如果提示登录或权限不足，再走 B；如果是限流，等待恢复，不要重复安装。
 
-[Zen](https://opencode.ai/docs/zen/) is the OpenCode model service with usage-based
-billing and a changing selection of free models. Its current table lists Big
-Pickle and Muse Spark 1.3 Contributor Free as free. A catalog listing does not
-prove that a particular account, region or external API route can use a model.
-Our tests use the official OpenCode runtime, not unrestricted access to Zen's
-external API.
+我们在没有继承账号、Key、配置的独立环境里实际调用 Big Pickle 成功。
+这是 2026-09-30 的一次访问测试，不代表永久免费、无限额度或所有地区可用。
+[测试记录](receipts/onboarding-anonymous-access.json)。
 
-[Go](https://opencode.ai/docs/go/) is an optional subscription provider. Subscribe
-in the console, then use `/connect`, select **OpenCode Go**, and enter its key.
-Use `/models` to inspect Go's models. Go and Go Plus have usage limits; an optional
-console setting can draw from a Zen balance after included usage is exhausted.
-Review that setting before enabling paid fallback. A Go subscription does not
-make every model in OpenCode free, nor does it imply this bridge has tested it.
+如果你想**先在 OpenCode 自己的界面里确认模型**：
 
-Bring-your-own-provider credentials are a third route. Those providers' prices,
-permissions and quotas apply. This project's initial installation scope is Big
-Pickle and Muse Spark 1.3 Contributor Free; other providers are not automatically
-certified by appearing in the OpenCode model list.
+1. 打开 [OpenCode 下载页](https://opencode.ai/download)，在 **OpenCode Desktop**
+   下选择与你的 Mac 对应的下载，安装后打开。已有 OpenCode 可跳过。
+2. 新建一个本地会话，在模型选择器中搜索 **Big Pickle** 并选择。桌面版本的具体
+   控件位置可能变化；终端界面可输入 `/models` 搜索同名模型。
+3. 发送“只回复 OK”。有正常回答即可回到 Codex 粘贴安装 Prompt。看得到模型但
+   回答报错不算获得权限。
 
-To check access, select the exact provider/model in OpenCode and make a short
-request. A successful response demonstrates access at that moment; it does not
-certify Codex tools or images. Then run the bridge's model workflow checks.
-For 401/403, check login, model eligibility and region. For 429, check the console
-and retry only after the stated reset/backoff. Do not create new identities or
-switch keys to bypass limits. If a model disappears, stop selecting it and check
-the official catalog. This project supplies no shared accounts or keys.
+不想单独安装 OpenCode 桌面版也没关系：桥接安装器会准备它需要的独立官方运行时。
 
-## Runtime used by this bridge
+## B. 我需要登录 Zen，或我想用 Muse
 
-The current bridge plugin targets official `@opencode/cli` **2.0.18**. The
-public introductory installation guide may install a different release. The
-bridge therefore provides a separate managed dependency command:
+1. 打开 [OpenCode Zen](https://opencode.ai/zen)，点 **Get started with Zen** 或
+   **Login**。使用页面提供的方式注册/登录。
+2. 按控制台指引取得你自己的 **API Key**。官方开户说明包含账单设置；若要求付款，
+   请先判断你是否需要付费服务，不要把免费目录理解为全部开户流程都免费。
+   控制台的账号内页面没有在本次测试中登录复核，按钮名称和账单要求以你看到的为准。
+3. 已有 OpenCode 终端界面：输入 `/connect` → 选择 **OpenCode Zen** → 在它的
+   输入框粘贴 Key。没有终端环境：先把首页 Prompt 给 Codex；它需要登录时会提供
+   一个本地终端入口，你只在该终端输入 Key，完成后回到原对话说“登录完成，请继续”。
+4. 用 `/models` 选择准确的 **Muse Spark 1.3 Contributor Free**，发一句测试消息。
+   成功后，在安装 Prompt 末尾加上首页给出的 Muse 补充句。
 
-```sh
-node bin/bridge.mjs install-runtime
-```
+**Muse 特别说明：** 当前官方价格表列为免费，但本次无登录测试返回
+`This model is not available in your country.`（403）。这不是缺 Key 的证明；
+登录、充值或购买 Go 都不能保证解决。如果你的账号或地区无法使用，就先安装 Big Pickle。
+不要选择名称相近的付费 `Muse Spark 1.3` 后以为仍在免费路线。
 
-It installs the pinned official npm package in this project's private runtime
-directory, checks the version, and returns the executable path. Package versions
-and integrity values are recorded in `runtime/package-lock.json`. It does not
-replace a global OpenCode installation, edit Codex, start a service, or establish
-model permissions. This is one installer component, not the complete desktop
-installation. Set `OPENCODE_BIN` to the returned executable when using the
-existing manual preparation flow.
+官方来源：[Zen 设置及价格](https://opencode.ai/docs/zen/)、
+[本地认证方式](https://opencode.ai/docs/cli/#auth)。
+Big Pickle 免费期的数据可能用于改进模型；Muse Contributor 条款涉及训练用途，
+使用前阅读 [Zen 隐私说明](https://opencode.ai/docs/zen/#privacy)。
 
-This component was tested on macOS arm64. The package contains a macOS x64
-runtime, but installation on x64 has not been tested. The managed installation
-command rejects other operating systems for this release candidate.
+## C. 我已经买了 Go，或者有其他供应商的 Key
 
-## 中文说明
+**Go 订阅：** 打开 [OpenCode Go](https://opencode.ai/go)，通过 **Login** 或
+**Subscribe to Go** 进入账号。已有订阅不要重复购买。取得账号提供的 Key 后，
+在 OpenCode 终端输入 `/connect`，这次选 **OpenCode Go**，再通过 `/models`
+选择订阅提供的模型并测试。控制台可查看用量；是否启用余额后备由你决定，安装器不会替你开启。
+[官方 Go 指引](https://opencode.ai/docs/go/)。
 
-先按 [OpenCode 官方说明](https://opencode.ai/docs/) 登录自己的供应商。
-在 OpenCode 中用 `/connect` 连接账号，用 `/models` 找到准确的供应商和模型，
-再发送一条简短消息确认当前账号有权使用。密钥只填进本地登录流程，不要发到聊天中。
+**其他供应商：** `/connect` 中选择实际供应商，按其官方登录方式连接，再选择该
+供应商下面的模型。使用的是该供应商的额度，不会自动获得 Zen 或 Go 的权限。
+[官方供应商说明](https://opencode.ai/docs/providers/)。
 
-- **免费模型**：来自当前免费目录，仍可能有账号、地区、限流或下架限制。
-- **Zen 付费模型**：按服务的计费规则使用；免费目录和付费目录需要区分。
-- **Go 订阅**：在控制台订阅后，连接 OpenCode Go；订阅有额度，不代表全部模型无限使用。
-- **自带供应商密钥**：使用该供应商的权限与额度，不自动获得其他供应商的模型。
+**本项目的一次 Prompt 安装当前只配置 Big Pickle 和可选 Muse 免费路线。**
+有 Go 或其他供应商的权限不等于这些模型已经被本项目适配；不要把订阅里的全部模型
+一键加进来，也不要把 Go Key 当成保证能访问 Zen 免费模型的凭据。
 
-本项目优先验证 Big Pickle 与 Muse Spark 1.3 Contributor Free。目录中存在、
-OpenCode 能回答、Codex 能正确调用工具和处理图片，是三项不同的验证。
+## English quick guide
 
-上面的 `install-runtime` 命令只安装项目独立管理的 OpenCode 2.0.18，
-不会改动已有 OpenCode 或 Codex 配置。它已在 macOS arm64 的新目录中完成安装与
-重复执行验证；完整桌面安装、升级和卸载流程仍在开发。
+- **Free first:** Big Pickle answered with a clean credential-free OpenCode home
+  in our dated test. Paste the README prompt to install and check your access;
+  buying Go is not required for this tested route.
+- **Zen login:** open [Zen](https://opencode.ai/zen), choose Get started/Login,
+  complete the account's requirements, and obtain your own key. Use `/connect`
+  → OpenCode Zen in the local terminal UI. Billing requirements depend on the
+  console; we did not inspect a signed-in console in this revision.
+- **Muse:** select the exact Contributor Free model with `/models` and test it
+  first. Our anonymous request was country-denied, so login/payment is not a
+  guaranteed fix. Ask Codex to add Muse only once your route works.
+- **Go:** sign in at [Go](https://opencode.ai/go), use your existing subscription
+  or deliberately subscribe, then `/connect` → OpenCode Go and `/models`. This
+  does not add every Go model to the bridge's tested onboarding scope.
+- **Your own provider:** connect that provider with its own credentials; its
+  permissions and quota apply. Never send credentials through a Codex chat.
+
+A working OpenCode reply proves access at that moment. The bridge's subsequent
+Codex text/file/image checks validate the integration separately.

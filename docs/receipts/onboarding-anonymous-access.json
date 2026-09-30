@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-30T06:42:19.743Z",
+  "isolatedHome": true,
+  "inheritedCredentials": false,
+  "checks": [
+    {
+      "model": "opencode/big-pickle",
+      "exitCode": 0,
+      "passed": true,
+      "eventTypes": [
+        "step_start",
+        "text"
+      ]
+    },
+    {
+      "model": "opencode/muse-spark-1.3-contributor-free",
+      "exitCode": 1,
+      "passed": false,
+      "eventTypes": [
+        "error"
+      ],
+      "followup": {
+        "status": 403,
+        "message": "This model is not available in your country.",
+        "category": "region_restricted",
+        "loginWouldResolve": false
+      }
+    }
+  ]
+}

@@ -1,213 +1,98 @@
-# codex-opencode-bridge
+# OpenCode models in Codex
 
-Use supported OpenCode models from Codex's model menu, with file and command
-execution handled by Codex. The bridge runs locally through the official OpenCode
-runtime and your own model access.
+**Get model access, paste one prompt into Codex, then choose your model.**
+No repository download, terminal setup or configuration editing is required before
+asking Codex to install it.
 
-[中文说明](docs/README.zh-CN.md) · [Model access](docs/opencode-access.md) ·
-[Verification](docs/verification.md) · [Release checklist](docs/release-readiness.json)
+[中文教程](docs/README.zh-CN.md) · Private macOS Apple Silicon trial.
+You need repository access while it remains private. Intel Macs are untested;
+Windows/Linux desktop setup is not covered by this guide.
 
-**Private trial candidate: 0.2.0-rc.1.** See the [delivery summary and deferred gates](docs/private-trial.md). The installer is implemented, but a
-complete clean-machine desktop installation has not passed acceptance. There is
-no public release yet. Upgrade and model-selection lifecycle checks have passed;
-clean-client acceptance, current-release full model workflows and some first-install recovery remain open. Do not interpret an install
-success message as certification of the model picker or every Codex feature.
+## 1. Choose your model
 
-## Start here
+**Start with Big Pickle** for text, coding and file tasks. Our 2026-09-30 check
+succeeded in a fresh OpenCode home without credentials. You can go directly to
+step 2 and let Codex test current access. You do not need to buy Go to try this
+route. Free availability and limits can change.
 
-The first target is **macOS arm64**. macOS x64 has not been exercised; Windows and
-Linux desktop installation are not certified. Install Codex and Node.js **22.19+
-with npm** first. Python 3 is required for the file-tool compatibility aliases.
-Git is needed when the installer downloads Router. Automatic Node installation is
-not implemented.
+**For images, optionally add Muse Spark 1.3 Contributor Free.** It is listed in
+the official free catalog, but our fresh unauthenticated check was country-denied.
+Confirm that the exact model works in your OpenCode before requesting it here;
+do not assume a subscription or a new key will remove a regional restriction.
 
-1. Follow [OpenCode account and model access](docs/opencode-access.md). Use your own
-   account; keys belong in a local login flow, not a chat or Git repository. Check
-   that the exact model answers in OpenCode.
-2. Obtain this repository. While private, access requires collaborator permission.
-3. Run the installer from the repository directory, or copy the Prompt below into
-   Codex with this repository open.
+[Step-by-step OpenCode access guide: free models, login and subscriptions](docs/opencode-access.md).
+For Zen account access, open [OpenCode Zen](https://opencode.ai/zen), choose
+**Get started with Zen / Login**, complete the account requirements and obtain
+your own API key. Codex will guide local login if needed. Put keys only into the
+local login terminal, never into chat. Zen onboarding may require billing; it is
+not a prerequisite for the anonymous Big Pickle route tested here.
 
-```sh
-git clone https://github.com/Hubuguilai/codex-opencode-bridge.git
-cd codex-opencode-bridge
-node bin/bridge.mjs install
-node bin/bridge.mjs verify --live
-```
+## 2. Paste this into Codex
 
-The installer reuses a compatible Router or downloads its pinned upstream source,
-installs a private OpenCode 2.0.18 runtime, prepares the two default models, starts
-a local service, checks its health, and registers the models through Router.
-It applies a shipped, version-checked Router compatibility change for strict image
-rejection on these routes, retaining protected original source backups. Unknown
-or edited Router versions are preserved and refused rather than patched blindly.
-Existing provider identities are not silently replaced. It does not restart Codex.
-See [the precise installer behavior and remaining gaps](docs/desktop-install.md).
-
-`verify --live` uses your OpenCode access and can consume paid quota if applicable.
-It starts an ephemeral Codex client, connects through the installed Router, checks a
-random text reply and a temporary file task for each model, then uploaded and tool-returned images
-for Muse. It leaves private receipts in the installation's `verification` directory.
-Use `verify --live --route bridge` to isolate the bridge from Router when diagnosing
-failures. Image checks use the installed model's declared capability, not a Router
-vision fallback. The latest full Router check passed both models’ text/file tasks
-and Muse uploaded and actual tool-returned images, with byte integrity checked.
-[Earlier failures and the latest evidence](docs/verification.md#image-byte-integrity-and-task-history-isolation)
-remain recorded; this does not prove every long-history vision task is reliable.
-The verifier requires an actual `view_image` event for the expected file and the
-correct image-only answer; command/OCR fallback does not pass that check.
-This does not certify the Desktop picker,
-permissions, full workflows or long context. Access/quota failure stops remaining
-model checks. `doctor` and `status` remain read-only without model inference.
-
-After successful installation, fully quit and reopen Codex. Look for:
-
-- **Big Pickle (OpenCode Native Bridge)**
-- **Muse Spark 1.3 Contributor Free (OpenCode Native Bridge)**
-
-Select a model in the same menu used for GPT models. A new chat is recommended for
-first verification. Menu visibility, a text answer, a successful file task, and
-image understanding are separate checks. Existing manually configured entries may
-have older names; the installer refuses identity collisions rather than adopting
-them without ownership records.
-
-## Copy this installation Prompt into Codex
+Open a **local** Codex chat using a working model. Any empty project folder is
+fine; you do not need this repository already open. Copy the whole prompt:
 
 ```text
-Install this codex-opencode-bridge checkout using its maintained installer.
-Read README.md, docs/desktop-install.md and docs/opencode-access.md first.
-Check macOS, Node 22.19+/npm, Git, Python 3, Codex, existing Router/configuration,
-and my OpenCode model access. Preserve existing GPT models, other providers and
-login. Do not ask me to paste credentials into chat; use local login flows.
-Run the repository's install command. Use its existing backup and ownership
-checks; do not bypass conflicts or erase incomplete installation records.
-If human login or a Codex restart is necessary, explain that exact action.
-After installation, run verify --live using my model access, report each result,
-and then verify the actual model menu and independently test text,
-file reading, file creation/modification, a follow-up turn and an applicable
-permission denial. For Muse, test both an uploaded image and a view_image result
-with image-only details unknown from the prompt. Record actual outcomes and
-unverified checks separately. Do not claim native-GPT equivalence or complete
-installation just because a service is healthy or a model answers a greeting.
+Install codex-opencode-bridge on this Mac so I can choose Big Pickle in Codex.
+Repository: https://github.com/Hubuguilai/codex-opencode-bridge
+Version: onboarding-2026-09-30.
+Actually perform installation and verification, not just give me instructions.
+I have not downloaded it. Check my system and existing installation, then obtain
+that version in a stable user-local project directory. Do not overwrite, reset
+or delete an existing checkout. If private GitHub access is missing, tell me the
+specific GitHub sign-in or collaborator-access step I need to complete.
+Read docs/agent-install.md from that version and follow its maintained entry point
+for dependencies, installation/resume and real verification. Do not invent a
+second configuration procedure. You may install the private dependencies and run
+Big Pickle text/file checks using my access. Do not buy credit, subscribe, or enable
+paid fallback. Preserve my GPT models, other providers, login and existing settings.
+Keep manual/ownership conflicts intact and diagnose them rather than force migration.
+If I need to log in, give me one concrete local action; never ask for API keys in chat.
+Report verified results, model-menu names, anything unverified, and whether I need
+to fully quit and reopen Codex. On failure give the cause and one next step; do not
+loop on permission or quota errors.
 ```
 
-## Models and current evidence
+For Muse, append: **“I confirmed Muse Spark 1.3 Contributor Free works in my
+OpenCode. Install it alongside Big Pickle and verify images too.”**
 
-Last documentation reconciliation: **2026-09-30**. Catalog capacity and a configured
-compression threshold are not proof of reliable full-capacity reasoning.
+You may need to finish GitHub/OpenCode login or an Apple developer-tools dialog.
+Return to the same chat afterward; Codex handles the remaining setup.
 
-| Model | New-install context / auto-compression setting | Images | Evidence |
-| --- | --- | --- | --- |
-| Big Pickle | 200,000 / 160,000 tokens | Text only | Ten workflow scenarios passed on frozen commit 3a096e9; see the [receipt](docs/receipts/big-pickle-frozen-workflows-20260930.json) |
-| Muse Spark 1.3 Contributor Free | 1,048,576 / 891,289 tokens | Uploaded images and client tool image results | Real Codex image/tool-result checks passed; ten workflow scenarios passed on frozen commit 3a096e9 |
+## 3. Reopen Codex and choose the model
 
-Muse also completed a single near-capacity marker-retrieval probe using 1,041,600
-total tokens. That does not certify sustained load, concurrent use, complex
-reasoning at that length or the precise overflow boundary. See [capacity evidence](docs/muse-capacity.md)
-and [image evidence](docs/images.md). Other models have historical experiments in
-[verification](docs/verification.md); they are not all first-release supported models.
+After Codex reports passing checks, fully quit and reopen the app. Use the model
+menu beside the message box:
 
-Unsupported: native audio/video/PDF input, provider-hosted tools, adjustable
-reasoning levels, structured final-output formats, stored/background Responses and
-`previous_response_id`. Model intelligence and upstream availability are unchanged.
-Codex handles client tools; OpenCode still contributes runtime/system context.
-See [security boundaries](docs/security.md) and [tool semantics](docs/client-aliases.md).
+| Selection | Menu name |
+| --- | --- |
+| Default | **Big Pickle (OpenCode Native Bridge)** |
+| Optional vision model | **Muse Spark 1.3 Contributor Free (OpenCode Native Bridge)** |
 
-## Diagnose a problem
+Start a new chat: “Create hello.txt in this empty folder, write hello, then read
+it back.” For Muse, also upload a non-sensitive image and ask about its contents.
+If a task fails despite the menu entry, use the diagnostic prompt below.
 
-```sh
-node bin/bridge.mjs doctor
-node bin/bridge.mjs status
-```
-
-These commands are read-only. `doctor` checks prerequisites; `status` checks a
-managed installation record, service health and published model entries. Neither
-performs model inference. A missing managed record does not prove an older manual
-installation is broken. Its
-OpenCode lookup uses PATH/OPENCODE_BIN; it may not find a separately managed runtime
-unless given its recorded path. The diagnostic Prompt below covers that distinction.
-See [error meanings and recovery](docs/troubleshooting.md).
+## Something went wrong?
 
 ```text
-Diagnose this codex-opencode-bridge installation without replacing configuration.
-Read README.md and docs/troubleshooting.md. Start with the exact error and the
-managed installation record, then check prerequisites, the recorded runtime,
-service-status, local bridge health, model registration and provider access.
-Do not print tokens, authentication files, raw conversation payloads or private
-backups. Distinguish local authentication, upstream 401/403, local bridge_busy,
-provider 429, input context overflow, output limits, tool schema errors,
-unsupported content/tools, timeout and stream interruption.
-Use the installed model and actual failing input mode; do not substitute a text
-hello for an image or tool-result failure. Preserve evidence and existing models.
-Use maintained recovery commands for reversible repairs. Stop on ownership
-conflicts and explain the specific conflict. Never retry quota failures in a loop.
-Report what was reproduced, changed, verified and still unknown.
+Diagnose my codex-opencode-bridge installation. Locate the existing checkout and
+installation record, then read docs/agent-install.md and docs/troubleshooting.md.
+Do not overwrite configuration or reinstall blindly. Check status, services,
+model registration and the exact failing model/input. Distinguish GitHub access,
+missing dependencies, OpenCode login, region/model permissions, rate limits,
+unsupported images and stream errors. Never print keys, auth files or private
+conversation logs. Use only the maintained reversible recovery commands. Tell me
+what failed, what you repaired and verified, and the one action I need to take.
 ```
 
-New managed installations run a content-verified code copy under their installation directory. Updating the checkout does not silently update that service; repeat installation retains the selected copy. Older installations retain their existing service paths. Use the explicit upgrade commands below to switch versions.
+## Later
 
-## Repeat, change, update or remove
+Ask the same Codex chat to check health, add Muse after confirming access, upgrade
+and verify, or uninstall while preserving other models and login. It should use
+[the maintained runbook](docs/agent-install.md).
 
-- **Repeat / recover a bridge-stage failure:** run the same `install` command with
-  the same options. Owned files are checked; old plans/backups are retained.
-- **Remove:** `node bin/bridge.mjs uninstall`. It removes this installation's model
-  registration and service, preserving the existing Router, login, backups and
-  preparation. Reinstall with the same `install` command.
-- **Choose models on the first install:** use `--models` with documented exact IDs.
-- **Change installed models:** finish active tasks, then pass the complete desired
-  list to `node bin/bridge.mjs models --models opencode/big-pickle` to keep only
-  Big Pickle, or `node bin/bridge.mjs models --models opencode/big-pickle,opencode/muse-spark-1.3-contributor-free`
-  to enable both. This updates the service allowlist and Router catalog together.
-  It preserves the local token and checks service health before publication.
-  A failure restores the original selection; reopen Codex and verify actual tasks.
-- **Interrupted model change:** run `node bin/bridge.mjs recover-models` before
-  other installation operations. It restores the saved configuration and catalog.
-  It refuses unrelated user edits rather than overwriting them. Use `uninstall`
-  to remove the whole integration; an empty model list is not accepted.
-  A later `install` without `--models` retains the recorded selection.
-- **Upgrade:** finish active model tasks, then run `node bin/bridge.mjs upgrade`
-  from the desired checked-out project version. It saves that code, installs its
-  pinned OpenCode runtime if needed, switches only this bridge service and checks
-  health. Model registration, credentials and prepared configuration stay intact.
-  Startup failure triggers restoration and a health check of the old version.
-- **Rollback:** `node bin/bridge.mjs rollback` switches to the previously selected
-  managed code/runtime pair. Both copies are retained.
-- **Interrupted upgrade:** `node bin/bridge.mjs recover-upgrade` restores the
-  recorded pre-upgrade version. Use this before install/uninstall when an upgrade
-  journal remains. Recovery refuses edited ownership records or code files.
-  Legacy installations without independent code releases require migration;
-  these commands currently explain that limitation instead of guessing paths.
-- **Router bootstrap failure:** re-run `install` after a download or dependency
-  failure. The installer checks recorded source and worker processes before
-  resuming preparation. A pinned-upstream “configuration incomplete” exit can also
-  retry. A crash or ordinary failure during client setup still requires state
-  recovery; it is not assumed to have rolled back.
-
-These commands verify startup health, not model workflows. Recheck actual model tasks after upgrading. The pinned compatibility repair is managed; arbitrary future Router-version and configuration-format migrations are not automated. Legacy-service migration has passed an isolated real-service rehearsal, but its end-user command remains pending; see [migration scope](docs/legacy-migration.md).
-
-The default state directory is `~/.local/share/codex-opencode-bridge/desktop`.
-Use the same `--directory` on later operations if you chose a custom location.
-Backups can contain sensitive local state; keep them private. Uninstall does not
-mean deleting all logs, credentials or third-party dependencies.
-
-## Development and release status
-
-```sh
-npm run check
-npm test
-npm run test:package
-```
-
-Live model acceptance consumes the account's allowance and requires explicit
-operator authorization. See [verification](docs/verification.md),
-[manual API/developer notes](docs/manual-api.md), [prior art](docs/prior-art.md),
-[license](LICENSE) and [release gates](docs/release-readiness.json).
-
-Release blockers include a clean supported-machine install from this README,
-actual Desktop picker and signed-in GPT preservation, full current-source model
-workflows, reboot/upgrade/lifecycle checks, and default-branch consistency. The
-repository remains private until its owner authorizes publication.
-
-Upgrades also install the shipped Router terminal-error repair and republish the
-owned routes. Bridge rollback retains this additive shared-dependency repair and
-its backups; it does not downgrade Router source.
+Only these two models are the initial onboarding scope. Native audio/video/PDF
+input is unsupported. [Advanced usage and model evidence](docs/advanced.en.md)
+and [this onboarding revision's actual checks and limits](docs/onboarding-verification.md)
+remain available without making beginners read the implementation details.
