@@ -148,3 +148,6 @@ node bin/bridge.mjs serve-prepared /absolute/new/bridge-config
 是模拟服务，因此它证明接入结构与工具调用传递，不代表上游访问限制已经解除。
 真正激活仍需刷新共享路由服务、由用户退出再打开 Codex，再检查实际菜单与真实任务。
 详见 [桌面接入说明](desktop-integration.md)。
+
+
+[模型账号、免费/订阅区别与独立运行时安装说明](opencode-access.md)。

@@ -29,6 +29,7 @@
     "LICENSE",
     "CONTRIBUTING.md",
     "ROADMAP.md",
-    "test/"
+    "test/",
+    "runtime/"
   ]
 }

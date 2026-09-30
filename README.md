@@ -216,3 +216,6 @@ This is an independently written extraction of a locally tested prototype, not a
 fork of another gateway. Existing alternatives and their tradeoffs are documented
 in [the dated comparison](docs/prior-art.md). MIT license covers this bridge code,
 not access to third-party models.
+
+
+[Official model access and managed runtime setup](docs/opencode-access.md).

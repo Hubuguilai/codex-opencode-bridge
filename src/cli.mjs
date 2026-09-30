@@ -1,7 +1,7 @@
 import {parseArgs} from 'node:util';
 
 const commands = {
-  doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
+  'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
   prepare: ['models', 'model', 'catalog'],
   'prepare-router': ['prepared', 'router-state'],
 };

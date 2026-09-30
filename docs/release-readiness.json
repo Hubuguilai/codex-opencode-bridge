@@ -8,7 +8,7 @@
     "read_only_prerequisite_doctor": "implemented_unit_tested",
     "automatic_dependency_and_desktop_installer": "pending",
     "transactional_backup_upgrade_uninstall_restore": "pending",
-    "official_access_guide_and_model_checks": "research_in_progress",
+    "official_access_guide_and_model_checks": "official_guide_written_model_checks_pending",
     "english_chinese_readme_install_diagnostic_prompts": "pending",
     "clean_macos_install_from_readme": "pending",
     "real_desktop_picker_and_model_selection": "pending",
@@ -17,6 +17,7 @@
     "image_tool_results": "verified_live_muse_codex_view_image",
     "installed_lifecycle_restart_upgrade_uninstall": "pending",
     "actionable_error_categories_and_stream_failures": "pending",
-    "docs_support_matrix_default_branch_consistency": "pending"
+    "docs_support_matrix_default_branch_consistency": "pending",
+    "pinned_managed_opencode_dependency": "verified_macos_arm64_new_directory_and_repeat"
   }
 }
