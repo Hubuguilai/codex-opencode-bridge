@@ -56,3 +56,12 @@ test('Prepared startup refuses modified files, relocated state, and symlinked to
  assert.throws(()=>preparedEnvironment(directory),/regular/);fs.unlinkSync(token);fs.renameSync(outside,token);
  const moved=path.join(root,'moved');fs.renameSync(directory,moved);assert.throws(()=>preparedEnvironment(moved),/moved/);
 });
+
+test('Muse preparation includes real vision and context settings and never upgrades Big Pickle to 1M',t=>{
+ const root=workspace(t),directory=path.join(root,'prepared');
+ const models=['opencode/big-pickle','opencode/muse-spark-1.3-contributor-free'];prepareDirectory(directory,{models});
+ const catalog=JSON.parse(fs.readFileSync(path.join(directory,'models.json'))).models;
+ assert.equal(catalog[0].context_window,200000);assert.deepEqual(catalog[0].input_modalities,['text']);
+ assert.equal(catalog[1].context_window,1048576);assert.equal(catalog[1].auto_compact_token_limit,891289);assert.deepEqual(catalog[1].input_modalities,['text','image']);
+ const env=preparedEnvironment(directory,{});assert.equal(env.BRIDGE_IMAGE_MODELS,models[1]);assert.equal(env.BRIDGE_IMAGE_DETAIL_POLICY,'auto');assert.equal(env.BRIDGE_REASONING_SUMMARY_POLICY,'omit');
+});

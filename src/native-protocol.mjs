@@ -1,3 +1,5 @@
+import {modelProfile} from './model-profiles.mjs';
+import {repairRecursiveSchema} from './tool-schema.mjs';
 import { nativeHistory } from './native-history.mjs';
 import { nativeContent, promptHistory } from './native-media.mjs';
 import { invalid, unsupported, BridgeError } from './errors.mjs';
@@ -55,12 +57,19 @@ export function normalizeNativeRequest(payload, api, config) {
   if (payload.text?.format && payload.text.format.type !== 'text') throw unsupported('Structured output format is unsupported.');
   if (payload.n != null && payload.n !== 1) throw unsupported('Only one completion is supported.');
   if (payload.tool_choice != null && !['auto', 'none'].includes(payload.tool_choice)) throw unsupported('Only auto/none tool choice is supported.');
+  const warnings = [];
   const tools = normalizeTools(payload.tools, api);
+  if(modelProfile(payload.model)?.recursiveTools === 'flatten') {
+    for(const tool of tools){
+      const repaired=repairRecursiveSchema(tool.parameters);
+      tool.parameters=repaired.schema;
+      if(repaired.changed&&!warnings.includes('recursive_tool_schema_relaxed'))warnings.push('recursive_tool_schema_relaxed');
+    }
+  }
   const activeTools = payload.tool_choice === 'none' ? [] : tools;
   const source = api === 'responses' ? (typeof payload.input === 'string' ? [{ role: 'user', content: payload.input }] : payload.input) : payload.messages;
   if (!Array.isArray(source) || !source.length) throw invalid('A nonempty input/messages list is required.');
   const history = [];
-  const warnings = [];
   if (payload.instructions != null) {
     if (typeof payload.instructions !== 'string') throw invalid('instructions must be text.');
     history.push({ role: 'system', content: payload.instructions });

@@ -30,8 +30,8 @@ export function prepareRouterPlan(directory,{prepared,routerState}={}){
   const slug=providerId+'/'+id,gatewayModel=safe(providerId)+'-'+safe(id);
   if(users.models.some(x=>x.slug===slug||x.gatewayModel===gatewayModel)||catalog.models.some(x=>x.slug===slug))throw new Error('A proposed model identity already exists.');
   const displayName=source.display_name.replace(/ \(OpenCode Bridge\)$/,'')+' (OpenCode Native Bridge)';
-  const description='Experimental OpenCode native client-tool bridge; text only; 32k acceptance budget. Provider access and quotas apply.';
-  const entry={slug,gatewayModel,compHash:gatewayModel+'-user-v1',upstreamModel:id,provider:providerId,listed:true,displayName,description,priority:100+index,contextWindow:source.context_window,autoCompact:26000,inputModalities:['text'],defaultEffort:'default',reasoningLevels:[{effort:'default',description:'Upstream default'}],supportsReasoningSummaries:false,supportedEndpoints:['/responses']};
+  const description=source.description+'; official OpenCode bridge. Provider access and quotas apply.';
+  const entry={slug,gatewayModel,compHash:gatewayModel+'-user-v1',upstreamModel:id,provider:providerId,listed:true,displayName,description,priority:100+index,contextWindow:source.context_window,autoCompact:source.auto_compact_token_limit??26000,inputModalities:source.input_modalities??['text'],defaultEffort:'default',reasoningLevels:[{effort:'default',description:'Upstream default'}],supportsReasoningSummaries:false,supportedEndpoints:['/responses']};
   return {entry,catalog:{...source,slug,display_name:displayName,description,priority:100+index}};
  });
  const provider={id:providerId,displayName:'OpenCode Native Bridge',baseUrl:`http://127.0.0.1:${port}/v1`,adapter:'openai-responses',headers:{},allowPrivate:true,enabled:true};

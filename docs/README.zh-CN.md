@@ -1,6 +1,9 @@
 # codex-opencode-bridge
 
-把用户有权使用的 OpenCode 模型接入 Codex 的本地兼容服务。当前为私有候选版本 **0.2.0-rc.1**。最新真实客户端十项验收：Big Pickle、MiMo V2.6 Flash Free 各通过 10/10；LongCat、Nemotron 各通过 9/10，分别仍有补丁内容不符和代码修复生成失败。此前 403 已定位为预分配会话 ID 格式回归，修正后这四个模型均恢复访问。Bunny 上一版本的 9/10 结果不作为当前版本重新验证。详见[根因与对照实测](session-id-regression.md)。整体仍属于实验性文本与工具兼容，桌面菜单尚未启用新桥接。
+把用户有权使用的 OpenCode 模型接入 Codex 的本地兼容服务。当前为私有候选版本 **0.2.0-rc.1**。最新真实客户端十项验收：Big Pickle、MiMo V2.6 Flash Free 各通过 10/10；LongCat、Nemotron 各通过 9/10，分别仍有补丁内容不符和代码修复生成失败。此前 403 已定位为预分配会话 ID 格式回归，修正后这四个模型均恢复访问。Bunny 上一版本的 9/10 结果不作为当前版本重新验证。详见[根因与对照实测](session-id-regression.md)。桌面一键安装流程仍在开发，不能把维护者本机已配置成功视作新用户安装验收通过。
+
+
+新安装流程进度：`prepare` 已纳入 Big Pickle 和 Muse，并按模型生成上下文和图片配置；`doctor` 可以只读检查依赖。Muse 的递归工具参数兼容已收进桥接本体，不再依赖维护者本机的 Router 补丁。自动安装、升级、卸载及 README 安装 Prompt 仍待完成，见[发布验收清单](release-readiness.json)。
 
 ## 已经验证到哪一步
 

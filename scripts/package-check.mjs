@@ -53,6 +53,16 @@ try{
  assert.deepEqual(result.models,models);assert.equal(fs.readFileSync(source,'utf8'),original);
  const catalog=JSON.parse(fs.readFileSync(path.join(prepared,'models.json')));assert.equal(catalog.models.length,6);assert.deepEqual(catalog.models[0],JSON.parse(original).models[0]);
  receipt.checks.fiveModelPreparationWithPreservation=true;
+ const musePrepared=path.join(root,'muse preparation');
+ run(cli,['prepare',musePrepared,'--models','opencode/big-pickle,opencode/muse-spark-1.3-contributor-free'],root,cliEnv);
+ const museCatalog=JSON.parse(fs.readFileSync(path.join(musePrepared,'models.json'))).models;
+ assert.equal(museCatalog[1].context_window,1048576);assert.deepEqual(museCatalog[1].input_modalities,['text','image']);
+ assert.equal(museCatalog[0].context_window,200000);
+ const museEnv=JSON.parse(fs.readFileSync(path.join(musePrepared,'bridge-env.json')));
+ assert.equal(museEnv.BRIDGE_IMAGE_MODELS,'opencode/muse-spark-1.3-contributor-free');
+ run(cli,['remove-prepared',musePrepared],root,cliEnv);assert.equal(fs.existsSync(musePrepared),false);
+ receipt.checks.museVisionPreparation=true;
+
  const router=path.join(root,'mock-router');fs.mkdirSync(router);
  fs.writeFileSync(path.join(router,'generic-providers.json'),'{"providers":[]}');fs.writeFileSync(path.join(router,'user-models.json'),'{"models":[]}');fs.writeFileSync(path.join(router,'merged-models.json'),original);
  const plan=JSON.parse(run(cli,['prepare-router',path.join(root,'plan'),'--prepared',prepared,'--router-state',router],root,cliEnv));

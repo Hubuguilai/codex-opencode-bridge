@@ -3,7 +3,20 @@
 This candidate is private and experimental. Passing the adapter tests does not
 certify every model, every Desktop tool, or future provider availability.
 
-## Current support matrix
+## Current release gate
+
+The simple desktop installer remains incomplete. See [release-readiness.json](release-readiness.json).
+The 2026-09-30 source adds Muse preparation, a read-only prerequisite doctor,
+and recursive tool-schema repair inside the native bridge. Direct official-runtime
+Muse image plus recursive namespace-tool input passed, without Router code.
+The current local unit suite has 100 tests. This does not replace the pending
+clean-machine desktop and full workflow acceptance gates.
+
+Muse's [near-capacity test](muse-capacity.md) and [image test](images.md) apply
+to the described exact routes and source revisions. Big Pickle's new installer
+profile uses the catalog's 200k context / 160k input rather than a local 1M override.
+
+## Historical support matrix (source-specific, not current release certification)
 
 All new alias suites below used the same runtime source digest
 `e0c3f0b79b53bbf2ead5992d2441511b2ccac1c7265021f1036b62e3e9944298`.
@@ -22,8 +35,9 @@ not a production success-rate estimate or full GPT feature parity.
 | `opencode/ling-3.0-flash-fin-free` | Suite failed; separate short diagnostic reported provider HTTP 400, endpoint unavailable | Unavailable in this run |
 | `opencode/jev-1.13-free` | Absent from default runtime inventory; explicit temporary registration succeeded, but text generation returned provider HTTP 500 | Not verified; upstream failure |
 | `opencode/deepseek-v4-flash-free` | Absent from runtime inventory; repair failed before a client command | Not verified; do not confuse with paid/Go DeepSeek routes |
-| `opencode/muse-spark-1.3-contributor-free` | Listed by runtime; no acceptance run | Unverified; eligibility not inferred |
-| Images/audio/files, hosted search, adjustable reasoning | Explicitly rejected | Unsupported |
+| `opencode/muse-spark-1.3-contributor-free` | See newer image/capacity and standalone schema tests above | Partial live verification; complete workflow remains pending |
+| Attached user images | Muse only; see newer evidence above | Implemented and tested |
+| Image tool results/audio/PDF/video, hosted search, adjustable reasoning | Explicitly rejected | Unsupported |
 
 [Client-alias semantics](client-aliases.md) explain why file aliases show command
 execution instead of a native patch diff. Original supplied Codex tools remain

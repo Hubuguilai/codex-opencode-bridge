@@ -4,6 +4,18 @@ A local, authenticated **OpenCode v2 to Codex compatibility bridge**.
 Experimental native-tool mode relays structured tool calls to Codex for execution.
 Version **0.2.0-rc.1**. The repository remains private; no public release has been made.
 
+**Desktop installer work is in progress.** `prepare` now supports Big Pickle and
+Muse Spark 1.3 Contributor Free with model-specific context and image settings.
+`doctor` performs read-only prerequisite checks; it does not claim a desktop
+installation or model entitlement. The automatic install/upgrade/uninstall flow
+is not yet ready. Track the [release gates](docs/release-readiness.json).
+
+Muse's recursive tool-schema compatibility is implemented inside this bridge,
+including namespaced tools; it no longer depends on a private Router patch.
+The provider sees a relaxed recursive schema, and Codex retains tool argument
+validation. This emits `recursive_tool_schema_relaxed` when applied.
+
+
 **Product target:** native Codex workspace and tool workflows for supported models.
 Current real-Codex ten-scenario tests pass 10/10 for Big Pickle and MiMo V2.6 Flash Free.
 LongCat 2.5 Preview Free and Nemotron 3 Ultra Free pass 9/10; exact patch contents

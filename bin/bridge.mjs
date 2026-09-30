@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {doctor} from '../src/doctor.mjs';
 import { prepareRouterPlan } from '../src/router-plan.mjs';
 import { prepareDirectory, removePreparedDirectory, preparedEnvironment } from '../src/setup.mjs';
 import { readConfig } from '../src/config.mjs';
@@ -12,7 +13,9 @@ try { invocation = parseCommand(process.argv.slice(2)); }
 catch (error) { console.error(error.message); process.exit(1); }
 const {command, directory, options} = invocation;
 if (command === 'help') {
-  console.log(`codex-opencode-bridge v0.2.0-rc.1\n\nCommands:\n  serve   Start an authenticated local bridge and OpenCode v2\n  serve-prepared DIR  Start a reviewed preparation without manual environment settings\n  init    Create a private local token and print its file path\n  prepare DIR [--models ID,ID] [--model DEFAULT_ID] [--catalog PATH]  Prepare isolated config files\n  prepare-router DIR --prepared DIR --router-state DIR  Export a read-only desktop integration plan\n  recover-prepared DIR  Clean verified abandoned bridge sessions without generating text\n  remove-prepared DIR  Remove unmodified prepared files after stopping service\n\nConfiguration: BRIDGE_MODE, BRIDGE_PORT, OPENCODE_PORT, OPENCODE_BIN, BRIDGE_MODELS,\nBRIDGE_STATE_DIR, BRIDGE_TOKEN, BRIDGE_TIMEOUT_MS, BRIDGE_MAX_BODY_BYTES.\nSee README.md. No client configuration is edited automatically.`);
+  console.log(`codex-opencode-bridge v0.2.0-rc.1\n\nCommands:\n  doctor  Read-only prerequisite and supported-model checks\n  serve   Start an authenticated local bridge and OpenCode v2\n  serve-prepared DIR  Start a reviewed preparation without manual environment settings\n  init    Create a private local token and print its file path\n  prepare DIR [--models ID,ID] [--model DEFAULT_ID] [--catalog PATH]  Prepare isolated config files\n  prepare-router DIR --prepared DIR --router-state DIR  Export a read-only desktop integration plan\n  recover-prepared DIR  Clean verified abandoned bridge sessions without generating text\n  remove-prepared DIR  Remove unmodified prepared files after stopping service\n\nConfiguration: BRIDGE_MODE, BRIDGE_PORT, OPENCODE_PORT, OPENCODE_BIN, BRIDGE_MODELS,\nBRIDGE_STATE_DIR, BRIDGE_TOKEN, BRIDGE_TIMEOUT_MS, BRIDGE_MAX_BODY_BYTES.\nSee README.md. No client configuration is edited automatically.`);
+} else if (command === 'doctor') {
+ const result=doctor();console.log(JSON.stringify(result,null,2));if(!result.prerequisitesReady)process.exitCode=1;
 } else if (command === 'recover-prepared') {
   let runtime;
   try {
