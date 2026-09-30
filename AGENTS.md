@@ -8,4 +8,4 @@
 - Live tests use real model access and must be explicitly requested/authorized.
 - Unsupported features must fail explicitly. Never silently discard content or tool calls.
 - Plan mode/empty directories are not an OS security boundary; document the distinction.
-- Keep this repository private unless the owner explicitly authorizes publication.
+- The owner authorized experimental open-source publication on 2026-09-30. Keep unverified acceptance gates explicit; never publish credentials or private local state.

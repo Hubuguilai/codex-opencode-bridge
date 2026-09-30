@@ -1,7 +1,7 @@
 {
   "target": "Simple macOS Codex desktop installation from README or a Codex prompt",
-  "status": "private_trial_candidate",
-  "publicReleaseAuthorized": false,
+  "status": "experimental_publication_ready",
+  "publicReleaseAuthorized": true,
   "gates": {
     "standalone_muse_schema_and_image_compatibility": "verified_live",
     "big_pickle_and_muse_prepared_profiles": "verified_offline",
@@ -51,5 +51,10 @@
   "scopeDecision": {
     "date": "2026-09-30",
     "decision": "Owner requested a quick closeout as a private trial candidate. Remaining public-release acceptance gates are deferred, not passed."
+  },
+  "publication": {
+    "date": "2026-09-30",
+    "scope": "macOS experimental open-source prerelease",
+    "fullCleanDesktopAcceptance": false
   }
 }

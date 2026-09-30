@@ -1,3 +1,5 @@
+> Historical private-trial record. For the subsequent owner-authorized public scope, see [public-release.md](public-release.md).
+
 # Private trial delivery / 私有试用交付
 
 **0.2.0-rc.1 · 2026-09-30 · private, not a public release.**
