@@ -1,5 +1,7 @@
 # OpenCode models in Codex
 
+**Experimental prerelease: 0.2.0-rc.1.** [Verified scope and known limitations](docs/public-release.md).
+
 **Get model access, paste one prompt into Codex, then choose your model.**
 No repository download, terminal setup or configuration editing is required before
 asking Codex to install it.

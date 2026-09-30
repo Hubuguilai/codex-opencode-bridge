@@ -40,9 +40,9 @@
 - [ ] Broader crash timing: live orphan runtime, spawn-recording window and interruption during recovery
 - [ ] Stronger isolation of third-party plugins/MCP beyond trusted local configuration
 - [x] Incremental native visible-text events, explicit failure semantics and real-client regression
-- [ ] Public-release decision after support boundaries and upstream access are reviewed
+- [x] Owner authorized experimental public release; complete desktop acceptance remains deferred
 
-The private candidate is not a universal or unlimited free API gateway. Windows,
+The experimental project is not a universal or unlimited free API gateway. Windows,
 multi-user hosting, automatic key/account routing and quota circumvention are
 outside the current scope. See [verification](docs/verification.md) for the exact
 model boundary and [acceptance contract](docs/native-codex-target.md) for the goal.

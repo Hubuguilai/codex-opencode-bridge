@@ -25,10 +25,16 @@
   creation whose reply is lost still has an exact cleanup target. A mismatching
   returned ID is rejected and never used as a deletion target. A process crash,
   server unavailability or creation committing after cleanup has already run can
-  still leave a session behind. There is no persistent crash-recovery journal yet.
-  Never delete unrelated sessions.
+  still leave a session behind. A persistent session-intent journal records exact
+  session identities before creation. Recovery verifies runtime ownership and
+  that the owner is no longer active before removing known sessions; ambiguous
+  or unknown state is retained. It does not replay model requests or guarantee
+  recovery from every interruption. Never delete unrelated sessions.
 - Upstream session DELETE may return HTTP 204; that is successful cleanup.
-- No prompts or responses are logged by this bridge. OpenCode has its own database,
+- Normal bridge error logs use fixed categories rather than raw provider payloads.
+  Protected local relay files temporarily contain request history and tool
+  arguments/results; crash leftovers may retain them. Do not upload work
+  directories, credentials or backups when reporting bugs. OpenCode has its own database,
   logging, telemetry and provider data handling; deleting a session is not a promise
   of secure data erasure or zero upstream retention.
 - Each upstream session has a four-model-step dispatch limit; intermediate
@@ -42,18 +48,38 @@
   retried. No account rotation or automatic quota fallback.
 - Do not expose this service to the Internet or treat it as a multi-user gateway.
 
-## Removing it
+## Managed installation and removal
 
-Stop the bridge with Ctrl-C (or send SIGTERM to its process), then remove its checkout
-if no longer wanted. The user-controlled `BRIDGE_STATE_DIR` can be removed separately
-once this service has stopped; this removes its local token and leftover work dirs.
-Do not remove `~/.local/share/opencode` or Codex auth/config as part of uninstall.
+The README's `setup`/`install` path installs a per-user macOS LaunchAgent,
+starts a local bridge, and registers its models through Codex Router. When Router
+is missing it can install the pinned Router dependency and run its client setup.
+Router compatibility changes are version-checked, backed up and recorded. This
+path does modify managed client configuration; `prepare` alone only exports files.
 
-No LaunchAgent or active Codex configuration is installed automatically. The
-`prepare` command writes an isolated model catalog/configuration copy, and
-`remove-prepared` refuses modified files or runtime leftovers.
-The older prototype's existing LaunchAgent is separate and remains unaffected.
+For an installation created by the managed installer, run from the checkout:
 
+```sh
+bash scripts/start.sh uninstall
+```
+
+Pass the same `--directory` used at installation when it was customized. Uninstall
+checks ownership, removes this installation's model registration and bridge
+service, and retains Router, other models, login, backups, credentials and prepared
+data. It does not uninstall shared Router dependencies or reverse every Router
+setup change. Interrupted model changes/upgrades need the corresponding documented
+recovery command first. Modified/unowned records are preserved rather than forced.
+
+Do not simply delete the checkout to uninstall: background services and model
+registrations can outlive it. Keep installation records until removal succeeds.
+Afterward, fully quit and reopen Codex to refresh the menu. See the
+[managed lifecycle runbook](agent-install.md#management-uses-the-same-launcher).
+
+For a manually started foreground `serve` process only, stop it with Ctrl-C or
+SIGTERM. Inspect any separate manual service registration before removing its
+files. The experimental old-install migration is not an automatic uninstall path.
+Never delete OpenCode's shared credential store or Codex auth/config as cleanup.
+Backups and runtime data may contain sensitive material; retained data is separate
+from uninstalling the bridge's service and model registrations.
 
 ## Optional client-executed aliases
 

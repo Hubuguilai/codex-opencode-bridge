@@ -7,9 +7,8 @@ runtime and your own model access.
 [中文说明](README.zh-CN.md) · [Model access](opencode-access.md) ·
 [Verification](verification.md) · [Release checklist](release-readiness.json)
 
-**Private trial candidate: 0.2.0-rc.1.** See the [delivery summary and deferred gates](private-trial.md). The installer is implemented, but a
-complete clean-machine desktop installation has not passed acceptance. There is
-no public release yet. Upgrade and model-selection lifecycle checks have passed;
+**Experimental candidate: 0.2.0-rc.1.** See the [publication scope and deferred gates](public-release.md). The installer is implemented, but a
+complete clean-machine desktop installation has not passed acceptance. Public availability does not certify the untested paths. Upgrade and model-selection lifecycle checks have passed;
 clean-client acceptance, current-release full model workflows and some first-install recovery remain open. Do not interpret an install
 success message as certification of the model picker or every Codex feature.
 
@@ -24,7 +23,7 @@ not implemented.
 1. Follow [OpenCode account and model access](opencode-access.md). Use your own
    account; keys belong in a local login flow, not a chat or Git repository. Check
    that the exact model answers in OpenCode.
-2. Obtain this repository. While private, access requires collaborator permission.
+2. Download the public repository; GitHub login is not required.
 3. Run the installer from the repository directory, or copy the Prompt below into
    Codex with this repository open.
 
@@ -206,7 +205,7 @@ operator authorization. See [verification](verification.md),
 Release blockers include a clean supported-machine install from this README,
 actual Desktop picker and signed-in GPT preservation, full current-source model
 workflows, reboot/upgrade/lifecycle checks, and default-branch consistency. The
-repository remains private until its owner authorizes publication.
+remaining gates stay open for the experimental public version.
 
 Upgrades also install the shipped Router terminal-error repair and republish the
 owned routes. Bridge rollback retains this additive shared-dependency repair and
