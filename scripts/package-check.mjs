@@ -22,7 +22,7 @@ try{
  const [pack]=JSON.parse(run('npm',['pack','--json','--ignore-scripts','--pack-destination',root]));
  const paths=pack.files.map(file=>file.path);
  assert.ok(paths.length>0);
- const required=['src/router-registration.mjs','src/service.mjs','runtime/package.json','runtime/package-lock.json','src/runtime-install.mjs','bin/bridge.mjs','src/runtime-plugin.mjs','src/client-aliases.mjs','src/recovery.mjs','examples/native-models.json','README.md','docs/README.zh-CN.md','LICENSE'];
+ const required=['src/desktop-install.mjs','docs/desktop-install.md','src/router-registration.mjs','src/service.mjs','runtime/package.json','runtime/package-lock.json','src/runtime-install.mjs','bin/bridge.mjs','src/runtime-plugin.mjs','src/client-aliases.mjs','src/recovery.mjs','examples/native-models.json','README.md','docs/README.zh-CN.md','LICENSE'];
  for(const file of required)assert.ok(paths.includes(file),'Required packaged asset missing: '+file);
  const forbidden=/(^|\/)(?:generated|node_modules|\.git|\.codex|\.env(?:\..*)?|auth\.json|local-token|bridge-env\.json|install-manifest\.json|generic-providers\.json|user-models\.json|merged-models\.json)(?:\/|$)|\.(?:key|log)$/;
  assert.ok(paths.every(file=>!path.isAbsolute(file)&&!file.split('/').includes('..')&&!forbidden.test(file)),'Local runtime/private state must not be packaged');

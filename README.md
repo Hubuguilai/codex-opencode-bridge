@@ -223,3 +223,5 @@ not access to third-party models.
 [Managed macOS service component / 后台服务组件](docs/managed-service.md).
 
 [Router registration / 模型注册组件](docs/router-registration.md).
+
+[Unified installer candidate and Codex Prompt / 统一安装候选与提示词](docs/desktop-install.md).

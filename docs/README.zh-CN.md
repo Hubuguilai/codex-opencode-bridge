@@ -155,3 +155,5 @@ node bin/bridge.mjs serve-prepared /absolute/new/bridge-config
 [Managed macOS service component / 后台服务组件](managed-service.md).
 
 [Router registration / 模型注册组件](router-registration.md).
+
+[Unified installer candidate and Codex Prompt / 统一安装候选与提示词](desktop-install.md).

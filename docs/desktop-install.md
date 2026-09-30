@@ -1,0 +1,82 @@
+# Unified installer candidate
+
+The unified command currently requires an existing compatible Codex Router.
+Automatic first-time Router installation, managed upgrades, model-set changes
+and interrupted-install recovery are still pending. This is a development
+candidate, not the complete README installation promised for the release.
+
+From the bridge checkout/package, on macOS:
+
+```sh
+node bin/bridge.mjs install
+```
+
+Defaults: install under `~/.local/share/codex-opencode-bridge/desktop`, discover
+Router under `~/.local/share/codex-router`, and select Big Pickle plus Muse Spark
+1.3 Contributor Free. Override discovery with `--router-root`; use `--directory`
+for a separate managed installation and `--models` for documented model IDs.
+The selected Router must already be set up for this user's Codex. Existing bridge
+providers are not silently adopted; identity conflicts stop before registration.
+
+The command installs its pinned OpenCode runtime, chooses unused local ports,
+prepares model configuration, registers a macOS service, waits for bridge and
+OpenCode health, then publishes model entries through the Router. A successful
+return still requires model-access and real Codex workflow verification. It does
+not equate a health response with a working model or restart Codex automatically.
+
+Repeat installation with the same options rechecks the service and registration
+without adding duplicates. On failure, the installation phase is saved in
+`desktop-install.json`, the new service is stopped where possible, and local
+preparation and rollback evidence remain. An incomplete record currently requires
+diagnosis rather than automatic resume. Do not delete evidence or edit credentials
+to force a retry.
+
+To remove this installation's routes and service:
+
+```sh
+node bin/bridge.mjs uninstall
+```
+
+Use the same `--directory` if a custom location was selected. The existing shared
+Router, other models, provider logins, backups, and bridge preparation remain.
+Removal stops if ownership checks find user edits or dependent models. Runtime
+cleanup, clean reinstall after uninstall and upgrades are not yet integrated.
+
+## Installation Prompt for the current candidate
+
+This prompt intentionally stops when the candidate cannot meet its prerequisites;
+it must not invent the missing automatic Router bootstrap.
+
+```text
+Set up this codex-opencode-bridge checkout using its maintained installer.
+Read README.md and docs/desktop-install.md first. Check macOS, Node/npm, Codex,
+the existing Codex Router location, and the user's OpenCode model access.
+Keep credentials in local provider login flows; never ask me to paste keys here.
+Run the supported install command, using explicit paths only when discovery needs
+them. Preserve existing models and login. If prerequisites or ownership conflict,
+report the exact missing step; do not overwrite existing installation records.
+After installation, distinguish service health, model access, picker visibility,
+and real text/tool/image workflow results. Explain any required Codex restart.
+Do not call the installation verified until those client checks actually pass.
+```
+
+## 中文说明
+
+当前可用的统一安装命令会串起运行时、模型准备、后台服务和模型注册，但要求电脑
+已经安装兼容的 Codex Router。首次自动安装 Router、升级、修改模型集合、失败后
+自动恢复与卸载后重新安装尚未完成，因此仍是开发候选。
+
+安装成功返回只代表配置流程完成，还需验证模型权限、重启后的菜单及真实任务。
+卸载保留已有 Router、其他模型、账号登录和备份；遇到用户修改时会停止并说明原因。
+
+可交给 Codex 的候选版提示词：
+
+```text
+请阅读当前 codex-opencode-bridge 仓库的 README.md 和 docs/desktop-install.md，
+使用仓库维护的安装命令配置 Big Pickle 与 Muse。先检查 macOS、Node/npm、Codex、
+已有 Router 和 OpenCode 模型权限。密钥只通过本地登录流程输入，不要让我贴进聊天。
+保留现有模型和登录。若前置条件缺失或已有配置冲突，报告具体原因，不要覆盖配置
+来强行继续，也不要自行编造尚未实现的安装步骤。安装后分别验证服务健康、模型权限、
+菜单可见性和真实文字/工具/图片任务，并说明是否需要我重启 Codex。未实测的项目
+明确标记为未验证，不要把安装命令成功当作全部验收通过。
+```

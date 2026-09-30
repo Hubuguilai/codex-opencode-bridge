@@ -1,7 +1,7 @@
 import {parseArgs} from 'node:util';
 
 const commands = {
-  'register-router': ['router-root'], 'unregister-router': ['router-root'], 'install-service': ['binary'], 'service-status': [], 'remove-service': [], 'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
+  'install': ['directory','router-root','models'], 'uninstall': ['directory'], 'register-router': ['router-root'], 'unregister-router': ['router-root'], 'install-service': ['binary'], 'service-status': [], 'remove-service': [], 'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
   prepare: ['models', 'model', 'catalog'],
   'prepare-router': ['prepared', 'router-state'],
 };
