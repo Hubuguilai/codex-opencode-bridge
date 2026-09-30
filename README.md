@@ -219,3 +219,5 @@ not access to third-party models.
 
 
 [Official model access and managed runtime setup](docs/opencode-access.md).
+
+[Managed macOS service component / 后台服务组件](docs/managed-service.md).

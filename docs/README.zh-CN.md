@@ -151,3 +151,5 @@ node bin/bridge.mjs serve-prepared /absolute/new/bridge-config
 
 
 [模型账号、免费/订阅区别与独立运行时安装说明](opencode-access.md)。
+
+[Managed macOS service component / 后台服务组件](managed-service.md).

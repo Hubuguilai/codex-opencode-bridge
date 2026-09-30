@@ -1,11 +1,11 @@
 import {parseArgs} from 'node:util';
 
 const commands = {
-  'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
+  'install-service': ['binary'], 'service-status': [], 'remove-service': [], 'install-runtime': ['directory'], doctor: [], serve: [], init: [], 'serve-prepared': [], 'remove-prepared': [], 'recover-prepared': [],
   prepare: ['models', 'model', 'catalog'],
   'prepare-router': ['prepared', 'router-state'],
 };
-const needsDirectory = new Set(['prepare', 'prepare-router', 'serve-prepared', 'remove-prepared', 'recover-prepared']);
+const needsDirectory = new Set(['install-service','service-status','remove-service','prepare', 'prepare-router', 'serve-prepared', 'remove-prepared', 'recover-prepared']);
 
 // Validate the entire invocation before configuration can create a token or
 // an operation can write/remove files. Never silently accept a misspelled flag.
