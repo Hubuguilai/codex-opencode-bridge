@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-30T04:45:57.985Z",
+  "type": "mock-upstream-router-integration",
+  "checks": {
+    "registryAccepted": true,
+    "nativeCatalogPreserved": true,
+    "codexCatalogLoaded": true,
+    "stateRemoved": true
+  },
+  "routerRevision": "b90aa60e257bbcc33855aad7d43954c1a09b1311",
+  "routerSourceSha256": "c47a2543a48a501e24465dc98fa0007263547800eeecb230ff163f875e563d50",
+  "routerWorktreeDirty": true,
+  "models": [
+    "opencode-native-bridge/opencode/nemotron-3-ultra-free"
+  ],
+  "existingCatalogEntries": 11,
+  "proposedCatalogEntries": 12,
+  "routes": [
+    {
+      "model": "opencode-native-bridge/opencode/nemotron-3-ultra-free",
+      "modelMapped": true,
+      "toolNamespacePreserved": true,
+      "reasoningPreserved": true,
+      "callIdReturned": true
+    }
+  ],
+  "failureRoutes": [
+    {
+      "route": "forwarder",
+      "status": 429,
+      "terminalFailure": true,
+      "errorCodePreserved": true,
+      "messagePreserved": true,
+      "falseCompletion": false
+    },
+    {
+      "route": "router_gateway_forwarder",
+      "status": 429,
+      "terminalFailure": false,
+      "errorCodePreserved": false,
+      "messagePreserved": true,
+      "falseCompletion": false
+    },
+    {
+      "route": "forwarder",
+      "status": 504,
+      "terminalFailure": true,
+      "errorCodePreserved": true,
+      "messagePreserved": true,
+      "falseCompletion": false
+    },
+    {
+      "route": "router_gateway_forwarder",
+      "status": 504,
+      "terminalFailure": false,
+      "errorCodePreserved": false,
+      "messagePreserved": true,
+      "falseCompletion": false
+    }
+  ],
+  "error": "Router lost a terminal provider error",
+  "passed": false
+}

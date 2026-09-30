@@ -726,3 +726,28 @@ prove byte identity, provider perception or the reason the stream ended. Cleanup
 [completed](receipts/router-wire-image-stream-lifecycle.json). Service diagnostics
 now distinguish fixed request_deadline, client_disconnected and request_failed_*
 codes without persisting user/provider content.
+
+
+## Direct-route image and gateway error isolation
+
+The [direct prepared-bridge run](receipts/muse-direct-image-diagnostic.json)
+passed Muse text/file tasks and reached a completed uploaded-image answer that
+failed recognition. One inline image was present at the provider boundary; no
+deadline/disconnect warning occurred. This demonstrates that failed image
+recognition can also occur without Router; its root cause remains unresolved.
+
+Separately, a [local fault fixture](receipts/gateway-terminal-error-before.json)
+proved that the API forwarder preserves response.failed, but the full gateway
+path converts it to untyped error data with a generic 500 code. An actual Codex
+client accepts the original terminal failure but cannot identify this transformed
+event. This explains loss of error detail, not the underlying provider failure.
+
+The proposed gateway stream transform restores a failed Responses event only
+for untyped error objects on the bridge route. It recovers recognized safe
+status categories, uses a fixed generic message otherwise, never logs raw error
+content, bounds frame buffering and never fabricates response.completed.
+`node scripts/gateway-error-rehearsal.mjs --router-root /absolute/pinned/router`
+tests it on a disposable Router copy, including actual Codex rate-limit/timeout
+classification. The [prototype receipt](receipts/gateway-terminal-error-prototype.json)
+passed both categories and confirms the source Router was preserved. This is a prototype integration, not an installed compatibility
+upgrade: shipping and migrating the version-bound Router change remain pending.

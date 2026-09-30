@@ -9,6 +9,7 @@ import {spawn,spawnSync} from 'node:child_process';
 import {randomBytes,createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {makeWriter} from '../src/protocol.mjs';
+import {verifyClientRoute} from '../src/client-verification.mjs';
 import {verificationImage} from '../src/verification-image.mjs';
 const flag=process.argv.indexOf('--router-root');
 if(flag<0||!process.argv[flag+1])throw new Error('Usage: node scripts/router-rehearsal.mjs --router-root /absolute/installed/codex-router');
@@ -22,7 +23,7 @@ process.env.MODEL_ROUTER_STATE_DIR=state;
 // Remove inherited path overrides so helper modules cannot write live state.
 for(const key of ['MODEL_ROUTER_GENERIC_PROVIDERS','MODEL_ROUTER_USER_MODELS','MODEL_ROUTER_PROVIDER_CREDENTIAL_STORE','MODEL_ROUTER_PROVIDER_CREDENTIAL_MIGRATIONS'])delete process.env[key];
 const mod=name=>import(pathToFileURL(path.join(router,'src',name+'.mjs')).href);
-const processes=[];let upstream,received;
+const processes=[];let upstream,received,fault;
 const receipt={date:new Date().toISOString(),type:'mock-upstream-router-integration',checks:{},routerRevision:spawnSync('git',['rev-parse','HEAD'],{cwd:router,encoding:'utf8'}).stdout.trim()};
 const routerHash=createHash('sha256');
 for(const name of fs.readdirSync(path.join(router,'src')).filter(x=>x.endsWith('.mjs')).sort()){routerHash.update(name);routerHash.update(fs.readFileSync(path.join(router,'src',name)));}
@@ -67,6 +68,7 @@ try{
   assert.equal(req.headers.authorization,'Bearer '+token);
   received=JSON.parse(body);
   const writer=makeWriter(res,'responses',{model:received.model,stream:true});
+  if(fault){writer.fail(fault);return;}
   writer.calls([{type:'function_call',id:'fc_mock',call_id:'call_mock',name:'probe',namespace:'client',arguments:'{"value":17}'}]);writer.finish(null);
  });
  await new Promise((resolve,reject)=>{upstream.once('error',reject);upstream.listen(4697,'127.0.0.1',resolve);});
@@ -118,6 +120,29 @@ try{
    receipt.routes.at(-1)[endpoint+'_'+name+'RejectedBeforeUpstream']=true;
   }
  }
+ }
+ if(process.argv.includes('--faults')){
+  receipt.failureRoutes=[];
+  for(const [status,code,message] of [[429,'upstream_access_or_quota','Provider returned HTTP 429.'],[504,'request_cancelled','Request cancelled or deadline exceeded.']]){
+   fault={status,code,message};
+   for(const direct of [true,false]){
+    const model=models[0];
+    const response=await fetch(`http://127.0.0.1:${direct?4698:4696}/v1/responses`,{method:'POST',headers:{authorization:'Bearer '+(direct?internal:caller),'content-type':'application/json'},body:JSON.stringify({model:direct?model.gatewayModel:model.slug,input:'Synthetic fault.',stream:true}),signal:AbortSignal.timeout(15000)});
+    const wire=await response.text();
+    fs.writeFileSync('generated/fault-wire-'+status+'-'+(direct?'forwarder':'router')+'.txt',wire,{mode:0o600});
+    receipt.failureRoutes.push({route:direct?'forwarder':'router_gateway_forwarder',status,terminalFailure:wire.includes('response.failed'),errorCodePreserved:wire.includes(code),safeMeaningPreserved:status===429?wire.includes('HTTP 429'):wire.includes('deadline exceeded'),falseCompletion:wire.includes('response.completed')});
+   }
+  }
+  receipt.clientFailures=[];
+  for(const [status,code,message,expected] of [[429,'upstream_access_or_quota','Provider returned HTTP 429.','rate_limit'],[504,'request_cancelled','Request cancelled or deadline exceeded.','timeout']]){
+   fault={status,code,message};
+   const selected=models[0];
+   const result=await verifyClientRoute({model:selected.slug,token:caller,baseUrl:'http://127.0.0.1:4696/v1',catalogEntry:{...bridgeModel,slug:selected.slug},timeoutMs:30000});
+   receipt.clientFailures.push({status,category:result.errorCategory,expected,passed:result.errorCategory===expected&&!result.passed});
+  }
+  assert.ok(receipt.clientFailures.every(x=>x.passed),'Codex lost the gateway failure category');
+  assert.ok(receipt.failureRoutes.every(x=>x.terminalFailure&&x.errorCodePreserved&&x.safeMeaningPreserved&&!x.falseCompletion),'Router lost a terminal provider error');
+  receipt.checks.terminalFailuresPreserved=true;
  }
  Object.assign(receipt.checks,{modelMapped:true,toolNamespacePreserved:true,reasoningPreserved:true,callIdReturned:true});
 }catch(error){receipt.error=error.message.replaceAll(state,'<temporary-state>');process.exitCode=1;}
