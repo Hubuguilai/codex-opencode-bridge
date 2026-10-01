@@ -1,0 +1,296 @@
+{
+  "checked_at_utc": "2026-10-01T13:53:08.445839+00:00",
+  "sources": [
+    "https://opencode.ai/zen/v1/models",
+    "https://models.dev/api.json",
+    "https://opencode.ai/docs/zen/"
+  ],
+  "official_catalog_ids": [
+    "big-pickle",
+    "jev-1.13-free",
+    "deepseek-v4-flash-free",
+    "muse-spark-1.3-contributor-free",
+    "muse-spark-1.2-contributor-free",
+    "mimo-v2.6-flash-free",
+    "space-bunny-free",
+    "longcat-2.5-preview-free",
+    "mimo-v2.5-free",
+    "ling-3.0-flash-fin-free",
+    "nemotron-3-ultra-free",
+    "nemotron-3.5-lightning-free"
+  ],
+  "opencode_metadata": [
+    {
+      "id": "big-pickle",
+      "metadata_present": true,
+      "name": "Big Pickle",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0,
+        "cache_write": 0
+      },
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 200000,
+        "input": 160000,
+        "output": 32000
+      }
+    },
+    {
+      "id": "jev-1.13-free",
+      "metadata_present": false,
+      "name": null,
+      "cost": null,
+      "modalities": null,
+      "limit": null
+    },
+    {
+      "id": "deepseek-v4-flash-free",
+      "metadata_present": true,
+      "name": "DeepSeek V4 Flash Free",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0
+      },
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 200000,
+        "output": 128000
+      }
+    },
+    {
+      "id": "muse-spark-1.3-contributor-free",
+      "metadata_present": true,
+      "name": "Muse Spark 1.3 Free",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0
+      },
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video",
+          "pdf",
+          "audio"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1048576,
+        "output": 131072
+      }
+    },
+    {
+      "id": "muse-spark-1.2-contributor-free",
+      "metadata_present": true,
+      "name": "Muse Spark 1.2 Free",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0
+      },
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video",
+          "pdf",
+          "audio"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1048576,
+        "output": 131072
+      }
+    },
+    {
+      "id": "mimo-v2.6-flash-free",
+      "metadata_present": true,
+      "name": "MiMo-V2.6-Flash Free",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0
+      },
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "audio",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 200000,
+        "output": 32000
+      }
+    },
+    {
+      "id": "space-bunny-free",
+      "metadata_present": true,
+      "name": "Space Bunny Free",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0,
+        "cache_write": 0
+      },
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1048576,
+        "input": 524288,
+        "output": 524288
+      }
+    },
+    {
+      "id": "longcat-2.5-preview-free",
+      "metadata_present": true,
+      "name": "LongCat 2.5 Preview Free",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0
+      },
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000,
+        "output": 131072
+      }
+    },
+    {
+      "id": "mimo-v2.5-free",
+      "metadata_present": true,
+      "name": "MiMo V2.5 Free",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0
+      },
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "audio",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 200000,
+        "output": 32000
+      }
+    },
+    {
+      "id": "ling-3.0-flash-fin-free",
+      "metadata_present": true,
+      "name": "Ling 3.0 Flash Fin Free",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0
+      },
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 262144,
+        "output": 32768
+      }
+    },
+    {
+      "id": "nemotron-3-ultra-free",
+      "metadata_present": true,
+      "name": "Nemotron 3 Ultra Free",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0
+      },
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000,
+        "output": 128000
+      }
+    },
+    {
+      "id": "nemotron-3.5-lightning-free",
+      "metadata_present": true,
+      "name": "Nemotron 3.5 Lightning Free",
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0
+      },
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 262144,
+        "output": 262144
+      }
+    }
+  ],
+  "generation_probes_run": false
+}
