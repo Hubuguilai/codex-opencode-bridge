@@ -64,6 +64,10 @@ OpenCode Go subscription first. Codex checks current access during setup.
 If a login or an Apple developer-tools dialog is needed, complete that one action,
 then return to the same chat so Codex can continue.
 
+![Default installation workflow: paste the README prompt, reopen Codex after checks pass, and choose Big Pickle](docs/assets/readme-install-flow.png)
+
+*The illustration shows the default Big Pickle route. If you installed another model, select that one instead.*
+
 ## 2. Reopen Codex and pick your model
 
 After Codex reports passing checks, **fully quit and reopen the app**.
