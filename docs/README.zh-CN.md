@@ -60,6 +60,10 @@ https://github.com/Hubuguilai/codex-opencode-bridge
 Codex 会在安装时检查你当前能否使用它。
 如果遇到登录或 Apple 开发工具安装提示，完成那个操作后回到同一对话，让它继续。
 
+![默认安装流程：复制 README 的 prompt，检查通过后重开 Codex，再选 Big Pickle](assets/readme-install-flow.png)
+
+*图中展示默认的 Big Pickle 路线；如果安装的是其他模型，重开后选择对应模型即可。*
+
 ## 第二步：重开 Codex，选模型试一下
 
 等 Codex 报告测试通过后，**完全退出 Codex，再重新打开**。
