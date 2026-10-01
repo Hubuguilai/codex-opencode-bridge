@@ -1,45 +1,22 @@
-# OpenCode models in Codex
+# Free OpenCode models in Codex
 
-**Experimental prerelease: 0.2.0-rc.1.** [Verified scope and known limitations](docs/public-release.md).
+Keep using Codex, with a free model in its model menu.
 
-**Get model access, paste one prompt into Codex, then choose your model.**
-No repository download, terminal setup or configuration editing is required before
-asking Codex to install it.
+Copy the prompt below and let Codex install the bridge. Reopen the app, pick
+**Big Pickle**, and try it on a text or coding task. Your existing GPT models,
+other providers and login stay in place.
 
-[中文教程](docs/README.zh-CN.md) · Experimental macOS Apple Silicon support.
-Intel Macs are untested;
-Windows/Linux desktop setup is not covered by this guide.
+You do not need to download this repository, open a terminal or edit configuration
+before asking Codex to install it.
 
-## 1. Choose your model
+[中文说明](docs/README.zh-CN.md) · [Installation runbook](docs/agent-install.md)
 
-**Start with Big Pickle** for text, coding and file tasks. Our 2026-09-30 check
-succeeded in a fresh OpenCode home without credentials. You can go directly to
-step 2 and let Codex test current access. You do not need to buy Go to try this
-route. Free availability and limits can change.
+## 1. Let Codex install it
 
-**For images, optionally add Muse Spark 1.3 Contributor Free.** It is listed in
-the official free catalog, but our fresh unauthenticated check was country-denied.
-Confirm that the exact model works in your OpenCode before requesting it here;
-do not assume a subscription or a new key will remove a regional restriction.
+You need an installed Codex app and a working model to run the installation
+prompt in a **local** chat. This installation guide targets **macOS Apple Silicon**.
 
-**Need an account/key? Follow this path:**
-
-1. Open [OpenCode sign-in](https://opencode.ai/auth) and sign in with your **GitHub or Google** account.
-2. Use the default workspace, or choose it under **Select workspace**.
-3. If the home page has **Copy Key**, use it. Otherwise select **API Keys → Create API Key**.
-4. Name it `Codex Bridge`, select **Create**, then copy the key using its row's copy icon.
-5. Save it securely; **never paste the key into chat**. Continue to step 2 below.
-6. When Codex provides a local login window, enter the key there, then return to
-   the same chat and say “Login complete; continue.”
-
-**Enable billing** is a billing action; **Subscribe to Go** is an optional
-subscription. Neither should be confused with a required purchase for this bridge.
-[Detailed registration guide, expected results and troubleshooting](docs/opencode-access.en.md).
-
-## 2. Paste this into Codex
-
-Open a **local** Codex chat using a working model. Any empty project folder is
-fine; you do not need this repository already open. Copy the whole prompt:
+Open a local chat in any project folder—even an empty one—and send this whole prompt:
 
 ```text
 Install and configure codex-opencode-bridge in Codex on this Mac:
@@ -56,27 +33,91 @@ Report actual test results and the model name to select after reopening Codex.
 Diagnose failures and repair reversible issues; state anything that still needs me.
 ```
 
-For Muse, append: **“I confirmed Muse Spark 1.3 Contributor Free works in my
-OpenCode. Install it alongside Big Pickle and verify images too.”**
+Start with the default **Big Pickle**. You do not need to choose a model or buy an
+OpenCode Go subscription first. Codex checks current access during setup.
+If a login or an Apple developer-tools dialog is needed, complete that one action,
+then return to the same chat so Codex can continue.
 
-You may need to finish OpenCode login or an Apple developer-tools dialog.
-Return to the same chat afterward; Codex handles the remaining setup.
+## 2. Reopen Codex and pick Big Pickle
 
-## 3. Reopen Codex and choose the model
+After Codex reports passing checks, **fully quit and reopen the app**.
+In the model menu beside the message box, select:
 
-After Codex reports passing checks, fully quit and reopen the app. Use the model
-menu beside the message box:
+**Big Pickle (OpenCode Native Bridge)**
 
-| Selection | Menu name |
-| --- | --- |
-| Default | **Big Pickle (OpenCode Native Bridge)** |
-| Optional vision model | **Muse Spark 1.3 Contributor Free (OpenCode Native Bridge)** |
+Start a new chat in an empty folder and send:
 
-Start a new chat: “Create hello.txt in this empty folder, write hello, then read
-it back.” For Muse, also upload a non-sensitive image and ask about its contents.
-If a task fails despite the menu entry, use the diagnostic prompt below.
+```text
+Create hello.txt in this folder, write hello, then read it back to check the contents.
+```
 
-## Something went wrong?
+This checks that the selected model can use file tools, not just answer a greeting.
+Once that works, try a small task in your own project: explain a script, edit a
+function, or fix a failing check.
+
+## What is verified?
+
+Big Pickle answered without credentials in a fresh OpenCode home in our
+2026-09-30 check. Actual Codex text/file tasks, repeat installation and uninstall
+also passed using isolated client state.
+
+The full first-time desktop installation on a separate Mac or a new macOS user
+account, including reopening the app and observing its model menu, has not been
+independently verified. This is an experimental prerelease, **0.2.0-rc.1**.
+
+[Checks and receipts](docs/onboarding-verification.md) ·
+[Verified scope and known limitations](docs/public-release.md)
+
+## Questions and recovery
+
+<details>
+<summary>Is the default model free? Do I need an API key?</summary>
+
+Big Pickle worked without an account or key in the check above. Free availability,
+limits and regional access can change; the installer tests the route you can
+actually use.
+
+This gives Codex an OpenCode model option; it does not add quota to your GPT
+subscription. No shared account or key is supplied.
+
+If your selected route needs authentication, Codex provides a local login step.
+Enter keys only there, never into chat. Buying Go, enabling billing or adding
+credit is not a required installation step for the default route.
+
+[Account and key instructions](docs/opencode-access.en.md)
+
+</details>
+
+<details>
+<summary>Can I use images or another OpenCode model?</summary>
+
+Big Pickle is for text, coding and file tasks; it does not support images.
+
+The optional **Muse Spark 1.3 Contributor Free** model has an image route.
+Our fresh unauthenticated check returned a country restriction. Confirm that this
+exact model works in your OpenCode before adding it; logging in or paying is not
+a guaranteed fix.
+
+Append this to the installation prompt, or ask the same installation chat later:
+
+> I confirmed Muse Spark 1.3 Contributor Free works in my OpenCode. Install it alongside Big Pickle and verify images too.
+
+After successful checks, reopen Codex and select
+**Muse Spark 1.3 Contributor Free (OpenCode Native Bridge)**.
+Try a non-sensitive image and ask about its contents.
+
+These two models are the initial onboarding scope. Other OpenCode models are
+not automatically supported. Native audio, video and PDF input is unsupported.
+Intel Macs are untested; Windows/Linux desktop setup is not covered by this guide.
+
+[Model capabilities and evidence](docs/advanced.en.md)
+
+</details>
+
+<details>
+<summary>The install failed, or the model appears but a task fails</summary>
+
+Return to the installation chat and send:
 
 ```text
 Diagnose my codex-opencode-bridge installation. Locate the existing checkout and
@@ -89,13 +130,20 @@ conversation logs. Use only the maintained reversible recovery commands. Tell me
 what failed, what you repaired and verified, and the one action I need to take.
 ```
 
-## Later
+A menu entry or a running service alone does not confirm that a model works.
+Use the actual task check and reported failure to decide what to do next.
 
-Ask the same Codex chat to check health, add Muse after confirming access, upgrade
-and verify, or uninstall while preserving other models and login. It should use
-[the maintained runbook](docs/agent-install.md).
+</details>
 
-Only these two models are the initial onboarding scope. Native audio/video/PDF
-input is unsupported. [Advanced usage and model evidence](docs/advanced.en.md)
-and [this onboarding revision's actual checks and limits](docs/onboarding-verification.md)
-remain available without making beginners read the implementation details.
+<details>
+<summary>How do I update or remove it?</summary>
+
+Ask the same Codex installation chat to check health, upgrade and verify, or
+uninstall while preserving your other models and login.
+It should follow the [maintained runbook](docs/agent-install.md).
+
+</details>
+
+If you find it useful, give it a star. If something fails,
+[open an issue](https://github.com/Hubuguilai/codex-opencode-bridge/issues) with the
+model name and a redacted error message—leave out keys and private chat logs.
