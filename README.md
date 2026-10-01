@@ -3,13 +3,39 @@
 Keep using Codex, with a free model in its model menu.
 
 Copy the prompt below and let Codex install the bridge. Reopen the app, pick
-**Big Pickle**, and try it on a text or coding task. Your existing GPT models,
+your installed model, and try it on a text or coding task. Your existing GPT models,
 other providers and login stay in place.
 
 You do not need to download this repository, open a terminal or edit configuration
 before asking Codex to install it.
 
 [中文说明](docs/README.zh-CN.md) · [Installation runbook](docs/agent-install.md)
+
+![OpenCode models connected to Codex — concept illustration](docs/assets/readme-cover.png)
+
+*Big Pickle is shown as an example; other candidates are listed below.*
+
+## Free models to try
+
+Catalog and pricing checked **2026-10-01**. These models have bridge profiles;
+their current access still needs a check during setup.
+
+| Model | Route in this project |
+| --- | --- |
+| Big Pickle | Default. Recorded text and file checks passed. |
+| Muse Spark 1.3 Contributor Free | Optional. Recorded image checks passed; the fresh no-login check was region-denied. |
+| Space Bunny Free | Experimental text/tool route. Historical checks passed. |
+| Nemotron 3 Ultra Free | Experimental text/tool route. Historical checks passed. |
+| MiMo-V2.6-Flash Free | Experimental text/tool route. Historical checks passed. |
+| LongCat 2.5 Preview Free | Experimental text/tool route. Historical checks passed. |
+
+The last four were tested on earlier source revisions and have not been rerun
+for this dated catalog check. Images are enabled only for the Muse route.
+[Exact model IDs, other free catalog entries and evidence](docs/free-models.md).
+
+Big Pickle is the default for a first install. To try another model in this table,
+name it explicitly in the installation chat and ask Codex to follow the runbook,
+verify text/file tasks, and report failures without silently changing models.
 
 ## 1. Let Codex install it
 
@@ -38,10 +64,11 @@ OpenCode Go subscription first. Codex checks current access during setup.
 If a login or an Apple developer-tools dialog is needed, complete that one action,
 then return to the same chat so Codex can continue.
 
-## 2. Reopen Codex and pick Big Pickle
+## 2. Reopen Codex and pick your model
 
 After Codex reports passing checks, **fully quit and reopen the app**.
-In the model menu beside the message box, select:
+In the model menu beside the message box, select your installed model.
+For the default installation, choose:
 
 **Big Pickle (OpenCode Native Bridge)**
 
@@ -106,8 +133,9 @@ After successful checks, reopen Codex and select
 **Muse Spark 1.3 Contributor Free (OpenCode Native Bridge)**.
 Try a non-sensitive image and ask about its contents.
 
-These two models are the initial onboarding scope. Other OpenCode models are
-not automatically supported. Native audio, video and PDF input is unsupported.
+Big Pickle and Muse are the initial onboarding routes. The other four profiles
+in the table above are experimental; other OpenCode catalog entries need adaptation
+and verification before installation. Native audio, video and PDF input is unsupported.
 Intel Macs are untested; Windows/Linux desktop setup is not covered by this guide.
 
 [Model capabilities and evidence](docs/advanced.en.md)
