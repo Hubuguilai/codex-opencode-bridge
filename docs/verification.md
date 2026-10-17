@@ -3,6 +3,19 @@
 This candidate is private and experimental. Passing the adapter tests does not
 certify every model, every Desktop tool, or future provider availability.
 
+## October 17 catalog and new-model check
+
+The [current model catalog](free-models.md) supersedes the October 1 discovery
+list. Nemotron 3 Ultra is absent from the current API and needs revalidation;
+its existing profile and historical evidence remain available.
+
+Fresh no-login GLM 5.3 Flash Free and DeepSeek V4.1 Flash Free probes on official
+OpenCode 2.0.18 failed at text, before file-tool verification. Neither receives
+an installer profile. See the [sanitized receipt](receipts/free-models-probe-20261017.json)
+for the route and repeat check. These failures do not diagnose provider access
+or certify a different runtime/account. Existing successful tests below remain
+source-specific historical evidence.
+
 ## Current release gate
 
 The simple desktop installer remains incomplete. See [release-readiness.json](release-readiness.json).

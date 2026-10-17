@@ -17,25 +17,33 @@ before asking Codex to install it.
 
 ## Free models to try
 
-Catalog and pricing checked **2026-10-01**. These models have bridge profiles;
-their current access still needs a check during setup.
+Catalog and official free pricing checked **2026-10-17**. Big Pickle remains the
+first-install default. A catalog listing does not confirm access on your route.
 
 | Model | Route in this project |
 | --- | --- |
 | Big Pickle | Default. Recorded text and file checks passed. |
 | Muse Spark 1.3 Contributor Free | Optional. Recorded image checks passed; the fresh no-login check was region-denied. |
 | Space Bunny Free | Experimental text/tool route. Historical checks passed. |
-| Nemotron 3 Ultra Free | Experimental text/tool route. Historical checks passed. |
 | MiMo-V2.6-Flash Free | Experimental text/tool route. Historical checks passed. |
 | LongCat 2.5 Preview Free | Experimental text/tool route. Historical checks passed. |
 
-The last four were tested on earlier source revisions and have not been rerun
-for this dated catalog check. Images are enabled only for the Muse route.
-[Exact model IDs, other free catalog entries and evidence](docs/free-models.md).
+The three experimental routes above have not been rerun for this catalog check.
+Images are enabled only for Muse. **Nemotron 3 Ultra Free is absent from the current
+API catalog**; its old profile is retained for existing installations, pending
+revalidation. It is no longer a suggested first choice.
 
-Big Pickle is the default for a first install. To try another model in this table,
-name it explicitly in the installation chat and ask Codex to follow the runbook,
-verify text/file tasks, and report failures without silently changing models.
+New free-priced catalog entries include **GLM 5.3 Flash Free, DeepSeek V4.1 Flash
+Free, Beam Free, LL Alpha Free and Nemotron 3.5 Super VL Free**. They do not yet
+have maintained bridge profiles. The fresh no-login text checks for GLM and
+DeepSeek failed on pinned OpenCode 2.0.18, so they are not install options yet.
+DeepSeek V4.1 uses a different ID from V4; the bridge does not silently substitute
+it. Model names do not enable image support.
+[Exact IDs, current catalog, discrepancies and test evidence](docs/free-models.md).
+
+To try another model with an existing profile, name it explicitly in the
+installation chat. Ask Codex to follow the runbook, verify text/file tasks, and
+report failures without silently changing models.
 
 ## 1. Let Codex install it
 
