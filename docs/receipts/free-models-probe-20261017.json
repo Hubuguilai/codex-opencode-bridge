@@ -1,0 +1,97 @@
+{
+  "checked_on": "2026-10-17",
+  "started_at_utc": "2026-10-17T04:47:34.061Z",
+  "route": "isolated_official_runtime_direct_bridge_real_codex",
+  "fresh_no_login": true,
+  "images_tested": false,
+  "maximum_context_tested": false,
+  "models": [
+    {
+      "model": "opencode/glm-5.3-flash-free",
+      "route": "installed_bridge_direct_real_codex_client",
+      "checks": [],
+      "desktopPickerVerified": false,
+      "activeCheck": "text",
+      "passed": false,
+      "errorCategory": "generation_failed"
+    },
+    {
+      "model": "opencode/deepseek-v4.1-flash-free",
+      "route": "installed_bridge_direct_real_codex_client",
+      "checks": [],
+      "desktopPickerVerified": false,
+      "activeCheck": "text",
+      "passed": false,
+      "errorCategory": "generation_failed"
+    }
+  ],
+  "sourceSha256": "d584beda55eaac609b435cb5acb83f8bb953427209a0df874178a143f075f0a3",
+  "runtime": "2.0.18",
+  "runtime_cleaned": true,
+  "root_cause": "not_established",
+  "file_tools_reached": false,
+  "runtime_discovery": [
+    {
+      "route": "/api/model",
+      "topLevelKeys": [
+        "location",
+        "data"
+      ],
+      "models": [
+        {
+          "id": "opencode/glm-5.3-flash-free",
+          "mentioned": false
+        },
+        {
+          "id": "opencode/deepseek-v4.1-flash-free",
+          "mentioned": false
+        }
+      ]
+    },
+    {
+      "route": "/api/provider",
+      "topLevelKeys": [
+        "location",
+        "data"
+      ],
+      "models": [
+        {
+          "id": "opencode/glm-5.3-flash-free",
+          "mentioned": false
+        },
+        {
+          "id": "opencode/deepseek-v4.1-flash-free",
+          "mentioned": false
+        }
+      ]
+    }
+  ],
+  "diagnostic_repeat": {
+    "started_at_utc": "2026-10-17T04:52:16.289Z",
+    "models": [
+      {
+        "model": "opencode/glm-5.3-flash-free",
+        "route": "installed_bridge_direct_real_codex_client",
+        "checks": [],
+        "desktopPickerVerified": false,
+        "activeCheck": "text",
+        "passed": false,
+        "errorCategory": "generation_failed"
+      },
+      {
+        "model": "opencode/deepseek-v4.1-flash-free",
+        "route": "installed_bridge_direct_real_codex_client",
+        "checks": [],
+        "desktopPickerVerified": false,
+        "activeCheck": "text",
+        "passed": false,
+        "errorCategory": "generation_failed"
+      }
+    ],
+    "runtime_cleaned": true
+  },
+  "profile_added": false,
+  "runtime_version_changed": false,
+  "scope": "Fresh no-login isolated state, no existing user configuration or service changes. Failed at text before file tools. Discovery absence is scoped to these responses; it is not proof of retirement or a root-cause diagnosis.",
+  "source_revision": "cdd7ab58feb645185b815ba2af8125b6bef4442e"
+}
