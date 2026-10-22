@@ -17,6 +17,26 @@ test('Namespace and custom tool definitions retain original identities with dist
  assert.throws(()=>normalizeTools([fn,fn]),{status:400});
 });
 
+test('Large connector catalogs preserve and relay tools beyond index 255', async t => {
+ const definitions=Array.from({length:300},(_,i)=>({...fn,name:`connector_action_${i}`}));
+ const request=normalizeNativeRequest({model:'opencode/test',input:'Use the last connector action',tools:[{type:'namespace',name:'connectors',tools:definitions}]},'responses',config);
+ assert.equal(request.tools.length,300);
+ assert.equal(new Set(request.tools.map(tool=>tool.relayName)).size,300);
+ assert.equal(request.tools[299].name,'connector_action_299');
+ assert.equal(request.tools[299].namespace,'connectors');
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-large-tools-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ fs.writeFileSync(path.join(root,'bridge-request.json'),JSON.stringify({requestId:'large',tools:request.tools}));
+ const hooks={},registered=[];
+ const ctx={location:{directory:root},session:{hook:async(n,f)=>{hooks[`session.${n}`]=f;}},permission:{hook:async(n,f)=>{hooks[`permission.${n}`]=f;}},tool:{hook:async(n,f)=>{hooks[`tool.${n}`]=f;},transform:async f=>{f({add:x=>registered.push(x)});return{dispose:async()=>{}};}}};
+ await plugin.setup(ctx);await hooks['session.prompt']();
+ assert.equal(registered.length,300);
+ const controller=new AbortController();
+ const pending=registered[299].execute({path:'last-action-marker'},{signal:controller.signal});
+ assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'bridge-call.json'))),{requestId:'large',kind:'call',relayName:request.tools[299].relayName,input:{path:'last-action-marker'}});
+ controller.abort();await assert.rejects(pending,/CANCELLED/);
+});
+
 test('Historical tool calls/results survive normalization; unknown or missing results are refused', () => {
  const input=[{role:'user',content:'Read it'},{type:'function_call',name:'read_file',call_id:'a',arguments:'{"path":"x"}'},{type:'function_call_output',call_id:'a',output:'random marker'}];
  const result=normalizeNativeRequest({model:'opencode/test',input,tools:[fn],reasoning:{summary:'auto'}},'responses',config);

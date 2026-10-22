@@ -17,6 +17,9 @@ export function providerGenerationError(error){
   if(/invalid (?:json )?schema for (?:function|tool)|invalid (?:function|tool) (?:schema|parameters)|tool(?:_call)? arguments.{0,40}(?:invalid|schema)/i.test(message)){
    return new BridgeError(422,'upstream_tool_schema','The provider rejected the supplied tool schema or arguments. Check model compatibility; do not remove tool results or conversation content to hide the failure.');
   }
+  if(/too many (?:function )?tools|(?:tools|functions)(?:\[\])?[^\n]{0,100}(?:maximum|max|limit)[^\n]{0,40}\d|(?:maximum|max)[^\n]{0,40}\d[^\n]{0,40}(?:tools|functions)/i.test(message)){
+   return new BridgeError(422,'upstream_tool_limit','The provider explicitly rejected the tool count. Reduce enabled client tools or choose a provider with a larger tool capacity; the bridge did not truncate the catalog.');
+  }
  }
  return new BridgeError(502,'generation_failed','OpenCode generation failed without a recognized safe error category. Inspect private runtime diagnostics; do not assume this means quota exhaustion or context overflow.');
 }

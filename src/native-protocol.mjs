@@ -30,7 +30,8 @@ export function normalizeTools(definitions = [], api = 'responses') {
       relayName: `bridge_client_${[namespace, fn.name].filter(Boolean).join('_').replace(/[^a-zA-Z0-9_]/g, '_').slice(0,40)}_${tools.length}` });
   }
   for (const tool of definitions) add(tool);
-  if (tools.length > 256) throw invalid('At most 256 client tools are supported.');
+  // Codex may expand connector namespaces into more than 256 tools. Preserve
+  // every identity; the HTTP request body limit already bounds incoming data.
   return tools;
 }
 
