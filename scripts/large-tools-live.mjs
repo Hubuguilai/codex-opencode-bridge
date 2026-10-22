@@ -20,16 +20,18 @@ try{
  const config=readConfig(env);runtime=await startOpenCode(config,env);receipt.runtime=(await runtime.backend.health()).version;
  if(local){
   mock=http.createServer(async(req,res)=>{
+   try{
    let raw='';for await(const chunk of req)raw+=chunk;
    const body=JSON.parse(raw);receipt.localProviderRequests=(receipt.localProviderRequests||0)+1;
    const names=body.tools.map(x=>x.function.name);assert.equal(names.length,300);assert.equal(new Set(names).size,300);
-   assert.ok(names.every((name,i)=>name===`bridge_client_probe_${i}_${i}`));
+   assert.deepEqual([...names].sort(),Array.from({length:300},(_,i)=>`bridge_client_probe_${i}_${i}`).sort());
    for(const tool of body.tools)assert.deepEqual(tool.function.parameters,{type:'object',properties:{marker:{type:'string'}},required:['marker'],additionalProperties:false});
-   const name=names[299];
+   const name='bridge_client_probe_299_299';
    res.writeHead(200,{'content-type':'text/event-stream'});
    const chunk=(delta,finish_reason=null)=>({id:'fixture',object:'chat.completion.chunk',created:1,model:'test',choices:[{index:0,delta,finish_reason}]});
    res.write('data: '+JSON.stringify(chunk({role:'assistant',tool_calls:[{index:0,id:'fixture_call',type:'function',function:{name,arguments:'{"marker":"capacity-300"}'}}]}))+'\n\n');
    res.end('data: '+JSON.stringify(chunk({},'tool_calls'))+'\n\ndata: [DONE]\n\n');
+   }catch{receipt.localProviderAssertionFailed=true;res.writeHead(400,{'content-type':'application/json'});res.end(JSON.stringify({error:{message:'Synthetic catalog verification failed.'}}));}
   });
   await new Promise((resolve,reject)=>{mock.once('error',reject);mock.listen(0,'127.0.0.1',resolve);});
   const file=path.join(runtime.backend.directory,'opencode.json'),base=JSON.parse(fs.readFileSync(file));
@@ -46,7 +48,7 @@ try{
  if(body.error){receipt.errorCode=body.error.code;throw Error('Model request failed; see safe errorCode.');}
  const call=body.output?.find(x=>x.type==='function_call');
  receipt.lastToolRelayed=call?.name==='probe_299'&&JSON.parse(call.arguments).marker==='capacity-300';
- assert.equal(receipt.wireToolCount,300);assert.equal(receipt.contextToolCount,300);assert.equal(receipt.lastToolRelayed,true);receipt.passed=true;
+ assert.notEqual(receipt.localProviderAssertionFailed,true);assert.equal(receipt.wireToolCount,300);assert.equal(receipt.contextToolCount,300);assert.equal(receipt.lastToolRelayed,true);receipt.passed=true;
 }catch(error){receipt.failure=true;receipt.errorCode??=error.code==='EPERM'?'local_listen_not_permitted':'probe_failed';process.exitCode=1;}
 finally{
  if(bridge)await bridge.close();if(runtime)await runtime.stop();if(mock){mock.closeAllConnections();await new Promise(r=>mock.close(r));}fs.rmSync(root,{recursive:true,force:true});

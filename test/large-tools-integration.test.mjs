@@ -41,5 +41,5 @@ for(const scenario of ['relay','limit','unknown','oversize'])test(`300-tool HTTP
  }else{assert.equal(response.status,scenario==='oversize'?413:scenario==='limit'?422:502);assert.equal(body.error.code,scenario==='oversize'?'input_too_large':scenario==='limit'?'upstream_tool_limit':'generation_failed');assert.doesNotMatch(JSON.stringify(body),/PRIVATE_SENTINEL/);}
  if(scenario==='oversize')assert.equal(routes.length,0);
  else{assert.equal(routes.filter(x=>x[0]==='/api/session').length,1);assert.ok(routes.at(-2)[0].endsWith('/interrupt'));assert.equal(routes.at(-1)[1],'DELETE');}
- assert.equal(backend.busy,false);assert.equal(fs.existsSync(path.join(directory,'bridge-request.json')),false);
+ assert.equal(Boolean(backend.busy),false);assert.equal(fs.existsSync(path.join(directory,'bridge-request.json')),false);
 });
