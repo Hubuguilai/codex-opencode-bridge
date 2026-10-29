@@ -18,21 +18,22 @@ before asking Codex to install it.
 ## Free models to try
 
 Catalog and official free pricing checked **2026-10-29**. Big Pickle remains the
-first-install default, with historical text/file evidence. In a fresh no-login
-**October 29 live check**, Flint failed at text and Big Pickle hit a rate limit;
-the six remaining candidates were not run after the quota stop. No model passed
-a new file-tool check in this run. A catalog listing does not confirm access.
+first-install default, with historical text/file evidence. **October 30 live
+checks attempted all six remaining candidates independently:** MiMo and Nemotron
+3.5 Lightning hit rate limits; DeepSeek, Beam, Nemotron 3.5 Super VL and GLM
+failed generation at the text gate. No file-tool gate was reached, so no new
+installer profile was added. A catalog listing does not confirm current access.
 
 | Current free candidate | Route in this project |
 | --- | --- |
 | Big Pickle | Default profile; October 29 text check hit a rate limit. Historical text/file checks passed. |
-| MiMo-V2.6-Flash Free | Experimental profile; historical text/tool checks passed. |
+| MiMo-V2.6-Flash Free | Experimental profile; October 30 text check hit a rate limit. |
 | Flint 40B Free | October 29 text check failed (`generation_failed`); file tools not reached. Not an install option. |
-| Beam Free | Catalog candidate; no maintained bridge profile. |
-| DeepSeek V4.1 Flash Free | Catalog candidate; no maintained bridge profile. |
-| GLM 5.3 Flash Free | Catalog candidate; no maintained bridge profile. |
-| Nemotron 3.5 Lightning Free | Catalog candidate; no maintained bridge profile. |
-| Nemotron 3.5 Super VL Free | Catalog candidate; no maintained bridge profile; images not verified. |
+| Beam Free | October 30 text check failed (`generation_failed`); no profile added. |
+| DeepSeek V4.1 Flash Free | October 30 text check failed (`generation_failed`); no profile added. |
+| GLM 5.3 Flash Free | October 30 text check failed (`generation_failed`); no profile added. |
+| Nemotron 3.5 Lightning Free | October 30 text check hit a rate limit; no profile added. |
+| Nemotron 3.5 Super VL Free | October 30 text check failed (`generation_failed`); images not verified. |
 
 **Space Bunny Free, LongCat 2.5 Preview Free, LL Alpha Free and Muse Spark 1.2/1.3
 Contributor Free are absent from the current API catalog.** They are no longer
@@ -46,9 +47,10 @@ maintained profile need adaptation and verification before the installer can
 select them. No currently listed free candidate has a verified image route in
 this project. DeepSeek V4.1 is distinct from old V4; no model is silently replaced.
 [Exact IDs, catalog changes and dated test evidence](docs/free-models.md) ·
-[October 29 live results](docs/receipts/free-models-live-20261029.json).
+[October 30 live results](docs/receipts/free-models-live-20261030.json).
 A follow-up diagnosed Big Pickle’s 429 as an upstream free-usage quota rejection;
-the response did not expose its reset time. [Quota details](docs/free-models.md#october-29-quota-diagnosis).
+the response did not expose its reset time. One model’s 429 does not prove a
+shared quota pool or the status of other models. [Quota details](docs/free-models.md#october-29-quota-diagnosis).
 
 To try MiMo with its existing profile, name it explicitly in the installation
 chat. Ask Codex to follow the runbook, verify text/file tasks, and report failures

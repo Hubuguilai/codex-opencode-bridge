@@ -14,19 +14,19 @@ are separate from successful bridge testing.
 These eight conversational IDs appear in both the API and the official table
 with free input/output. Availability, eligibility and limits can change.
 Only IDs with a maintained profile in `src/model-profiles.mjs` can be selected by
-the maintained installer. “Not run” below means skipped after the October 29
-probe hit a rate limit; it is not a failed inference result.
+the maintained installer. Latest live checks below are from October 30; the
+catalog/prices remain the separate October 29 snapshot.
 
 | Model | Exact OpenCode ID | Official input/output price | Bridge status |
 | --- | --- | --- | --- |
 | Big Pickle | `opencode/big-pickle` | Free | Default profile; October 29 text check hit rate_limit; historical text/file checks passed. |
-| MiMo V2.6 Flash Free | `opencode/mimo-v2.6-flash-free` | Free | Experimental profile; historical text/tool checks passed; not run after quota stop. |
+| MiMo V2.6 Flash Free | `opencode/mimo-v2.6-flash-free` | Free | Experimental profile; October 30 text gate returned rate_limit; file tools not reached. |
 | Flint 40B Free | `opencode/flint-40b-free` | Free | October 29 text check failed: generation_failed; file tools not reached; no profile added. |
-| Beam Free | `opencode/beam-free` | Free | No maintained profile; not run after quota stop. |
-| DeepSeek V4.1 Flash Free | `opencode/deepseek-v4.1-flash-free` | Free | No maintained profile; not run after quota stop. Distinct from old V4. |
-| GLM 5.3 Flash Free | `opencode/glm-5.3-flash-free` | Free | No maintained profile; not run after quota stop. |
-| Nemotron 3.5 Lightning Free | `opencode/nemotron-3.5-lightning-free` | Free | No maintained profile; not run after quota stop. Historical repair workflow timed out. |
-| Nemotron 3.5 Super VL Free | `opencode/nemotron-3.5-super-vl-free` | Free | No maintained profile; image support not verified; not run after quota stop. |
+| Beam Free | `opencode/beam-free` | Free | October 30 text gate returned generation_failed; file tools not reached; no profile added. |
+| DeepSeek V4.1 Flash Free | `opencode/deepseek-v4.1-flash-free` | Free | October 30 text gate returned generation_failed; file tools not reached; no profile added. |
+| GLM 5.3 Flash Free | `opencode/glm-5.3-flash-free` | Free | October 30 text gate returned generation_failed; file tools not reached; no profile added. |
+| Nemotron 3.5 Lightning Free | `opencode/nemotron-3.5-lightning-free` | Free | October 30 text gate returned rate_limit; file tools not reached; no profile added. |
+| Nemotron 3.5 Super VL Free | `opencode/nemotron-3.5-super-vl-free` | Free | October 30 text gate returned generation_failed; file tools not reached; no profile added. |
 
 `opencode/jev-1.13-free` is also listed and free-priced. Its System One endpoint
 returns structured decisions rather than conversational text, so it is excluded
@@ -71,6 +71,33 @@ there is no currently listed free candidate with a verified image route in this
 project. Model names, VL labels and upstream context metadata do not extend the
 bridge's verified capabilities. No maximum-context claim is added.
 
+### October 30 independent model checks
+
+Attempted all six remaining candidates independently through pinned official
+OpenCode 2.0.18, the bridge and a real Codex app-server, with fresh no-login
+runtime/client state. MiMo's quota rejection did not skip the other five models.
+
+| Model | Text gate | File-tool gate |
+| --- | --- | --- |
+| MiMo V2.6 Flash Free | rate_limit (HTTP 429 category) | Not reached |
+| DeepSeek V4.1 Flash Free | generation_failed | Not reached |
+| Beam Free | generation_failed | Not reached |
+| Nemotron 3.5 Super VL Free | generation_failed | Not reached |
+| Nemotron 3.5 Lightning Free | provider.quota, HTTP 429, free usage limit | Not reached |
+| GLM 5.3 Flash Free | generation_failed | Not reached |
+
+No model passed both gates; no new installer profiles were added. The four
+unclassified generation failures are not counted as quota errors. A further
+DeepSeek diagnostic exposed only an idle failed outcome, without a provider error
+or HTTP status; its cause remains unknown. These are dated route-specific results,
+not proof of permanent model retirement.
+
+The observation does not establish whether free models share one quota pool.
+Use one bounded check per distinct candidate; after a model returns 429, stop that
+model for the round and continue checking the other candidates independently.
+Do not retry the limited model immediately or change identity/network to avoid
+its restriction. See the [sanitized six-model receipt](receipts/free-models-live-20261030.json).
+
 ### October 29 live probe
 
 Used pinned **official OpenCode 2.0.18 → bridge → real Codex app-server** with
@@ -107,8 +134,10 @@ probe cannot determine which counter applies. A
 Do not infer remaining allowance or a guaranteed recovery time from HTTP 429.
 
 Retry after a daily boundary rather than looping immediately. Resume with pending
-models, keep passed and failed results separately, and stop generation requests
-on another quota error. Only add an installer profile after both text and real
+models and keep passed and failed results separately. A quota error stops only
+that exact model for the round; continue one check of each other distinct model.
+The initial October 29 global-stop policy was overly conservative and is replaced
+by the independent October 30 checks above. Only add an installer profile after both text and real
 client-file-tool gates pass. See the
 [sanitized diagnosis](receipts/free-model-quota-diagnosis-20261029.json).
 

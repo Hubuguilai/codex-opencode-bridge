@@ -17,19 +17,20 @@
 ## 可以尝试哪些免费模型？
 
 目录和官方免费标价核对日期：**2026-10-29**。首次安装仍默认选 Big Pickle。
-同日用全新无登录环境实测：Flint 在文字阶段失败，Big Pickle 遇到限流，随后停止请求，
-其余六款尚未运行。本轮没有模型通过新的文件工具检查，历史通过记录仍按原日期保留。
+**10 月 30 日已分别尝试剩余六款**：MiMo 和 Nemotron 3.5 Lightning 返回限流；
+DeepSeek、Beam、Nemotron 3.5 Super VL 和 GLM 在文字阶段返回生成失败。
+没有模型进入文件工具检查，因此本轮未新增安装配置，历史通过记录仍按原日期保留。
 
 | 当前免费候选 | 在本项目里的路径 |
 | --- | --- |
 | Big Pickle | 默认配置；10 月 29 日文字检查遇到限流，历史文字和文件任务检查通过。 |
-| MiMo-V2.6-Flash Free | 实验配置；历史文字／工具检查通过。 |
+| MiMo-V2.6-Flash Free | 已有实验配置；10 月 30 日文字检查返回限流。 |
 | Flint 40B Free | 10 月 29 日文字检查失败（`generation_failed`），未进入文件工具检查；不加入安装选项。 |
-| Beam Free | 目录候选；尚无维护的桥接配置。 |
-| DeepSeek V4.1 Flash Free | 目录候选；尚无维护的桥接配置。 |
-| GLM 5.3 Flash Free | 目录候选；尚无维护的桥接配置。 |
-| Nemotron 3.5 Lightning Free | 目录候选；尚无维护的桥接配置。 |
-| Nemotron 3.5 Super VL Free | 目录候选；尚无维护的桥接配置，图片能力未验证。 |
+| Beam Free | 10 月 30 日文字检查返回 `generation_failed`；未新增配置。 |
+| DeepSeek V4.1 Flash Free | 10 月 30 日文字检查返回 `generation_failed`；未新增配置。 |
+| GLM 5.3 Flash Free | 10 月 30 日文字检查返回 `generation_failed`；未新增配置。 |
+| Nemotron 3.5 Lightning Free | 10 月 30 日文字检查返回限流；未新增配置。 |
+| Nemotron 3.5 Super VL Free | 10 月 30 日文字检查返回 `generation_failed`；图片未验证。 |
 
 **Space Bunny Free、LongCat 2.5 Preview Free、LL Alpha Free，以及 Muse Spark
 1.2／1.3 Contributor Free 已不在当前 API 目录中**，不再建议新安装时选择。
@@ -41,8 +42,9 @@ Nemotron 3 Ultra Free 仍有免费标价，但 API 目录中没有。
 需要先适配并验证，才能通过安装器选择。当前目录里的免费候选中，本项目尚无
 已验证的图片路线。DeepSeek V4.1 与旧 V4 是不同 ID，不会自动替换模型。
 [准确 ID、目录变化和分日期的测试记录](free-models.md) ·
-[10 月 29 日实测结果](receipts/free-models-live-20261029.json)。
+[10 月 30 日实测结果](receipts/free-models-live-20261030.json)。
 后续诊断确认 Big Pickle 的 429 来自上游免费额度限制，响应未提供具体重置时间。
+单款 429 不能证明免费模型共用同一个额度池，也不能代替其他模型的测试。
 [限流诊断](free-models.md#october-29-quota-diagnosis)。
 
 想试已有配置的 MiMo，可以在安装对话中明确说出模型名，
