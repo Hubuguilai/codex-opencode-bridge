@@ -47,6 +47,8 @@ select them. No currently listed free candidate has a verified image route in
 this project. DeepSeek V4.1 is distinct from old V4; no model is silently replaced.
 [Exact IDs, catalog changes and dated test evidence](docs/free-models.md) ·
 [October 29 live results](docs/receipts/free-models-live-20261029.json).
+A follow-up diagnosed Big Pickle’s 429 as an upstream free-usage quota rejection;
+the response did not expose its reset time. [Quota details](docs/free-models.md#october-29-quota-diagnosis).
 
 To try MiMo with its existing profile, name it explicitly in the installation
 chat. Ask Codex to follow the runbook, verify text/file tasks, and report failures
