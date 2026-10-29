@@ -1,0 +1,87 @@
+{
+  "checked_on": "2026-10-29",
+  "started_at_utc": "2026-10-29T10:41:46.809Z",
+  "gitHead": "2443f80245689e97a5adbbe7b090c4b91832b87e",
+  "sourceSha256": "d584beda55eaac609b435cb5acb83f8bb953427209a0df874178a143f075f0a3",
+  "route": "isolated_official_runtime_direct_bridge_real_codex",
+  "fresh_no_login": true,
+  "images_tested": false,
+  "maximum_context_tested": false,
+  "models": [
+    {
+      "model": "opencode/flint-40b-free",
+      "route": "installed_bridge_direct_real_codex_client",
+      "checks": [],
+      "desktopPickerVerified": false,
+      "activeCheck": "text",
+      "passed": false,
+      "errorCategory": "generation_failed",
+      "backendErrors": [
+        {
+          "code": "generation_failed",
+          "status": 502
+        }
+      ]
+    },
+    {
+      "model": "opencode/big-pickle",
+      "route": "installed_bridge_direct_real_codex_client",
+      "checks": [],
+      "desktopPickerVerified": false,
+      "activeCheck": "text",
+      "passed": false,
+      "errorCategory": "rate_limit",
+      "backendErrors": [
+        {
+          "code": "upstream_access_or_quota",
+          "status": 429
+        }
+      ]
+    },
+    {
+      "model": "opencode/mimo-v2.6-flash-free",
+      "passed": false,
+      "notRun": true,
+      "reason": "Earlier model hit rate_limit; no further requests sent."
+    },
+    {
+      "model": "opencode/deepseek-v4.1-flash-free",
+      "passed": false,
+      "notRun": true,
+      "reason": "Earlier model hit rate_limit; no further requests sent."
+    },
+    {
+      "model": "opencode/beam-free",
+      "passed": false,
+      "notRun": true,
+      "reason": "Earlier model hit rate_limit; no further requests sent."
+    },
+    {
+      "model": "opencode/nemotron-3.5-super-vl-free",
+      "passed": false,
+      "notRun": true,
+      "reason": "Earlier model hit rate_limit; no further requests sent."
+    },
+    {
+      "model": "opencode/nemotron-3.5-lightning-free",
+      "passed": false,
+      "notRun": true,
+      "reason": "Earlier model hit rate_limit; no further requests sent."
+    },
+    {
+      "model": "opencode/glm-5.3-flash-free",
+      "passed": false,
+      "notRun": true,
+      "reason": "Earlier model hit rate_limit; no further requests sent."
+    }
+  ],
+  "runtime": "2.0.18",
+  "completed_at_utc": "2026-10-29T10:41:50.365Z",
+  "runtime_cleaned": true,
+  "passed": [],
+  "scope": "Planned gates: exact-text response followed by a real Codex read/compute/write/verify task. Actual run: Flint failed at text; Big Pickle returned rate_limit at text; six models not run after quota stop. No file-tool gate was reached. No GUI picker, images, maximum context or sustained reliability tested. Existing services and configuration unchanged.",
+  "attempted_models": 2,
+  "not_run_models": 6,
+  "stop_reason": "upstream_rate_limit",
+  "discovery_note": "Non-inference runtime discovery did not identify Flint or the Big Pickle control. This is inconclusive and does not establish model absence or the cause of generation_failed."
+}

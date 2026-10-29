@@ -18,14 +18,16 @@ before asking Codex to install it.
 ## Free models to try
 
 Catalog and official free pricing checked **2026-10-29**. Big Pickle remains the
-first-install default. This was a catalog check; no inference or file-tool tests
-were rerun. A catalog listing does not confirm access on your route.
+first-install default, with historical text/file evidence. In a fresh no-login
+**October 29 live check**, Flint failed at text and Big Pickle hit a rate limit;
+the six remaining candidates were not run after the quota stop. No model passed
+a new file-tool check in this run. A catalog listing does not confirm access.
 
 | Current free candidate | Route in this project |
 | --- | --- |
-| Big Pickle | Default profile; historical text/file checks passed. |
+| Big Pickle | Default profile; October 29 text check hit a rate limit. Historical text/file checks passed. |
 | MiMo-V2.6-Flash Free | Experimental profile; historical text/tool checks passed. |
-| Flint 40B Free | Newly listed; no maintained bridge profile or live test. |
+| Flint 40B Free | October 29 text check failed (`generation_failed`); file tools not reached. Not an install option. |
 | Beam Free | Catalog candidate; no maintained bridge profile. |
 | DeepSeek V4.1 Flash Free | Catalog candidate; no maintained bridge profile. |
 | GLM 5.3 Flash Free | Catalog candidate; no maintained bridge profile. |
@@ -38,11 +40,13 @@ suggested for new installations. Historical profiles and receipts remain for
 existing installations; they do not establish current access. Nemotron 3 Ultra
 Free is still free-priced but absent from the API.
 
-Flint is the only added free ID since October 17. The six candidates without a
+Flint is the only added free ID since October 17. Its live check did not pass,
+so no installer profile was added. The six candidates without a
 maintained profile need adaptation and verification before the installer can
 select them. No currently listed free candidate has a verified image route in
 this project. DeepSeek V4.1 is distinct from old V4; no model is silently replaced.
-[Exact IDs, catalog changes and dated test evidence](docs/free-models.md).
+[Exact IDs, catalog changes and dated test evidence](docs/free-models.md) ·
+[October 29 live results](docs/receipts/free-models-live-20261029.json).
 
 To try MiMo with its existing profile, name it explicitly in the installation
 chat. Ask Codex to follow the runbook, verify text/file tasks, and report failures

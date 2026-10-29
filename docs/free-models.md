@@ -4,26 +4,29 @@ The public [OpenCode inference catalog](https://opencode.ai/inference/v1/models)
 and [official pricing table](https://opencode.ai/v2/docs/console/models/#pricing)
 were checked on **2026-10-29 (China Standard Time)**. See the
 [sanitized comparison receipt](receipts/free-models-catalog-20261029.json).
-This check made no inference calls and changed no installed configuration or service.
-Catalog presence and free pricing are separate from successful bridge testing.
+The catalog-only receipt remains separate from the subsequent
+[October 29 live probe](receipts/free-models-live-20261029.json). Neither check
+changed installed configuration or services. Catalog presence and free pricing
+are separate from successful bridge testing.
 
 ## Current API candidates
 
 These eight conversational IDs appear in both the API and the official table
 with free input/output. Availability, eligibility and limits can change.
 Only IDs with a maintained profile in `src/model-profiles.mjs` can be selected by
-the maintained installer. “Not rerun” below refers to this October 29 check.
+the maintained installer. “Not run” below means skipped after the October 29
+probe hit a rate limit; it is not a failed inference result.
 
 | Model | Exact OpenCode ID | Official input/output price | Bridge status |
 | --- | --- | --- | --- |
-| Big Pickle | `opencode/big-pickle` | Free | Default profile; historical text/file checks passed; not rerun. |
-| MiMo V2.6 Flash Free | `opencode/mimo-v2.6-flash-free` | Free | Experimental profile; historical text/tool checks passed; not rerun. |
-| Flint 40B Free | `opencode/flint-40b-free` | Free | Added since October 17; no maintained profile or live test. |
-| Beam Free | `opencode/beam-free` | Free | No maintained profile; not rerun. |
-| DeepSeek V4.1 Flash Free | `opencode/deepseek-v4.1-flash-free` | Free | No maintained profile; not rerun. Distinct from old V4. |
-| GLM 5.3 Flash Free | `opencode/glm-5.3-flash-free` | Free | No maintained profile; not rerun. |
-| Nemotron 3.5 Lightning Free | `opencode/nemotron-3.5-lightning-free` | Free | No maintained profile; not rerun. Historical repair workflow timed out. |
-| Nemotron 3.5 Super VL Free | `opencode/nemotron-3.5-super-vl-free` | Free | No maintained profile; image support not verified; not rerun. |
+| Big Pickle | `opencode/big-pickle` | Free | Default profile; October 29 text check hit rate_limit; historical text/file checks passed. |
+| MiMo V2.6 Flash Free | `opencode/mimo-v2.6-flash-free` | Free | Experimental profile; historical text/tool checks passed; not run after quota stop. |
+| Flint 40B Free | `opencode/flint-40b-free` | Free | October 29 text check failed: generation_failed; file tools not reached; no profile added. |
+| Beam Free | `opencode/beam-free` | Free | No maintained profile; not run after quota stop. |
+| DeepSeek V4.1 Flash Free | `opencode/deepseek-v4.1-flash-free` | Free | No maintained profile; not run after quota stop. Distinct from old V4. |
+| GLM 5.3 Flash Free | `opencode/glm-5.3-flash-free` | Free | No maintained profile; not run after quota stop. |
+| Nemotron 3.5 Lightning Free | `opencode/nemotron-3.5-lightning-free` | Free | No maintained profile; not run after quota stop. Historical repair workflow timed out. |
+| Nemotron 3.5 Super VL Free | `opencode/nemotron-3.5-super-vl-free` | Free | No maintained profile; image support not verified; not run after quota stop. |
 
 `opencode/jev-1.13-free` is also listed and free-priced. Its System One endpoint
 returns structured decisions rather than conversational text, so it is excluded
@@ -68,6 +71,25 @@ there is no currently listed free candidate with a verified image route in this
 project. Model names, VL labels and upstream context metadata do not extend the
 bridge's verified capabilities. No maximum-context claim is added.
 
+### October 29 live probe
+
+Used pinned **official OpenCode 2.0.18 → bridge → real Codex app-server** with
+fresh isolated runtime/client state and no provider login. The two gates were an
+exact-text response and a real client-tool read/compute/write/verify task.
+
+| Model | Text gate | File-tool gate | Outcome |
+| --- | --- | --- | --- |
+| Flint 40B Free | Failed: `generation_failed` | Not reached | Not added to installer profiles. |
+| Big Pickle | Failed: upstream `rate_limit` (HTTP 429 category) | Not reached | Stopped requests; historical successes remain historical. |
+| Other six current candidates | Not run after quota stop | Not run | No new compatibility conclusion. |
+
+No model passed both gates in this run. The failure category does not establish
+Flint's root cause or permanent unavailability. Runtime discovery also failed to
+identify the Big Pickle control, so it is not used as evidence of model absence.
+There were no quota retries, alternate identities, paid fallback or service/config
+changes. Temporary runtime and client state were cleaned up. Existing model
+profiles remain unchanged. See the [sanitized live receipt](receipts/free-models-live-20261029.json).
+
 ### October 17 compatibility probe
 
 GLM 5.3 Flash Free and DeepSeek V4.1 Flash Free were each tried through the pinned
@@ -90,6 +112,6 @@ used temporary state and owned child processes, which were cleaned up afterward.
 The October 17 probe above is historical and route-specific; it is not a fresh
 October 29 result or proof that every authenticated route fails. Historical
 experiments also appear in [source-specific workflow evidence](verification.md).
-No models.dev metadata or model capacity was refreshed in this check.
+No models.dev metadata or model capacity was refreshed in these checks.
 
 [English README](../README.md) · [中文 README](README.zh-CN.md)
