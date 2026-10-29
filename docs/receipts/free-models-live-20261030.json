@@ -1,0 +1,123 @@
+{
+  "checked_on": "2026-10-30",
+  "started_at_utc": "2026-10-29T17:01:38.710Z",
+  "completed_at_utc": "2026-10-29T17:23:14.721Z",
+  "runtime": "2.0.18",
+  "sourceSha256": "d584beda55eaac609b435cb5acb83f8bb953427209a0df874178a143f075f0a3",
+  "route": "isolated_official_runtime_direct_bridge_real_codex",
+  "fresh_no_login": true,
+  "models": [
+    {
+      "model": "opencode/mimo-v2.6-flash-free",
+      "route": "isolated_official_runtime_direct_bridge_real_codex",
+      "checks": [],
+      "desktopPickerVerified": false,
+      "activeCheck": "text",
+      "passed": false,
+      "errorCategory": "rate_limit",
+      "backendErrors": [
+        {
+          "code": "upstream_access_or_quota",
+          "status": 429
+        }
+      ]
+    },
+    {
+      "model": "opencode/deepseek-v4.1-flash-free",
+      "route": "isolated_official_runtime_direct_bridge_real_codex",
+      "checks": [],
+      "desktopPickerVerified": false,
+      "activeCheck": "text",
+      "passed": false,
+      "errorCategory": "generation_failed",
+      "backendErrors": [
+        {
+          "code": "generation_failed",
+          "status": 502
+        }
+      ],
+      "providerErrors": []
+    },
+    {
+      "model": "opencode/beam-free",
+      "route": "isolated_official_runtime_direct_bridge_real_codex",
+      "checks": [],
+      "desktopPickerVerified": false,
+      "activeCheck": "text",
+      "passed": false,
+      "errorCategory": "generation_failed",
+      "backendErrors": [
+        {
+          "code": "generation_failed",
+          "status": 502
+        }
+      ],
+      "providerErrors": []
+    },
+    {
+      "model": "opencode/nemotron-3.5-super-vl-free",
+      "route": "isolated_official_runtime_direct_bridge_real_codex",
+      "checks": [],
+      "desktopPickerVerified": false,
+      "activeCheck": "text",
+      "passed": false,
+      "errorCategory": "generation_failed",
+      "backendErrors": [
+        {
+          "code": "generation_failed",
+          "status": 502
+        }
+      ],
+      "providerErrors": []
+    },
+    {
+      "model": "opencode/nemotron-3.5-lightning-free",
+      "route": "isolated_official_runtime_direct_bridge_real_codex",
+      "checks": [],
+      "desktopPickerVerified": false,
+      "activeCheck": "text",
+      "passed": false,
+      "errorCategory": "rate_limit",
+      "backendErrors": [
+        {
+          "code": "upstream_access_or_quota",
+          "status": 429
+        }
+      ],
+      "providerErrors": [
+        {
+          "type": "provider.quota",
+          "status": 429,
+          "freeUsageLimitMessage": true
+        }
+      ]
+    },
+    {
+      "model": "opencode/glm-5.3-flash-free",
+      "route": "isolated_official_runtime_direct_bridge_real_codex",
+      "checks": [],
+      "desktopPickerVerified": false,
+      "activeCheck": "text",
+      "passed": false,
+      "errorCategory": "generation_failed",
+      "backendErrors": [
+        {
+          "code": "generation_failed",
+          "status": 502
+        }
+      ],
+      "providerErrors": []
+    }
+  ],
+  "attempted_models": 6,
+  "not_run_models": 0,
+  "passed": [],
+  "file_tool_gates_reached": 0,
+  "quota_pool_scope": "Unconfirmed. A quota response for one model does not establish that another model is quota-limited.",
+  "quota_policy": "One attempt per distinct candidate; stop only the affected model after HTTP 429 and continue the other distinct candidates. No immediate quota retries, alternate identities or network changes.",
+  "generation_failure_diagnostic": "An additional DeepSeek diagnostic exposed only an idle message with outcome=failed, no provider error or HTTP status. Cause remains unknown; not classified as quota.",
+  "scope": "Exact-text gate followed by a real Codex file-tool task if text passes. All six text gates were attempted, none passed, and no file-tool gate was reached. No images, maximum-context or desktop-picker claim.",
+  "runtime_cleaned": true,
+  "installed_configuration_changed": false,
+  "existing_services_restarted": false
+}
