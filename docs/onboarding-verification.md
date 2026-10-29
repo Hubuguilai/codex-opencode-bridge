@@ -1,5 +1,11 @@
 # One-prompt onboarding checks — 2026-09-30
 
+> **Catalog update — 2026-10-29:** Muse Spark 1.3 Contributor Free, Space Bunny
+> and LongCat are absent from the current API. Their profiles and test evidence
+> below are historical, not recommendations for new installations. Start with
+> Big Pickle and consult the [current catalog](free-models.md). Do not substitute
+> paid models for missing free IDs.
+
 This revision makes the README a three-step user entry point, adds a versioned
 from-zero Codex prompt and a maintained `scripts/start.sh setup --live` entry point.
 It defaults new users to Big Pickle; Muse is an explicit option after access checks.

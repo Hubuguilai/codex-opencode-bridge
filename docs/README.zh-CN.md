@@ -16,29 +16,31 @@
 
 ## 可以尝试哪些免费模型？
 
-目录和官方免费标价核对日期：**2026-10-17**。首次安装仍默认选 Big Pickle。
-目录里有这个模型，不代表你当前的线路一定能调用。
+目录和官方免费标价核对日期：**2026-10-29**。首次安装仍默认选 Big Pickle。
+这次只核查目录和价格，没有重新运行推理或文件工具测试；目录中有模型，不代表当前线路一定能用。
 
-| 模型 | 在本项目里的路径 |
+| 当前免费候选 | 在本项目里的路径 |
 | --- | --- |
-| Big Pickle | 默认安装；已有文字和文件任务的通过记录。 |
-| Muse Spark 1.3 Contributor Free | 可选；已有图片任务的通过记录，但全新无登录检查遇到地区限制。 |
-| Space Bunny Free | 文字／工具实验路径；历史检查通过。 |
-| MiMo-V2.6-Flash Free | 文字／工具实验路径；历史检查通过。 |
-| LongCat 2.5 Preview Free | 文字／工具实验路径；历史检查通过。 |
+| Big Pickle | 默认配置；历史文字和文件任务检查通过。 |
+| MiMo-V2.6-Flash Free | 实验配置；历史文字／工具检查通过。 |
+| Flint 40B Free | 本次新增；尚无维护的桥接配置，也未实测。 |
+| Beam Free | 目录候选；尚无维护的桥接配置。 |
+| DeepSeek V4.1 Flash Free | 目录候选；尚无维护的桥接配置。 |
+| GLM 5.3 Flash Free | 目录候选；尚无维护的桥接配置。 |
+| Nemotron 3.5 Lightning Free | 目录候选；尚无维护的桥接配置。 |
+| Nemotron 3.5 Super VL Free | 目录候选；尚无维护的桥接配置，图片能力未验证。 |
 
-上面三款实验模型本次没有重新测试，目前仅 Muse 路径启用图片输入。
-**Nemotron 3 Ultra Free 已不在当前 API 目录中**，保留旧配置供已有安装使用，
-状态改为待复核，暂不建议首次安装时选择。
+**Space Bunny Free、LongCat 2.5 Preview Free、LL Alpha Free，以及 Muse Spark
+1.2／1.3 Contributor Free 已不在当前 API 目录中**，不再建议新安装时选择。
+保留已有配置和历史测试记录，供已有安装诊断使用，不代表当前仍能调用。
+Nemotron 3 Ultra Free 仍有免费标价，但 API 目录中没有。
 
-上游新增的免费候选有 **GLM 5.3 Flash Free、DeepSeek V4.1 Flash Free、
-Beam Free、LL Alpha Free、Nemotron 3.5 Super VL Free**，目前尚无本项目的正式桥接配置。
-其中 GLM 和 DeepSeek 在固定的 OpenCode 2.0.18、全新无登录环境中均未通过文字检查，
-因此暂不加入安装选项。DeepSeek V4.1 和旧 V4 的 ID 不同，不会自动替换。
-模型名字里有 VL 也不会自动启用图片。
-[准确 ID、当前完整名单、目录差异与测试记录](free-models.md)。
+与 10 月 17 日相比，新增的免费 ID 只有 Flint。上表六款没有维护配置的候选，
+需要先适配并验证，才能通过安装器选择。当前目录里的免费候选中，本项目尚无
+已验证的图片路线。DeepSeek V4.1 与旧 V4 是不同 ID，不会自动替换模型。
+[准确 ID、目录变化和分日期的测试记录](free-models.md)。
 
-想试已有桥接配置的其他模型，可以在安装对话里明确说出模型名，
+想试已有配置的 MiMo，可以在安装对话中明确说出模型名，
 让 Codex 按操作手册安装、验证文字和文件任务；失败时报告原因，不自动换模型。
 
 ## 第一步：让 Codex 帮你装
@@ -54,7 +56,7 @@ Beam Free、LL Alpha Free、Nemotron 3.5 Super VL Free**，目前尚无本项目
 https://github.com/Hubuguilai/codex-opencode-bridge
 请下载仓库 main 分支，先阅读 README 和 docs/agent-install.md，再实际完成安装，
 不要只给我操作步骤。我没有提前下载项目或准备运行环境，请你检查并准备所需依赖。
-默认安装 Big Pickle；如果我另行说明需要 Muse，也请加入并分别验证。
+默认安装 Big Pickle，并验证所选模型；选择其他模型前先检查 docs/free-models.md。
 请使用项目提供的统一安装入口，保留已有 GPT、其他模型、登录和配置。
 我授权运行所选模型的必要验证；不要替我购买订阅、充值或开启付费后备。
 需要我登录 OpenCode 或完成系统授权时，一次告诉我一个具体操作；API Key 只在
@@ -119,22 +121,14 @@ Key 只在那个入口输入，不要发进聊天。
 
 Big Pickle 用于文字、代码和文件任务，不支持看图。
 
-可选的 **Muse Spark 1.3 Contributor Free** 有图片接入路径。
-本次无登录检查返回了地区限制。先确认这个准确模型在你的 OpenCode 中可用，
-再安装；不要为了消除地区错误盲目登录或充值。
+历史的 Muse Spark 1.3 Contributor Free 配置支持图片传递，但该免费 ID 已不在
+10 月 29 日的 API 目录中，不再建议新安装时选择。已有安装需要先重新确认访问权限，
+不要自动替换为收费的 Muse 模型。
 
-在安装 prompt 后加一句，或者安装后回到同一对话说：
-
-> 我已确认 Muse Spark 1.3 Contributor Free 在我的 OpenCode 中可用，请同时安装并验证它的图片能力。
-
-测试通过并重开 Codex 后，选择
-**Muse Spark 1.3 Contributor Free (OpenCode Native Bridge)**，
-上传一张无敏感信息的图片，让它描述具体内容。
-
-Big Pickle 和 Muse 是初始安装路径；上表的另外四款属于实验路径。
-上游目录里的其他模型仍需适配和验证，不能直接通过本项目安装。
-不支持原生音频、视频或 PDF 输入。
-Intel Mac 尚未实测；Windows/Linux 暂不提供这条桌面安装路径。
+Big Pickle 是默认安装路线；MiMo V2.6 Flash Free 有实验性的文字／工具配置。
+其他当前候选需要先补配置并验证。名字里有 VL 不会自动启用桥接的图片能力。
+不支持原生音频、视频或 PDF 输入。Intel Mac 尚未实测；Windows/Linux 暂不提供
+这条桌面安装路径。
 
 [模型能力与证据](advanced.zh-CN.md#模型能力与证据)
 

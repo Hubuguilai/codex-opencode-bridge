@@ -1,5 +1,11 @@
 # codex-opencode-bridge
 
+> **Catalog update — 2026-10-29:** Muse Spark 1.3 Contributor Free, Space Bunny
+> and LongCat are absent from the current API. Their profiles and test evidence
+> below are historical, not recommendations for new installations. Start with
+> Big Pickle and consult the [current catalog](free-models.md). Do not substitute
+> paid models for missing free IDs.
+
 Use supported OpenCode models from Codex's model menu, with file and command
 execution handled by Codex. The bridge runs locally through the official OpenCode
 runtime and your own model access.

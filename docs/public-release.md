@@ -1,5 +1,11 @@
 # Experimental open-source scope — 0.2.0-rc.1
 
+> **Catalog update — 2026-10-29:** Muse Spark 1.3 Contributor Free, Space Bunny
+> and LongCat are absent from the current API. Their profiles and test evidence
+> below are historical, not recommendations for new installations. Start with
+> Big Pickle and consult the [current catalog](free-models.md). Do not substitute
+> paid models for missing free IDs.
+
 The owner authorized public experimental distribution on 2026-09-30 under the
 repository's MIT license. This is a macOS-first trial, not a stable release or a
 guarantee of feature parity with native GPT. GitHub visibility and the prerelease

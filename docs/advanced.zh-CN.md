@@ -1,5 +1,10 @@
 # codex-opencode-bridge
 
+> **2026-10-29 目录更新：** Muse Spark 1.3 Contributor Free、Space Bunny 和 LongCat
+> 已不在当前 API 目录中。下文相关配置和测试属于历史记录，不再作为新安装推荐。
+> 首次安装默认选 Big Pickle；其他模型先查看[当前目录](free-models.md)，不要自动
+> 用收费模型替换缺失的免费 ID。
+
 让你在 Codex 的模型菜单中选择经过验证的 OpenCode 模型，文件操作和命令仍由
 Codex 执行。桥接在本机运行，使用官方 OpenCode 运行时和你自己的模型权限。
 
