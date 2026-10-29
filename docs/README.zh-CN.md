@@ -42,6 +42,8 @@ Nemotron 3 Ultra Free 仍有免费标价，但 API 目录中没有。
 已验证的图片路线。DeepSeek V4.1 与旧 V4 是不同 ID，不会自动替换模型。
 [准确 ID、目录变化和分日期的测试记录](free-models.md) ·
 [10 月 29 日实测结果](receipts/free-models-live-20261029.json)。
+后续诊断确认 Big Pickle 的 429 来自上游免费额度限制，响应未提供具体重置时间。
+[限流诊断](free-models.md#october-29-quota-diagnosis)。
 
 想试已有配置的 MiMo，可以在安装对话中明确说出模型名，
 让 Codex 按操作手册安装、验证文字和文件任务；失败时报告原因，不自动换模型。

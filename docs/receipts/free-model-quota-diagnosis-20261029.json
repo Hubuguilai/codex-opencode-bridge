@@ -1,0 +1,32 @@
+{
+  "checked_on": "2026-10-29",
+  "observed_at_utc": "2026-10-29T11:22:28.753112+00:00",
+  "model": "opencode/big-pickle",
+  "runtime": "2.0.18",
+  "route": "fresh_no_login_official_runtime_bridge_real_codex",
+  "provider_error_type": "provider.quota",
+  "provider_status": 429,
+  "message_category": "free_usage_limit_reached",
+  "provider_message_excerpt": "Free usage limit reached.",
+  "error_fields_exposed": [
+    "type",
+    "message",
+    "status"
+  ],
+  "retry_after_exposed": false,
+  "reset_at_exposed": false,
+  "confirmed_scope": "upstream free usage allowance; not local bridge concurrency",
+  "unresolved": [
+    "account versus workspace versus network attribution",
+    "allowance size and counter contents",
+    "exact reset time for this route"
+  ],
+  "sources": {
+    "upstream_scope_explanation": "https://github.com/anomalyco/opencode/issues/58186",
+    "upstream_daily_reset_report": "https://github.com/anomalyco/opencode/issues/59027",
+    "status": "https://status.opencode.ai/"
+  },
+  "retry_policy": "No immediate loop. Recheck after the next daily boundary; 00:00 UTC is reported in a separate upstream issue, not exposed by this local response. Preserve results and stop on the next quota error.",
+  "installed_configuration_changed": false,
+  "existing_services_restarted": false
+}

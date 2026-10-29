@@ -90,6 +90,28 @@ There were no quota retries, alternate identities, paid fallback or service/conf
 changes. Temporary runtime and client state were cleaned up. Existing model
 profiles remain unchanged. See the [sanitized live receipt](receipts/free-models-live-20261029.json).
 
+### October 29 quota diagnosis
+
+A separate diagnostic through the same fresh no-login official runtime reproduced
+Big Pickle's rejection. OpenCode's original structured error was
+`type: provider.quota`, `status: 429`, with the message “Free usage limit reached.”
+This identifies an upstream free-usage allowance restriction, not the bridge's
+local concurrency guard. The runtime exposed only type, message and status; it
+did not expose a reset timestamp or Retry-After value.
+
+The [upstream service response](https://github.com/anomalyco/opencode/issues/58186)
+describes free limits by account, workspace and network. This isolated no-login
+probe cannot determine which counter applies. A
+[separate report](https://github.com/anomalyco/opencode/issues/59027) observed a
+00:00 UTC reset, but that does not establish this route's exact reset time.
+Do not infer remaining allowance or a guaranteed recovery time from HTTP 429.
+
+Retry after a daily boundary rather than looping immediately. Resume with pending
+models, keep passed and failed results separately, and stop generation requests
+on another quota error. Only add an installer profile after both text and real
+client-file-tool gates pass. See the
+[sanitized diagnosis](receipts/free-model-quota-diagnosis-20261029.json).
+
 ### October 17 compatibility probe
 
 GLM 5.3 Flash Free and DeepSeek V4.1 Flash Free were each tried through the pinned
