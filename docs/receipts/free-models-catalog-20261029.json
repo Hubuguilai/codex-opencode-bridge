@@ -1,0 +1,85 @@
+{
+  "checked_on": "2026-10-29",
+  "recorded_at_utc": "2026-10-29T10:25:58.503492+00:00",
+  "sources": {
+    "catalog": "https://opencode.ai/inference/v1/models",
+    "pricing": "https://opencode.ai/v2/docs/console/models/#pricing"
+  },
+  "retrieval_method": "Official pages read using web tool; local urllib GET returned HTTP 403. IDs transcribed from successful web catalog read.",
+  "baseline": "published repository snapshot 2026-10-17",
+  "current_free_named_ids": [
+    "beam-free",
+    "big-pickle",
+    "deepseek-v4.1-flash-free",
+    "flint-40b-free",
+    "glm-5.3-flash-free",
+    "jev-1.13-free",
+    "mimo-v2.6-flash-free",
+    "nemotron-3.5-lightning-free",
+    "nemotron-3.5-super-vl-free"
+  ],
+  "added": [
+    "flint-40b-free"
+  ],
+  "absent": [
+    "ll-alpha-free",
+    "longcat-2.5-preview-free",
+    "muse-spark-1.2-contributor-free",
+    "muse-spark-1.3-contributor-free",
+    "space-bunny-free"
+  ],
+  "conversational_candidates": [
+    "beam-free",
+    "big-pickle",
+    "deepseek-v4.1-flash-free",
+    "flint-40b-free",
+    "glm-5.3-flash-free",
+    "mimo-v2.6-flash-free",
+    "nemotron-3.5-lightning-free",
+    "nemotron-3.5-super-vl-free"
+  ],
+  "price_table_free_but_absent_from_api": [
+    "nemotron-3-ultra-free"
+  ],
+  "inference_tested_this_check": false,
+  "note": "Directory absence does not establish permanent retirement. Catalog and price presence do not establish successful bridge inference.",
+  "scope": "Public catalog and pricing documentation only; no new live inference or installer support.",
+  "official_input_output_prices": {
+    "beam-free": {
+      "input": "Free",
+      "output": "Free"
+    },
+    "big-pickle": {
+      "input": "Free",
+      "output": "Free"
+    },
+    "deepseek-v4.1-flash-free": {
+      "input": "Free",
+      "output": "Free"
+    },
+    "flint-40b-free": {
+      "input": "Free",
+      "output": "Free"
+    },
+    "glm-5.3-flash-free": {
+      "input": "Free",
+      "output": "Free"
+    },
+    "jev-1.13-free": {
+      "input": "Free",
+      "output": "Free"
+    },
+    "mimo-v2.6-flash-free": {
+      "input": "Free",
+      "output": "Free"
+    },
+    "nemotron-3.5-lightning-free": {
+      "input": "Free",
+      "output": "Free"
+    },
+    "nemotron-3.5-super-vl-free": {
+      "input": "Free",
+      "output": "Free"
+    }
+  }
+}

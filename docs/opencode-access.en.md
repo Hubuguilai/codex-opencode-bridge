@@ -1,5 +1,11 @@
 # Get an OpenCode account and key, then let Codex install the bridge
 
+> **Catalog update — 2026-10-29:** Muse Spark 1.3 Contributor Free, Space Bunny
+> and LongCat are absent from the current API. Their profiles and test evidence
+> below are historical, not recommendations for new installations. Start with
+> Big Pickle and consult the [current catalog](free-models.md). Do not substitute
+> paid models for missing free IDs.
+
 You need a browser and a working local Codex chat. You do not need to install
 OpenCode Desktop or buy Go first. To try Big Pickle without an account, start
 with the [README install prompt](../README.md#2-paste-this-into-codex); return here

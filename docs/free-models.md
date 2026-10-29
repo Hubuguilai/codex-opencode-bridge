@@ -1,66 +1,72 @@
-# Free-model catalog snapshot — 2026-10-17
+# Free-model catalog snapshot — 2026-10-29
 
 The public [OpenCode inference catalog](https://opencode.ai/inference/v1/models)
 and [official pricing table](https://opencode.ai/v2/docs/console/models/#pricing)
-were checked on **2026-10-17 (China Standard Time)**. The captured UTC time and
-source results are in the [sanitized receipt](receipts/free-models-catalog-20261017.json).
-This page distinguishes catalog presence, documented price and bridge testing.
-An API listing or a name ending in `-free` is not a successful inference test.
+were checked on **2026-10-29 (China Standard Time)**. See the
+[sanitized comparison receipt](receipts/free-models-catalog-20261029.json).
+This check made no inference calls and changed no installed configuration or service.
+Catalog presence and free pricing are separate from successful bridge testing.
 
 ## Current API candidates
 
-All IDs below were present in the API. “Free” means the official table explicitly
-listed free input/output at this check, not guaranteed future pricing, account
-eligibility or unrestricted access. The model-selection command accepts only IDs
-with a maintained profile in `src/model-profiles.mjs`.
+These eight conversational IDs appear in both the API and the official table
+with free input/output. Availability, eligibility and limits can change.
+Only IDs with a maintained profile in `src/model-profiles.mjs` can be selected by
+the maintained installer. “Not rerun” below refers to this October 29 check.
 
 | Model | Exact OpenCode ID | Official input/output price | Bridge status |
 | --- | --- | --- | --- |
-| Big Pickle | `opencode/big-pickle` | Free | Default profile; recorded text/file checks passed. Not rerun in this catalog check. |
-| Muse Spark 1.3 Contributor Free | `opencode/muse-spark-1.3-contributor-free` | Free | Optional profile; recorded image/tool evidence; fresh no-login check was region-denied. |
-| Space Bunny Free | `opencode/space-bunny-free` | Free | Historical text/tool profile; not rerun in this check. |
-| MiMo V2.6 Flash Free | `opencode/mimo-v2.6-flash-free` | Free | Historical text/tool profile; not rerun in this check. |
-| LongCat 2.5 Preview Free | `opencode/longcat-2.5-preview-free` | Free | Historical text/tool profile; not rerun in this check. |
-| GLM 5.3 Flash Free | `opencode/glm-5.3-flash-free` | Free | Fresh no-login text probe failed; no maintained profile. |
-| DeepSeek V4.1 Flash Free | `opencode/deepseek-v4.1-flash-free` | Free | Fresh no-login text probe failed; no maintained profile. Distinct from old V4. |
-| Beam Free | `opencode/beam-free` | Free | New candidate; no bridge profile or workflow verification. |
-| LL Alpha Free | `opencode/ll-alpha-free` | Free | New candidate; no bridge profile or workflow verification. |
-| Nemotron 3.5 Super VL Free | `opencode/nemotron-3.5-super-vl-free` | Free | New candidate; no bridge profile or image/workflow verification. |
-| Nemotron 3.5 Lightning Free | `opencode/nemotron-3.5-lightning-free` | Free | No bridge profile; historical repair workflow timed out. |
-| Muse Spark 1.2 Contributor Free | `opencode/muse-spark-1.2-contributor-free` | No matching current price row | No bridge profile. Current free pricing is not verified by the name alone. |
+| Big Pickle | `opencode/big-pickle` | Free | Default profile; historical text/file checks passed; not rerun. |
+| MiMo V2.6 Flash Free | `opencode/mimo-v2.6-flash-free` | Free | Experimental profile; historical text/tool checks passed; not rerun. |
+| Flint 40B Free | `opencode/flint-40b-free` | Free | Added since October 17; no maintained profile or live test. |
+| Beam Free | `opencode/beam-free` | Free | No maintained profile; not rerun. |
+| DeepSeek V4.1 Flash Free | `opencode/deepseek-v4.1-flash-free` | Free | No maintained profile; not rerun. Distinct from old V4. |
+| GLM 5.3 Flash Free | `opencode/glm-5.3-flash-free` | Free | No maintained profile; not rerun. |
+| Nemotron 3.5 Lightning Free | `opencode/nemotron-3.5-lightning-free` | Free | No maintained profile; not rerun. Historical repair workflow timed out. |
+| Nemotron 3.5 Super VL Free | `opencode/nemotron-3.5-super-vl-free` | Free | No maintained profile; image support not verified; not rerun. |
 
-The API also lists `opencode/jev-1.13-free`, with free input/output in the pricing
-table. Its System One endpoint evaluates structured decisions, so it is not
-treated as a conversational Codex candidate.
+`opencode/jev-1.13-free` is also listed and free-priced. Its System One endpoint
+returns structured decisions rather than conversational text, so it is excluded
+from the eight conversational candidates above.
 
-## Changes since October 1
+## Changes since October 17
 
-Five IDs were added: `beam-free`, `deepseek-v4.1-flash-free`, `glm-5.3-flash-free`,
-`ll-alpha-free` and `nemotron-3.5-super-vl-free`. All five also have free price rows.
+Added: **Flint 40B Free** (`opencode/flint-40b-free`).
 
-Four previously recorded IDs are absent from the current API:
+Five previously listed IDs are absent from the current API and matching free
+price rows. None is recommended for a new installation:
 
-| Exact OpenCode ID | Current interpretation |
-| --- | --- |
-| `opencode/nemotron-3-ultra-free` | Still in the price table, absent from the API. Existing historical bridge profile retained for installed configurations; revalidation required, not a recommended new selection. |
-| `opencode/mimo-v2.5-free` | Still in the price table, absent from the API; no bridge profile. |
-| `opencode/deepseek-v4-flash-free` | Absent from the current API and price table; no bridge profile. V4.1 is a separate candidate, not an alias. |
-| `opencode/ling-3.0-flash-fin-free` | Absent from the current API and price table; no bridge profile. Historical diagnostic reported an unavailable endpoint. |
+| Model | Exact OpenCode ID | Retained project state |
+| --- | --- | --- |
+| Space Bunny Free | `opencode/space-bunny-free` | Historical profile and evidence retained. |
+| LongCat 2.5 Preview Free | `opencode/longcat-2.5-preview-free` | Historical profile and evidence retained. |
+| LL Alpha Free | `opencode/ll-alpha-free` | No maintained profile. |
+| Muse Spark 1.2 Contributor Free | `opencode/muse-spark-1.2-contributor-free` | No maintained profile. |
+| Muse Spark 1.3 Contributor Free | `opencode/muse-spark-1.3-contributor-free` | Historical image profile and evidence retained. |
 
-Absence is a discovery result, not proof of permanent retirement or a failed call.
-`exo-free` is another free-priced entry absent from the API. Conversely, Muse 1.2
-Contributor Free appears in the API without a matching current price-table row.
-These discrepancies remain explicit rather than combining both sources into a
-single “available and free” claim.
+Paid Muse Spark 1.2/1.3 entries remain separate models. Do not silently replace a
+missing free ID with a paid one. Directory absence does not establish permanent
+retirement or prove a failed inference call.
+
+Nemotron 3 Ultra Free remains in the price table but is absent from the API.
+Its historical profile remains for existing installations, pending revalidation.
+MiMo V2.5 Free, old DeepSeek V4 Flash Free and Ling 3.0 Flash Fin Free also remain
+absent from the API; none is a suggested new selection.
+The [October 17 snapshot](receipts/free-models-catalog-20261017.json) and
+[October 1 snapshot](receipts/free-models-catalog-20261001.json) are preserved.
 
 ## Bridge compatibility
 
-Six historical profiles remain in the source, including Nemotron 3 Ultra for
-existing installations. Catalog candidates without a profile cannot be selected
-by the maintained installer. A new profile requires route and client-tool
-verification before being presented as usable. Only Muse 1.3 currently enables
-image inputs. Names or upstream metadata describing VL, images or large context
-windows do not extend the bridge's verified capabilities.
+Six profiles remain in the source for compatibility with existing installations;
+only Big Pickle and MiMo V2.6 Flash Free also appear in today's API catalog.
+Keeping a profile does not certify current upstream access. No profile is added
+or removed in this documentation update. Flint and other candidates without a
+profile require adaptation and live client-tool verification before installation.
+
+Only the historical Muse 1.3 profile enables images. Because its free ID is absent,
+there is no currently listed free candidate with a verified image route in this
+project. Model names, VL labels and upstream context metadata do not extend the
+bridge's verified capabilities. No maximum-context claim is added.
 
 ### October 17 compatibility probe
 
@@ -81,9 +87,9 @@ support or maximum-context claim is introduced. The pinned runtime remains
 No existing Codex/Router/OpenCode configuration or service was changed. The probe
 used temporary state and owned child processes, which were cleaned up afterward.
 
-Current models.dev metadata could not be refreshed because its download did not
-complete. The [October 1 receipt](receipts/free-models-catalog-20261001.json) is
-preserved as historical evidence, not reused as current pricing or capacity.
-See [source-specific workflow evidence](verification.md) for previous tests.
+The October 17 probe above is historical and route-specific; it is not a fresh
+October 29 result or proof that every authenticated route fails. Historical
+experiments also appear in [source-specific workflow evidence](verification.md).
+No models.dev metadata or model capacity was refreshed in this check.
 
 [English README](../README.md) · [中文 README](README.zh-CN.md)

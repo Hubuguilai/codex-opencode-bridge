@@ -17,33 +17,36 @@ before asking Codex to install it.
 
 ## Free models to try
 
-Catalog and official free pricing checked **2026-10-17**. Big Pickle remains the
-first-install default. A catalog listing does not confirm access on your route.
+Catalog and official free pricing checked **2026-10-29**. Big Pickle remains the
+first-install default. This was a catalog check; no inference or file-tool tests
+were rerun. A catalog listing does not confirm access on your route.
 
-| Model | Route in this project |
+| Current free candidate | Route in this project |
 | --- | --- |
-| Big Pickle | Default. Recorded text and file checks passed. |
-| Muse Spark 1.3 Contributor Free | Optional. Recorded image checks passed; the fresh no-login check was region-denied. |
-| Space Bunny Free | Experimental text/tool route. Historical checks passed. |
-| MiMo-V2.6-Flash Free | Experimental text/tool route. Historical checks passed. |
-| LongCat 2.5 Preview Free | Experimental text/tool route. Historical checks passed. |
+| Big Pickle | Default profile; historical text/file checks passed. |
+| MiMo-V2.6-Flash Free | Experimental profile; historical text/tool checks passed. |
+| Flint 40B Free | Newly listed; no maintained bridge profile or live test. |
+| Beam Free | Catalog candidate; no maintained bridge profile. |
+| DeepSeek V4.1 Flash Free | Catalog candidate; no maintained bridge profile. |
+| GLM 5.3 Flash Free | Catalog candidate; no maintained bridge profile. |
+| Nemotron 3.5 Lightning Free | Catalog candidate; no maintained bridge profile. |
+| Nemotron 3.5 Super VL Free | Catalog candidate; no maintained bridge profile; images not verified. |
 
-The three experimental routes above have not been rerun for this catalog check.
-Images are enabled only for Muse. **Nemotron 3 Ultra Free is absent from the current
-API catalog**; its old profile is retained for existing installations, pending
-revalidation. It is no longer a suggested first choice.
+**Space Bunny Free, LongCat 2.5 Preview Free, LL Alpha Free and Muse Spark 1.2/1.3
+Contributor Free are absent from the current API catalog.** They are no longer
+suggested for new installations. Historical profiles and receipts remain for
+existing installations; they do not establish current access. Nemotron 3 Ultra
+Free is still free-priced but absent from the API.
 
-New free-priced catalog entries include **GLM 5.3 Flash Free, DeepSeek V4.1 Flash
-Free, Beam Free, LL Alpha Free and Nemotron 3.5 Super VL Free**. They do not yet
-have maintained bridge profiles. The fresh no-login text checks for GLM and
-DeepSeek failed on pinned OpenCode 2.0.18, so they are not install options yet.
-DeepSeek V4.1 uses a different ID from V4; the bridge does not silently substitute
-it. Model names do not enable image support.
-[Exact IDs, current catalog, discrepancies and test evidence](docs/free-models.md).
+Flint is the only added free ID since October 17. The six candidates without a
+maintained profile need adaptation and verification before the installer can
+select them. No currently listed free candidate has a verified image route in
+this project. DeepSeek V4.1 is distinct from old V4; no model is silently replaced.
+[Exact IDs, catalog changes and dated test evidence](docs/free-models.md).
 
-To try another model with an existing profile, name it explicitly in the
-installation chat. Ask Codex to follow the runbook, verify text/file tasks, and
-report failures without silently changing models.
+To try MiMo with its existing profile, name it explicitly in the installation
+chat. Ask Codex to follow the runbook, verify text/file tasks, and report failures
+without silently changing models.
 
 ## 1. Let Codex install it
 
@@ -57,8 +60,8 @@ Install and configure codex-opencode-bridge in Codex on this Mac:
 https://github.com/Hubuguilai/codex-opencode-bridge
 Download the main branch, read README and docs/agent-install.md, and perform the
 installation. I have not downloaded the project or prepared dependencies; handle those
-for me rather than only giving instructions. Install Big Pickle by default; include
-Muse only if I explicitly request it, and verify each selected model.
+for me rather than only giving instructions. Install Big Pickle by default and verify
+each selected model. Check docs/free-models.md before selecting another model.
 Use the maintained installer and preserve existing GPT models, other providers, login
 and settings. You may run necessary model checks, but do not buy subscriptions, add
 credit or enable paid fallback. If login or system authorization is needed, give me
@@ -132,23 +135,16 @@ credit is not a required installation step for the default route.
 
 Big Pickle is for text, coding and file tasks; it does not support images.
 
-The optional **Muse Spark 1.3 Contributor Free** model has an image route.
-Our fresh unauthenticated check returned a country restriction. Confirm that this
-exact model works in your OpenCode before adding it; logging in or paying is not
-a guaranteed fix.
+The historical Muse Spark 1.3 Contributor Free profile supports image transport,
+but its free ID is absent from the October 29 API catalog. It is no longer a
+suggested new installation. Existing installations must recheck access before
+using it; do not substitute the paid Muse model.
 
-Append this to the installation prompt, or ask the same installation chat later:
-
-> I confirmed Muse Spark 1.3 Contributor Free works in my OpenCode. Install it alongside Big Pickle and verify images too.
-
-After successful checks, reopen Codex and select
-**Muse Spark 1.3 Contributor Free (OpenCode Native Bridge)**.
-Try a non-sensitive image and ask about its contents.
-
-Big Pickle and Muse are the initial onboarding routes. The other four profiles
-in the table above are experimental; other OpenCode catalog entries need adaptation
-and verification before installation. Native audio, video and PDF input is unsupported.
-Intel Macs are untested; Windows/Linux desktop setup is not covered by this guide.
+Big Pickle is the default onboarding route. MiMo V2.6 Flash Free has an
+experimental text/tool profile. Other current candidates need maintained profiles
+and verification first. The name “VL” does not enable images in this bridge.
+Native audio, video and PDF input is unsupported. Intel Macs are untested;
+Windows/Linux desktop setup is not covered by this guide.
 
 [Model capabilities and evidence](docs/advanced.en.md)
 

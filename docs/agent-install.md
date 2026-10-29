@@ -49,10 +49,15 @@ installs choose **Big Pickle only**; reruns preserve an existing managed selecti
 The lower-level `install` command has different historical defaults: do not
 substitute it for `setup`.
 
-If the user explicitly selected both models on the first install:
+Before selecting any non-default model, read [the dated catalog](free-models.md).
+As of October 29, Muse Contributor Free, Space Bunny and LongCat are absent from
+the API. Keep existing installation records, but do not suggest these as new
+selections or replace them with paid models. Flint has no maintained profile yet.
+
+If the user explicitly selected the current experimental MiMo profile:
 
 ```sh
-bash scripts/start.sh setup --live --models opencode/big-pickle,opencode/muse-spark-1.3-contributor-free
+bash scripts/start.sh setup --live --models opencode/big-pickle,opencode/mimo-v2.6-flash-free
 ```
 
 For an existing managed install with a different selection, use `models` below,
@@ -112,7 +117,7 @@ free access. Account billing, model availability and privacy terms remain upstre
 ```sh
 bash scripts/start.sh status
 bash scripts/start.sh verify --live
-bash scripts/start.sh models --models opencode/big-pickle,opencode/muse-spark-1.3-contributor-free
+bash scripts/start.sh models --models opencode/big-pickle,opencode/mimo-v2.6-flash-free
 bash scripts/start.sh upgrade
 bash scripts/start.sh rollback
 bash scripts/start.sh recover-upgrade

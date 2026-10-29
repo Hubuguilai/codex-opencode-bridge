@@ -1,5 +1,10 @@
 # 从零注册 OpenCode、取得 Key，再交给 Codex 安装
 
+> **2026-10-29 目录更新：** Muse Spark 1.3 Contributor Free、Space Bunny 和 LongCat
+> 已不在当前 API 目录中。下文相关配置和测试属于历史记录，不再作为新安装推荐。
+> 首次安装默认选 Big Pickle；其他模型先查看[当前目录](free-models.md)，不要自动
+> 用收费模型替换缺失的免费 ID。
+
 你只需要浏览器和已经能正常使用的 Codex。**不需要先装 OpenCode 桌面版，也不需要先买 Go。**
 下面先讲账号路径；只想先试 Big Pickle 的用户，可以直接使用首页的安装 Prompt，
 让 Codex 先测试免费访问，需要登录时再回来完成本页。
