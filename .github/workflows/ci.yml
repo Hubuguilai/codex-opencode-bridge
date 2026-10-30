@@ -18,3 +18,15 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run test:package
+
+  runtime-tool-catalog:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefix runtime --omit=dev --no-audit --no-fund
+      - run: node scripts/large-tools-live.mjs --local-provider
+        env:
+          OPENCODE_BIN: ${{ github.workspace }}/runtime/node_modules/@opencode/cli/bin/opencode.exe
