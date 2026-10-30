@@ -92,6 +92,13 @@ not evidence that paying or logging in will fix it.
   bash scripts/start.sh login
   ```
 
+  The pinned v2 runtime accepts the integration as a positional argument:
+  `auth login --standalone opencode`, not `--provider opencode`. Standalone mode
+  uses a private server and does not restart the user's existing service. Native
+  `auth list --standalone` confirms the saved connection; it does not prove model
+  access. A Router-stored key is not automatically an OpenCode login, and an
+  anonymous probe must not be reported as the user's account result.
+
   On return, rerun `setup --live`. Do not use a Go key as a presumed Zen entitlement.
 - **403/region/model missing:** confirm the exact route in OpenCode. Stop that
   model; do not buy access, rotate keys or silently substitute another model.

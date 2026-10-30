@@ -30,5 +30,5 @@ test('ownership conflict never starts verification or force recovery',async()=>{
 test('login never prompts for secrets through a noninteractive agent process',()=>{
  assert.throws(()=>loginProvider({tty:false,install:()=>{throw Error('must not install');}}),/本地终端/);
  let args;const result=loginProvider({tty:true,install:()=>({binary:'/runtime/opencode'}),run:(_binary,a,options)=>{args=a;assert.equal(options.stdio,'inherit');return {status:0};}});
- assert.deepEqual(args,['auth','login','--provider','opencode']);assert.equal(result.modelAccessVerified,false);
+ assert.deepEqual(args,['auth','login','--standalone','opencode']);assert.equal(result.modelAccessVerified,false);
 });
